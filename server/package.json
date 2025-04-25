@@ -1,0 +1,37 @@
+{
+  "name": "suvvidha-server",
+  "version": "1.0.0",
+  "description": "Server for Suvvidha MERN stack web application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "client": "npm start --prefix ../client",
+    "dev-full": "concurrently \"npm run dev\" \"npm run client\"",
+    "build-client": "cd ../client && npm install && npm run build"
+  },
+  "keywords": [
+    "mern",
+    "mongodb",
+    "express",
+    "node",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "colors": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-async-handler": "^1.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.1",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.9"
+  }
+}

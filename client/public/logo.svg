@@ -1,0 +1,11 @@
+<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .logo-text { font-family: Arial, sans-serif; font-weight: bold; }
+    .primary { fill: #1976d2; }
+    .secondary { fill: #f50057; }
+  </style>
+  <rect x="10" y="10" width="30" height="30" rx="5" class="primary" />
+  <circle cx="25" cy="25" r="10" fill="white" />
+  <text x="50" y="33" class="logo-text primary" font-size="24">Suvvidha</text>
+  <text x="150" y="33" class="logo-text secondary" font-size="12">Services</text>
+</svg>
