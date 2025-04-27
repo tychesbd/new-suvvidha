@@ -392,7 +392,7 @@ const Home = () => {
           </Grid>
           <Divider sx={{ my: 3, backgroundColor: 'rgba(255,255,255,0.2)' }} />
           <Typography variant="body2" align="center" sx={{ pt: 2 }}>
-            © {new Date().getFullYear()} Suvvidha. All rights reserved.
+            © {new Date().getFullYear()} Suvvidha & Shiv Bijay Deep. All rights reserved.
           </Typography>
         </Container>
       </Footer>

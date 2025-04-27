@@ -62,8 +62,8 @@ const App = () => {
       <CssBaseline />
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={userInfo ? <Navigate to={`/${userInfo.role}`} replace /> : <Login />} />
-        <Route path="/register" element={userInfo ? <Navigate to={`/${userInfo.role}`} replace /> : <Register />} />
+        <Route path="/login" element={userInfo ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/register" element={userInfo ? <Navigate to="/" replace /> : <Register />} />
         
         {/* Protected Routes */}
         <Route
@@ -91,8 +91,8 @@ const App = () => {
           }
         />
         
-        {/* Default Route */}
-        <Route path="/" element={<Navigate to={userInfo ? `/${userInfo.role}` : '/login'} replace />} />
+        {/* Home Route */}
+        <Route path="/" element={<Navigate to={userInfo ? `/${userInfo.role}/home` : '/login'} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ThemeProvider>

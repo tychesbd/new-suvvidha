@@ -3,28 +3,16 @@ import { Typography, Container, Box, Grid, Avatar, Card, CardContent, Divider } 
 
 const team = [
   {
-    name: 'John Doe',
+    name: 'Mohit Kumar Singh',
     position: 'CEO & Founder',
-    bio: 'With over 15 years of experience in the service industry, John founded Suvvidha with a vision to transform how services are delivered.',
+    bio: 'With over 5 years of experience in the service industry, John founded Suvvidha with a vision to transform how services are delivered.',
     avatar: 'https://source.unsplash.com/random/300x300/?man,portrait,1',
   },
   {
-    name: 'Jane Smith',
-    position: 'Operations Director',
-    bio: 'Jane oversees all service operations, ensuring that every customer receives the highest quality of service.',
-    avatar: 'https://source.unsplash.com/random/300x300/?woman,portrait,1',
-  },
-  {
-    name: 'David Wilson',
-    position: 'Customer Relations Manager',
-    bio: 'David is dedicated to maintaining excellent customer relationships and ensuring customer satisfaction.',
-    avatar: 'https://source.unsplash.com/random/300x300/?man,portrait,2',
-  },
-  {
-    name: 'Sarah Johnson',
-    position: 'Technology Head',
-    bio: 'Sarah leads our technology initiatives, constantly innovating to improve our service delivery platform.',
-    avatar: 'https://source.unsplash.com/random/300x300/?woman,portrait,2',
+    name: 'Shiv Bijay Deep',
+    position: 'Head of Information Technology',
+    bio: 'Shiv Bijay Deep oversees all the information technology, ensuring that every customer receives the highest quality of services and experience.',
+    avatar: 'https://unsplash.com/photos/CN4OM64B12U',
   },
 ];
 

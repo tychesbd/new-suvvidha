@@ -46,14 +46,8 @@ const Register = () => {
     }
 
     if (isSuccess || userInfo) {
-      // Redirect based on user role
-      if (userInfo.role === 'admin') {
-        navigate('/admin');
-      } else if (userInfo.role === 'vendor') {
-        navigate('/vendor');
-      } else {
-        navigate('/customer');
-      }
+      // Redirect to home page after successful registration
+      navigate('/');
     }
 
     dispatch(reset());
