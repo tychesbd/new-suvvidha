@@ -19,8 +19,14 @@ import {
   Typography,
   Container,
   CircularProgress,
+  Card,
+  CardContent,
+  Fade,
 } from '@mui/material';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import HandymanIcon from '@mui/icons-material/Handyman';
+import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
+import PestControlIcon from '@mui/icons-material/PestControl';
+import HouseIcon from '@mui/icons-material/House';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -77,6 +83,14 @@ const Register = () => {
     }
   };
 
+  // Service icons with animation
+  const services = [
+    { icon: <HandymanIcon sx={{ fontSize: 40 }} />, name: "Maintenance" },
+    { icon: <LocalLaundryServiceIcon sx={{ fontSize: 40 }} />, name: "Laundry" },
+    { icon: <PestControlIcon sx={{ fontSize: 40 }} />, name: "Pest Control" },
+    { icon: <HouseIcon sx={{ fontSize: 40 }} />, name: "Home Care" },
+  ];
+
   return (
     <Container component="main" maxWidth="lg">
       <Grid container spacing={2} sx={{ height: '100vh' }}>
@@ -86,14 +100,71 @@ const Register = () => {
           sm={4}
           md={7}
           sx={{
-            backgroundImage: 'url(https://source.unsplash.com/random?technology)',
+            backgroundImage: 'url(https://source.unsplash.com/random?home-maintenance)',
             backgroundRepeat: 'no-repeat',
             backgroundColor: (t) =>
               t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 4,
           }}
-        />
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.6)',
+              zIndex: 1,
+            }}
+          />
+          <Box
+            sx={{
+              position: 'relative',
+              zIndex: 2,
+              textAlign: 'center',
+              color: 'white',
+              width: '100%',
+            }}
+          >
+            <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '80px', marginBottom: '20px' }} />
+            <Typography variant="h3" component="h1" gutterBottom>
+              Join Suvvidha Today
+            </Typography>
+            <Typography variant="h6" gutterBottom>
+              Register for Quality Home Services at Your Fingertips
+            </Typography>
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 3 }}>
+              {services.map((service, index) => (
+                <Fade in={true} style={{ transitionDelay: `${index * 300}ms` }} key={index}>
+                  <Card sx={{ 
+                    width: 120, 
+                    height: 120, 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    transition: 'transform 0.3s',
+                    '&:hover': { transform: 'scale(1.05)' }
+                  }}>
+                    <CardContent>
+                      <Box sx={{ color: 'secondary.main' }}>{service.icon}</Box>
+                      <Typography variant="body2" sx={{ mt: 1 }}>{service.name}</Typography>
+                    </CardContent>
+                  </Card>
+                </Fade>
+              ))}
+            </Box>
+          </Box>
+        </Grid>
         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
           <Box
             sx={{
@@ -104,11 +175,12 @@ const Register = () => {
               alignItems: 'center',
             }}
           >
-            <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-              <PersonAddIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Sign up
+            <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px' }} />
+            <Typography component="h1" variant="h5" gutterBottom>
+              Create your account
+            </Typography>
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
+              Join thousands of satisfied customers using our services
             </Typography>
             <Box component="form" noValidate onSubmit={onSubmit} sx={{ mt: 3 }}>
               <Grid container spacing={2}>

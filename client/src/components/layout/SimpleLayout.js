@@ -10,7 +10,6 @@ import {
   Button,
   CssBaseline,
   Toolbar,
-  Typography,
   Avatar,
   Menu,
   MenuItem,
@@ -75,7 +74,7 @@ const SimpleLayout = ({ children, title }) => {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed">
+      <AppBar position="fixed" sx={{ backgroundColor: '#F56227' }}>
         <Toolbar>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 0, mr: 3 }}>
             <img src="/logo1.png" alt="Suvvidha Logo" height="40" />
