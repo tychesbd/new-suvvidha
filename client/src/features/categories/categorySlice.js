@@ -8,11 +8,24 @@ export const getCategories = createAsyncThunk(
   'categories/getAll',
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(API_URL, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
       return response.data;
     } catch (error) {
+      // Handle HTML responses (common in production when routes are misconfigured)
+      if (error.response && 
+          error.response.headers && 
+          error.response.headers['content-type'] && 
+          error.response.headers['content-type'].includes('text/html')) {
+        console.error('Invalid content type received: text/html; charset=UTF-8');
+        return thunkAPI.rejectWithValue('Server returned HTML instead of JSON. The API endpoint might be unavailable.');
+      }
+      
       const message =
-        error.response && error.response.data.message
+        error.response && error.response.data && error.response.data.message
           ? error.response.data.message
           : error.message;
       return thunkAPI.rejectWithValue(message);

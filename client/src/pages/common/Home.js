@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Container, Box, Grid, Paper, Button, Card, CardContent, CardMedia, CardActionArea, Divider, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 import { getContentByType } from '../../features/content/contentSlice';
 import { getServices } from '../../features/services/serviceSlice';
 import { getCategories } from '../../features/categories/categorySlice';
@@ -133,28 +134,64 @@ const Home = () => {
 
   // Fetch services and categories
   useEffect(() => {
-    dispatch(getServices());
-    dispatch(getCategories());
+    const fetchData = async () => {
+      try {
+        await dispatch(getServices()).unwrap();
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        // Continue with other requests even if this one fails
+      }
+      
+      try {
+        await dispatch(getCategories()).unwrap();
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        // Continue with other requests even if this one fails
+      }
+    };
+    
+    fetchData();
     
     // Fetch why us and ads content
     const fetchWhyUsContent = async () => {
       try {
-        const response = await fetch('/api/content/whyUs');
-        const data = await response.json();
-        setWhyUsContent(data);
+        // Use axios instead of fetch for consistent handling
+        const response = await axios.get('/api/content/whyUs', {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        setWhyUsContent(response.data);
       } catch (error) {
-        console.error('Error fetching Why Us content:', error);
+        if (error.response && error.response.headers && 
+            error.response.headers['content-type'] && 
+            error.response.headers['content-type'].includes('text/html')) {
+          console.error('Invalid content type received: text/html; charset=UTF-8');
+        } else {
+          console.error('Error fetching Why Us content:', error.message || error);
+        }
+        // Always use fallback content on error
         setWhyUsContent(fallbackWhyUs);
       }
     };
     
     const fetchAdsContent = async () => {
       try {
-        const response = await fetch('/api/content/ads');
-        const data = await response.json();
-        setAdsContent(data);
+        // Use axios instead of fetch for consistent handling
+        const response = await axios.get('/api/content/ads', {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        setAdsContent(response.data);
       } catch (error) {
-        console.error('Error fetching Ads content:', error);
+        if (error.response && error.response.headers && 
+            error.response.headers['content-type'] && 
+            error.response.headers['content-type'].includes('text/html')) {
+          console.error('Invalid content type received: text/html; charset=UTF-8');
+        } else {
+          console.error('Error fetching Ads content:', error.message || error);
+        }
         setAdsContent(fallbackAds);
       }
     };

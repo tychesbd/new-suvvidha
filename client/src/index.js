@@ -7,6 +7,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import App from './App';
 import store from './store';
 import './index.css';
+import setupAxios from './utils/axiosConfig';
+
+// Configure axios for the current environment
+setupAxios();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

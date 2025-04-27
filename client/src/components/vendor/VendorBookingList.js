@@ -220,7 +220,7 @@ const VendorBookingList = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {bookings.map((booking) => (
+            {Array.isArray(bookings) && bookings.map((booking) => (
               <TableRow key={booking._id} hover>
                 <TableCell>{booking._id.substring(0, 8)}...</TableCell>
                 <TableCell>{booking.customer.name}</TableCell>

@@ -176,7 +176,7 @@ const NotificationIcon = () => {
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
             <CircularProgress size={24} />
           </Box>
-        ) : notifications.length > 0 ? (
+        ) : Array.isArray(notifications) && notifications.length > 0 ? (
           notifications.map((notification) => (
             <MenuItem
               key={notification._id}

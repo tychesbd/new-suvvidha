@@ -97,14 +97,14 @@ const BookingList = ({ type = 'active' }) => {
   }, []);
   
   // Filter bookings based on type
-  const filteredBookings = bookings.filter(booking => {
+  const filteredBookings = Array.isArray(bookings) ? bookings.filter(booking => {
     if (type === 'active') {
       return ['in-progress', 'pending'].includes(booking.status);
     } else if (type === 'history') {
       return ['completed', 'cancelled'].includes(booking.status);
     }
     return true;
-  });
+  }) : [];
 
   // Handle opening cancel dialog
   const handleCancelClick = (booking) => {
@@ -209,7 +209,7 @@ const BookingList = ({ type = 'active' }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredBookings.map((booking) => (
+            {Array.isArray(filteredBookings) && filteredBookings.map((booking) => (
               <TableRow key={booking._id} hover>
                 <TableCell>{booking._id}</TableCell>
                 <TableCell>{booking.serviceName}</TableCell>

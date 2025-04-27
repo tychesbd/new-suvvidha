@@ -174,12 +174,12 @@ const AdminCategories = () => {
   };
 
   // Filter categories based on search term
-  const filteredCategories = categories.filter((category) => {
+  const filteredCategories = Array.isArray(categories) ? categories.filter((category) => {
     return (
       category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (category.description && category.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  });
+  }) : [];
 
   // Show loading spinner while fetching data
   if (isLoading) {

@@ -385,7 +385,7 @@ const AdminServices = () => {
                   onChange={handleInputChange}
                   label="Category"
                 >
-                  {apiCategories && apiCategories.length > 0 ? (
+                  {Array.isArray(apiCategories) && apiCategories.length > 0 ? (
                     apiCategories.map((category) => (
                       <MenuItem key={category._id} value={category.name}>
                         {category.name}

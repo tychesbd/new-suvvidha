@@ -28,15 +28,6 @@ if (!require('fs').existsSync(uploadsDir)){
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve static files from the React app in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
-}
-
 // Routes
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
@@ -46,15 +37,32 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/subscriptions', require('./routes/subscriptionRoutes'));
 
-// Default route
-app.get('/', (req, res) => {
-  res.send('API is running...');
+// Default API route
+app.get('/api', (req, res) => {
+  res.json({ message: 'API is running...' });
 });
 
-// Error handler middleware
+// Error handler middleware - must be before the catch-all route
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5003;
+// Serve static files from the React app in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/build')));
+  
+  // All other GET requests not handled before will return the React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  });
+}
+
+// Default route - only used when not in production
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (req, res) => {
+    res.json({ message: 'API is running...' });
+  });
+}
+
+const PORT =process.env.PORT || 5003;
 
 // Function to find an available port
 const findAvailablePort = (startPort) => {
