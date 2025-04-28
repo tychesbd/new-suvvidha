@@ -91,7 +91,7 @@ const findAvailablePort = (startPort) => {
 
 // Start server with port detection
 findAvailablePort(PORT).then((availablePort) => {
-  app.listen(availablePort, () => {
+  app.listen(availablePort, '0.0.0.0', () => {
     console.log(`Server running in ${process.env.NODE_ENV} mode on port ${availablePort}`.yellow.bold);
     if (availablePort !== PORT) {
       console.log(`Note: Default port ${PORT} was already in use, using port ${availablePort} instead`.yellow);
