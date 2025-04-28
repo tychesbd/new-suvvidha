@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Container, Box, Grid, Paper, Button, Card, CardContent, CardMedia, CardActionArea, Divider, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { getContentByType } from '../../features/content/contentSlice';
 import { getServices } from '../../features/services/serviceSlice';
@@ -361,41 +362,55 @@ const Home = () => {
       </Container>
 
       {/* Footer */}
-      <Footer>
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom>
-                About Suvvidha
-              </Typography>
-              <Typography variant="body2">
-                Suvvidha is your one-stop solution for all your service needs. We provide high-quality services at affordable prices.
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom>
-                Quick Links
-              </Typography>
-              <Typography variant="body2" paragraph>Home</Typography>
-              <Typography variant="body2" paragraph>Services</Typography>
-              <Typography variant="body2" paragraph>About Us</Typography>
-              <Typography variant="body2" paragraph>Contact</Typography>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Typography variant="h6" gutterBottom>
-                Contact Us
-              </Typography>
-              <Typography variant="body2" paragraph>Email: info@suvvidha.com</Typography>
-              <Typography variant="body2" paragraph>Phone: +91 1234567890</Typography>
-              <Typography variant="body2" paragraph>Address: 123, Main Street, City, Country</Typography>
-            </Grid>
-          </Grid>
-          <Divider sx={{ my: 3, backgroundColor: 'rgba(255,255,255,0.2)' }} />
-          <Typography variant="body2" align="center" sx={{ pt: 2 }}>
-            © {new Date().getFullYear()} Suvvidha & Shiv Bijay Deep. All rights reserved.
-          </Typography>
-        </Container>
-      </Footer>
+      <Footer sx={{ backgroundColor: '#F56227', color: 'white', py: 4 }}>
+  <Container maxWidth="lg">
+    <Grid container spacing={4}>
+      {/* About Section */}
+      <Grid item xs={12} md={4}>
+        <Typography variant="h6" gutterBottom>
+          About Suvvidha
+        </Typography>
+        <Typography variant="body2">
+          Suvvidha is your one-stop solution for all your service needs. We provide high-quality services at affordable prices.
+        </Typography>
+      </Grid>
+
+      {/* Quick Links Section */}
+      <Grid item xs={12} md={4}>
+        <Typography variant="h6" gutterBottom>
+          Quick Links
+        </Typography>
+        <Typography variant="body2" paragraph>
+          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>Home</Link>
+        </Typography>
+        <Typography variant="body2" paragraph>
+          <Link to="/services" style={{ textDecoration: 'none', color: 'inherit' }}>Services</Link>
+        </Typography>
+        <Typography variant="body2" paragraph>
+          <Link to="/about us" style={{ textDecoration: 'none', color: 'inherit' }}>About Us</Link>
+        </Typography>
+      </Grid>
+
+      {/* Contact Us Section */}
+      <Grid item xs={12} md={4}>
+        <Typography variant="h6" gutterBottom>
+          Contact Us
+        </Typography>
+        <Typography variant="body2" paragraph>Email: info@suvvidha.com</Typography>
+        <Typography variant="body2" paragraph>Phone: +91 xxxxxxxxxx</Typography>
+        <Typography variant="body2" paragraph>Address: Patna, Bihar, India</Typography>
+      </Grid>
+    </Grid>
+
+    {/* Divider */}
+    <Divider sx={{ my: 3, backgroundColor: 'rgba(255,255,255,0.2)' }} />
+
+    {/* Footer Bottom */}
+    <Typography variant="body2" align="center" sx={{ pt: 2 }}>
+      © {new Date().getFullYear()} Suvvidha & Shiv Bijay Deep. All rights reserved.
+    </Typography>
+  </Container>
+</Footer>
       
       {/* Booking Modal */}
       <BookingModal 

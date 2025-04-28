@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { register, reset } from '../features/auth/authSlice';
+import indianFlag from './indianflag.jpg';
 
 // Material UI imports
 import {
-  Avatar,
   Button,
   TextField,
   FormControl,
@@ -100,10 +100,8 @@ const Register = () => {
           sm={4}
           md={7}
           sx={{
-            backgroundImage: 'url(https://source.unsplash.com/random?home-maintenance)',
+            backgroundImage: `url(${indianFlag})`,
             backgroundRepeat: 'no-repeat',
-            backgroundColor: (t) =>
-              t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             position: 'relative',

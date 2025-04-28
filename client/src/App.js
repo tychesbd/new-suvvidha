@@ -4,6 +4,9 @@ import { useSelector } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
+// Language Context
+import { LanguageProvider } from './contexts/LanguageContext';
+
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -59,8 +62,9 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Routes>
+      <LanguageProvider>
+        <CssBaseline />
+        <Routes>
         {/* Public Routes */}
         <Route path="/login" element={userInfo ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/register" element={userInfo ? <Navigate to="/" replace /> : <Register />} />
@@ -94,7 +98,8 @@ const App = () => {
         {/* Home Route */}
         <Route path="/" element={<Navigate to={userInfo ? `/${userInfo.role}/home` : '/login'} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        </Routes>
+      </LanguageProvider>
     </ThemeProvider>
   );
 };

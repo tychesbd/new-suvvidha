@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
 import NotificationIcon from '../notifications/NotificationIcon';
+import { useLanguage } from '../../contexts/LanguageContext';
+import LanguageSelector from '../language/LanguageSelector';
 
 // Material UI imports
 import {
@@ -50,6 +52,7 @@ const DashboardLayout = ({ children, title, menuItems }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { getTranslation } = useLanguage();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -95,7 +98,9 @@ const DashboardLayout = ({ children, title, menuItems }) => {
     <div>
       <Toolbar>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/logo1.png" alt="Suvvidha Logo" height="40" />
+          <Link to={`/${userInfo?.role || 'guest'}/home`}>
+            <img src="/logo1.png" alt="Suvvidha Logo" height="40" />
+          </Link>
         </Box>
       </Toolbar>
       <Divider />
@@ -153,6 +158,9 @@ const DashboardLayout = ({ children, title, menuItems }) => {
             <MenuIcon />
           </IconButton>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 0, mr: 3 }}>
+            <Link to={`/${userInfo?.role || 'guest'}/home`}>
+              <img src="/logo1.png" alt="Suvvidha Logo" height="40" />
+            </Link>
             {/* Title removed as requested */}
           </Box>
           
@@ -170,7 +178,7 @@ const DashboardLayout = ({ children, title, menuItems }) => {
               }}
               startIcon={<HomeIcon />}
             >
-              Home
+              {getTranslation('home')}
             </Button>
             <Button
               component={Link}
@@ -184,7 +192,7 @@ const DashboardLayout = ({ children, title, menuItems }) => {
               }}
               startIcon={<MiscellaneousServicesIcon />}
             >
-              Services
+              {getTranslation('services')}
             </Button>
             <Button
               component={Link}
@@ -198,55 +206,59 @@ const DashboardLayout = ({ children, title, menuItems }) => {
               }}
               startIcon={<InfoIcon />}
             >
-              About Us
+              {getTranslation('aboutUs')}
             </Button>
           </Box>
+          
           {/* Notification Icon */}
           <Box sx={{ flexGrow: 0, mr: 2 }}>
             <NotificationIcon />
           </Box>
           
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt={userInfo?.name} src="/static/images/avatar/2.svg" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              <MenuItem onClick={handleProfileClick}>
-                <ListItemIcon>
-                  <AccountCircleIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography textAlign="center">Profile</Typography>
-              </MenuItem>
-              <MenuItem onClick={handleDashboardClick}>
-                <ListItemIcon>
-                  <DashboardIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography textAlign="center">Dashboard</Typography>
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon>
-                  <LogoutIcon fontSize="small" />
-                </ListItemIcon>
-                <Typography textAlign="center">Logout</Typography>
-              </MenuItem>
-            </Menu>
+          <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
+            <LanguageSelector />
+            <Box sx={{ ml: 2 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt={userInfo?.name} src="/static/images/avatar/2.svg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                <MenuItem onClick={handleProfileClick}>
+                  <ListItemIcon>
+                    <AccountCircleIcon fontSize="small" />
+                  </ListItemIcon>
+                  <Typography textAlign="center">{getTranslation('profile')}</Typography>
+                </MenuItem>
+                <MenuItem onClick={handleDashboardClick}>
+                  <ListItemIcon>
+                    <DashboardIcon fontSize="small" />
+                  </ListItemIcon>
+                  <Typography textAlign="center">{getTranslation('dashboard')}</Typography>
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  <Typography textAlign="center">{getTranslation('logout')}</Typography>
+                </MenuItem>
+              </Menu>
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>
