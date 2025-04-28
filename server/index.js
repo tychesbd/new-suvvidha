@@ -47,7 +47,19 @@ app.use(errorHandler);
 
 // Serve static files from the React app in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  // Serve static assets with proper MIME types
+  app.use(express.static(path.join(__dirname, '../client/build'), {
+    setHeaders: (res, path) => {
+      // Set correct content type for JavaScript files
+      if (path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+      // Set correct content type for CSS files
+      else if (path.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+      }
+    }
+  }));
   
   // All other GET requests not handled before will return the React app
   app.get('*', (req, res) => {
