@@ -31,14 +31,7 @@ Thumbs.db
 # Testing
 /coverage
 
-# Production
-/build
-
 # Misc
 .eslintcache
 .vercel
 .netlify
-
-# Build outputs
-/client/build
-/client/dist
