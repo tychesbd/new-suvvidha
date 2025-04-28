@@ -29,6 +29,9 @@ const ChangePasswordForm = () => {
     confirmPassword: '',
   });
   
+  // Track whether a password change was submitted
+  const [passwordChangeSubmitted, setPasswordChangeSubmitted] = useState(false);
+  
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,17 +44,18 @@ const ChangePasswordForm = () => {
       toast.error(message);
     }
 
-    if (isSuccess) {
+    if (isSuccess && passwordChangeSubmitted) {
       toast.success('Password changed successfully');
       setFormData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
       });
+      setPasswordChangeSubmitted(false);
     }
 
     dispatch(reset());
-  }, [isError, isSuccess, message, dispatch]);
+  }, [isError, isSuccess, message, dispatch, passwordChangeSubmitted]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -80,6 +84,8 @@ const ChangePasswordForm = () => {
       newPassword,
     };
     
+    // Set flag to indicate a password change was submitted
+    setPasswordChangeSubmitted(true);
     dispatch(changePassword(passwordData));
   };
 
