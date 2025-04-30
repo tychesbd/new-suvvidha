@@ -13,6 +13,8 @@ import Register from './pages/Register';
 import CustomerDashboard from './pages/customer/Dashboard';
 import VendorDashboard from './pages/vendor/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
+import SimpleLayout from './components/layout/SimpleLayout';
+import Home from './pages/common/Home';
 
 // Create a theme instance
 const theme = createTheme({
@@ -69,6 +71,13 @@ const App = () => {
         <Route path="/login" element={userInfo ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/register" element={userInfo ? <Navigate to="/" replace /> : <Register />} />
         
+        {/* Home Route - Now the default landing page */}
+        <Route path="/" element={
+          <SimpleLayout>
+            <Home />
+          </SimpleLayout>
+        } />
+        
         {/* Protected Routes */}
         <Route
           path="/customer/*"
@@ -95,8 +104,6 @@ const App = () => {
           }
         />
         
-        {/* Home Route */}
-        <Route path="/" element={<Navigate to={userInfo ? `/${userInfo.role}/home` : '/login'} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </LanguageProvider>

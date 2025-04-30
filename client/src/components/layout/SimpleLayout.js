@@ -97,10 +97,10 @@ const SimpleLayout = ({ children, title }) => {
         <ListItem disablePadding>
           <ListItemButton 
             component={Link} 
-            to={`/${userRole}/home`}
+            to={userInfo ? `/${userRole}/home` : '/'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/home`) ? '2px solid #F56227' : 'none',
+              borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
             }}
           >
             <ListItemText primary={getTranslation('home')} />
@@ -109,10 +109,10 @@ const SimpleLayout = ({ children, title }) => {
         <ListItem disablePadding>
           <ListItemButton 
             component={Link} 
-            to={`/${userRole}/services`}
+            to={userInfo ? `/${userRole}/services` : '/'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/services`) ? '2px solid #F56227' : 'none',
+              borderBottom: location.pathname.includes(`/${userRole}/services`) ? '2px solid #ad6fa9' : 'none',
             }}
           >
             <ListItemText primary={getTranslation('services')} />
@@ -121,10 +121,10 @@ const SimpleLayout = ({ children, title }) => {
         <ListItem disablePadding>
           <ListItemButton 
             component={Link} 
-            to={`/${userRole}/about`}
+            to={userInfo ? `/${userRole}/about` : '/'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/about`) ? '2px solid #F56227' : 'none',
+              borderBottom: location.pathname.includes(`/${userRole}/about`) ? '2px solid #ad6fa9' : 'none',
             }}
           >
             <ListItemText primary={getTranslation('aboutUs')} />
@@ -153,7 +153,7 @@ const SimpleLayout = ({ children, title }) => {
           {drawer}
         </Drawer>
       </Box>
-      <AppBar position="fixed" sx={{ backgroundColor: '#F56227' }}>
+      <AppBar position="fixed" sx={{ backgroundColor: '#ad6fa9' }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -165,7 +165,7 @@ const SimpleLayout = ({ children, title }) => {
             <MenuIcon />
           </IconButton>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 0, mr: 3 }}>
-            <Link to={`/${userRole}/home`}>
+            <Link to={'/'}>
               <img src="/logo1.png" alt="Suvvidha Logo" height="40" />
             </Link>
             {/* Title removed as requested */}
@@ -175,11 +175,11 @@ const SimpleLayout = ({ children, title }) => {
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             <Button
               component={Link}
-              to={`/${userRole}/home`}
+              to={userInfo ? `/${userRole}/home` : '/'}
               sx={{
                 color: 'white',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
+                borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
                 borderRadius: 0,
                 paddingBottom: '4px'
               }}
@@ -189,7 +189,7 @@ const SimpleLayout = ({ children, title }) => {
             </Button>
             <Button
               component={Link}
-              to={`/${userRole}/services`}
+              to={userInfo ? `/${userRole}/services` : '/'}
               sx={{
                 color: 'white',
                 mx: 1,
@@ -203,7 +203,7 @@ const SimpleLayout = ({ children, title }) => {
             </Button>
             <Button
               component={Link}
-              to={`/${userRole}/about`}
+              to={userInfo ? `/${userRole}/about` : '/'}
               sx={{
                 color: 'white',
                 mx: 1,
@@ -262,15 +262,25 @@ const SimpleLayout = ({ children, title }) => {
                 </Menu>
               </>
             ) : (
-              <Button
-                component={Link}
-                to="/login"
-                variant="contained"
-                color="secondary"
-                sx={{ fontWeight: 'bold' }}
-              >
-                {getTranslation('signIn')}
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  component={Link}
+                  to="/login"
+                  variant="contained"
+                  color="secondary"
+                  sx={{ fontWeight: 'bold' }}
+                >
+                  {getTranslation('signIn')}
+                </Button>
+                <Button
+                  component={Link}
+                  to="/register"
+                  variant="outlined"
+                  sx={{ fontWeight: 'bold', color: 'white', borderColor: 'white' }}
+                >
+                  {getTranslation('signUp') || 'Sign Up'}
+                </Button>
+              </Box>
             )}
           </Box>
         </Toolbar>

@@ -207,11 +207,22 @@ const Login = () => {
               >
                 {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
               </Button>
-              <Grid container>
+              <Grid container justifyContent="space-between" alignItems="center">
                 <Grid item>
                   <Link to="/register" style={{ textDecoration: 'none' }}>
                     {"Don't have an account? Sign Up"}
                   </Link>
+                </Grid>
+                <Grid item>
+                  <Button
+                    component={Link}
+                    to="/"
+                    variant="outlined"
+                    color="primary"
+                    sx={{ mt: 1 }}
+                  >
+                    Return to Home
+                  </Button>
                 </Grid>
               </Grid>
             </Box>

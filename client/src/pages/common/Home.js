@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography, Container, Box, Grid, Paper, Button, Card, CardContent, CardMedia, CardActionArea, Divider, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getContentByType } from '../../features/content/contentSlice';
 import { getServices } from '../../features/services/serviceSlice';
@@ -114,7 +114,9 @@ const whyUsFeatures = [
 ];
 
 const Home = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.auth);
   const { currentContent: heroContent, isLoading: heroLoading } = useSelector((state) => state.content);
   const { services, isLoading: servicesLoading } = useSelector((state) => state.services);
   const { categories } = useSelector((state) => state.categories);
@@ -305,6 +307,13 @@ const Home = () => {
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
+                            // Check if user is logged in
+                            if (!userInfo) {
+                              // Redirect to login page if not authenticated
+                              navigate('/login');
+                              return;
+                            }
+                            // Proceed with booking if authenticated
                             setSelectedService(service);
                             setOpenBookingModal(true);
                           }}
@@ -354,7 +363,20 @@ const Home = () => {
             {ads.subtitle}
           </Typography>
           {ads.buttonText && (
-            <Button variant="contained" color="secondary" size="large">
+            <Button 
+              variant="contained" 
+              color="secondary" 
+              size="large"
+              onClick={() => {
+                // Check if user is logged in before booking
+                if (!userInfo) {
+                  navigate('/login');
+                  return;
+                }
+                // Open booking modal if authenticated
+                setOpenBookingModal(true);
+              }}
+            >
               {ads.buttonText}
             </Button>
           )}
@@ -362,7 +384,7 @@ const Home = () => {
       </Container>
 
       {/* Footer */}
-      <Footer sx={{ backgroundColor: '#F56227', color: 'white', py: 4 }}>
+      <Footer sx={{ backgroundColor: '#ad6fa9', color: 'white', py: 4 }}>
   <Container maxWidth="lg">
     <Grid container spacing={4}>
       {/* About Section */}
