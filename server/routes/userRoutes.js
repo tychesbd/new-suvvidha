@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const User = require('../models/userModel');
 const {
   registerUser,
   loginUser,
@@ -21,6 +22,35 @@ router.post('/create-defaults', createDefaultUsers);
 // Protected routes
 router.get('/profile', protect, getUserProfile);
 router.put('/profile', protect, upload.single('idProofDocument'), updateUserProfile);
+router.put('/change-password', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+    
+    const { currentPassword, newPassword } = req.body;
+    
+    // Check if current password matches
+    const isMatch = await user.matchPassword(currentPassword);
+    
+    if (!isMatch) {
+      res.status(400);
+      throw new Error('Current password is incorrect');
+    }
+    
+    // Update password
+    user.password = newPassword;
+    await user.save();
+    
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(error.statusCode || 500);
+    throw new Error(error.message || 'Server error');
+  }
+});
 
 // Admin routes
 router.get('/', protect, admin, getUsers);

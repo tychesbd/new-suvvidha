@@ -100,6 +100,9 @@ export const updateProfile = createAsyncThunk(
             token: currentUserInfo.token // Ensure token is preserved
           };
           localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+          
+          // Return the complete updated user info including the token
+          return updatedUserInfo;
         }
         
         return response.data;
@@ -148,6 +151,11 @@ export const changePassword = createAsyncThunk(
         if (apiError.response) {
           console.error('Response data:', apiError.response.data);
           console.error('Response status:', apiError.response.status);
+          
+          // If we have a specific error message from the server, use it
+          if (apiError.response.data && apiError.response.data.message) {
+            throw new Error(apiError.response.data.message);
+          }
         } else if (apiError.request) {
           console.error('Request made but no response received:', apiError.request);
         }

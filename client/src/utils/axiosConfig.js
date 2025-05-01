@@ -35,9 +35,24 @@ const setupAxios = () => {
           error.response.headers['content-type'] && 
           error.response.headers['content-type'].includes('text/html')) {
         console.error('Invalid content type received: text/html; charset=UTF-8');
+        
+        // Log the response data for debugging
+        if (error.response.data) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+        }
+        
+        // Create a more descriptive error message based on status code
+        let errorMessage = 'Server error: Received HTML instead of JSON.';
+        if (error.response.status === 404) {
+          errorMessage = 'The requested API endpoint does not exist. Please check the server configuration.';
+        } else if (error.response.status >= 500) {
+          errorMessage = 'Server error occurred. Please try again later or contact support.';
+        }
+        
         return Promise.reject({
           ...error,
-          message: 'Server error: Received HTML instead of JSON. The API endpoint might be unavailable.'
+          message: errorMessage
         });
       }
       return Promise.reject(error);
