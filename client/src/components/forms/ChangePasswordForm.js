@@ -14,6 +14,7 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  Alert,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -40,8 +41,9 @@ const ChangePasswordForm = () => {
   const { currentPassword, newPassword, confirmPassword } = formData;
 
   useEffect(() => {
-    if (isError) {
-      toast.error(message);
+    if (isError && passwordChangeSubmitted) {
+      toast.error(message || 'Failed to change password. Please try again.');
+      setPasswordChangeSubmitted(false);
     }
 
     if (isSuccess && passwordChangeSubmitted) {
@@ -54,7 +56,11 @@ const ChangePasswordForm = () => {
       setPasswordChangeSubmitted(false);
     }
 
-    dispatch(reset());
+    return () => {
+      if (passwordChangeSubmitted) {
+        dispatch(reset());
+      }
+    };
   }, [isError, isSuccess, message, dispatch, passwordChangeSubmitted]);
 
   const onChange = (e) => {
@@ -83,6 +89,9 @@ const ChangePasswordForm = () => {
       currentPassword,
       newPassword,
     };
+    
+    // Reset any previous errors
+    dispatch(reset());
     
     // Set flag to indicate a password change was submitted
     setPasswordChangeSubmitted(true);

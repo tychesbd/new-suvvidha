@@ -92,7 +92,14 @@ export const updateProfile = createAsyncThunk(
         const response = await axios.put('/api/users/profile', userData, config);
         
         if (response.data) {
-          localStorage.setItem('userInfo', JSON.stringify(response.data));
+          // Update the userInfo in localStorage with the new data
+          // Preserve the token from the original userInfo
+          const currentUserInfo = JSON.parse(localStorage.getItem('userInfo'));
+          const updatedUserInfo = { 
+            ...response.data,
+            token: currentUserInfo.token // Ensure token is preserved
+          };
+          localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
         }
         
         return response.data;
@@ -133,8 +140,19 @@ export const changePassword = createAsyncThunk(
         },
       };
 
-      const response = await axios.put('/api/users/change-password', passwordData, config);
-      return response.data;
+      try {
+        const response = await axios.put('/api/users/change-password', passwordData, config);
+        return response.data;
+      } catch (apiError) {
+        console.error('Password Change Error:', apiError);
+        if (apiError.response) {
+          console.error('Response data:', apiError.response.data);
+          console.error('Response status:', apiError.response.status);
+        } else if (apiError.request) {
+          console.error('Request made but no response received:', apiError.request);
+        }
+        throw apiError;
+      }
     } catch (error) {
       const message =
         (error.response && error.response.data && error.response.data.message) ||
