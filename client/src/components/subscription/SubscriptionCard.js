@@ -1,10 +1,12 @@
 import React from 'react';
 import {
+  Typography,
   Box,
   Card,
   CardContent,
-  Typography,
+  CardActions,
   Button,
+  Divider,
   Chip,
   LinearProgress,
   List,
@@ -15,26 +17,17 @@ import {
 import { styled } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import TimerIcon from '@mui/icons-material/Timer';
-
-const StyledCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-  },
-}));
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 const StatusChip = styled(Chip)(({ theme, status }) => {
   let color = theme.palette.info.main;
   let backgroundColor = theme.palette.info.light;
   
-  if (status === 'active') {
+  if (status === 'active' || status === 'approved') {
     color = theme.palette.success.main;
     backgroundColor = theme.palette.success.light;
-  } else if (status === 'expired') {
+  } else if (status === 'expired' || status === 'denied') {
     color = theme.palette.error.main;
     backgroundColor = theme.palette.error.light;
   } else if (status === 'pending') {
@@ -52,107 +45,141 @@ const StatusChip = styled(Chip)(({ theme, status }) => {
   };
 });
 
-const SubscriptionCard = ({ subscription, onBuyClick, isVendor = true }) => {
-  // If no subscription, show a placeholder card
-  if (!subscription) {
-    return (
-      <StyledCard variant="outlined">
-        <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', p: 4 }}>
-          <Typography variant="h5" gutterBottom align="center">
-            No Active Subscription
-          </Typography>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
-            Subscribe to a plan to access all vendor features
-          </Typography>
-          {isVendor && (
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={onBuyClick}
-              sx={{ mt: 2 }}
-            >
-              Buy Subscription
-            </Button>
-          )}
-        </CardContent>
-      </StyledCard>
-    );
-  }
+const FeatureItem = ({ text }) => (
+  <ListItem>
+    <ListItemIcon>
+      <CheckCircleIcon color="success" fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary={text} />
+  </ListItem>
+);
 
-  // Calculate days left
-  const today = new Date();
-  const endDate = new Date(subscription.endDate);
-  const daysLeft = Math.max(0, Math.ceil((endDate - today) / (1000 * 60 * 60 * 24)));
-  
-  // Calculate progress percentage
-  const startDate = new Date(subscription.startDate);
-  const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-  const daysUsed = totalDays - daysLeft;
-  const progressPercentage = Math.min(100, Math.max(0, (daysUsed / totalDays) * 100));
+/**
+ * SubscriptionCard Component
+ * 
+ * @param {Object} props
+ * @param {Object} props.subscription - Subscription details
+ * @param {Function} props.onBuyClick - Function to call when buy/renew button is clicked
+ * @param {boolean} props.isVendor - Whether the user is a vendor
+ */
+const SubscriptionCard = ({ subscription, onBuyClick, isVendor = false }) => {
+  // Format date
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  // Calculate days remaining
+  const calculateDaysRemaining = (endDate) => {
+    if (!endDate) return 0;
+    const today = new Date();
+    const diffTime = endDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const daysRemaining = calculateDaysRemaining(subscription.endDate);
+  const bookingProgress = subscription.bookingLimit > 0 
+    ? (subscription.usedBookings / subscription.bookingLimit) * 100 
+    : 0;
 
   return (
-    <StyledCard variant="outlined">
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+    <Card elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardContent sx={{ flexGrow: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" component="div">
-            {subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)} Plan
+          <Typography variant="h5" color="primary">
+            {subscription.plan} Plan
           </Typography>
           <StatusChip 
             label={subscription.status} 
             status={subscription.status} 
-            size="small"
           />
         </Box>
         
-        <Typography variant="h4" color="primary" sx={{ mb: 1 }}>
-          ₹{subscription.price}
-        </Typography>
+        <Divider sx={{ mb: 2 }} />
         
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <TimerIcon color="action" sx={{ mr: 1 }} />
+        <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            {daysLeft} days left
+            Subscription Period
           </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+            <CalendarTodayIcon color="primary" sx={{ mr: 1, fontSize: 'small' }} />
+            <Typography variant="body1">
+              {formatDate(subscription.startDate)} - {formatDate(subscription.endDate)}
+            </Typography>
+          </Box>
         </Box>
         
-        <Box sx={{ width: '100%', mb: 2 }}>
-          <LinearProgress 
-            variant="determinate" 
-            value={progressPercentage} 
-            sx={{ height: 8, borderRadius: 4 }}
-          />
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Days Remaining
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+            <TimerIcon color="warning" sx={{ mr: 1, fontSize: 'small' }} />
+            <Typography variant="body1">
+              {daysRemaining} days
+            </Typography>
+          </Box>
         </Box>
         
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Valid until: {endDate.toLocaleDateString()}
-        </Typography>
+        {isVendor && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Bookings Usage
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <EventAvailableIcon color="success" sx={{ mr: 1, fontSize: 'small' }} />
+              <Typography variant="body1">
+                {subscription.bookingLimit - subscription.usedBookings} of {subscription.bookingLimit} remaining
+              </Typography>
+            </Box>
+            <LinearProgress 
+              variant="determinate" 
+              value={bookingProgress} 
+              sx={{ mt: 1, height: 8, borderRadius: 4 }} 
+            />
+          </Box>
+        )}
         
-        <List dense sx={{ mb: 2 }}>
-          {subscription.features && subscription.features.map((feature, index) => (
-            <ListItem key={index} disableGutters>
-              <ListItemIcon sx={{ minWidth: 30 }}>
-                <CheckCircleIcon color="success" fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary={feature} />
-            </ListItem>
-          ))}
-        </List>
+        {subscription.features && subscription.features.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Features
+            </Typography>
+            <List dense>
+              {subscription.features.map((feature, index) => (
+                <FeatureItem key={index} text={feature} />
+              ))}
+            </List>
+          </Box>
+        )}
         
-        <Box sx={{ mt: 'auto' }}>
-          {isVendor && (
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={onBuyClick}
-              fullWidth
-              disabled={subscription.status === 'active'}
-            >
-              {subscription.status === 'active' ? 'Active' : 'Renew Subscription'}
-            </Button>
-          )}
-        </Box>
+        {subscription.status === 'pending' && (
+          <Box sx={{ mt: 2, bgcolor: 'warning.light', p: 1, borderRadius: 1 }}>
+            <Typography variant="body2" color="warning.dark">
+              Your subscription is pending approval. You will be notified once it's approved.
+            </Typography>
+          </Box>
+        )}
       </CardContent>
-    </StyledCard>
+      
+      {(subscription.status === 'expired' || !isVendor) && (
+        <CardActions sx={{ p: 2 }}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            fullWidth
+            onClick={onBuyClick}
+          >
+            {subscription.status === 'expired' ? 'Renew Subscription' : 'Buy Now'}
+          </Button>
+        </CardActions>
+      )}
+    </Card>
   );
 };
 

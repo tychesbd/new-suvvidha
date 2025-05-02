@@ -1,100 +1,109 @@
 import React from 'react';
 import {
+  Typography,
   Box,
+  Grid,
   Card,
   CardContent,
-  Typography,
+  CardActions,
   Button,
-  Grid,
+  Divider,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
+  Paper,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-const StyledCard = styled(Card)(({ theme, selected }) => ({
+// Styled components
+const PlanCard = styled(Card)(({ theme, selected }) => ({
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
-  transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-  border: selected ? `2px solid ${theme.palette.primary.main}` : '1px solid rgba(0, 0, 0, 0.12)',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
-  },
+  transition: 'all 0.3s ease',
+  transform: selected ? 'scale(1.03)' : 'scale(1)',
+  border: selected ? `2px solid ${theme.palette.primary.main}` : 'none',
+  boxShadow: selected 
+    ? `0 8px 16px 0 ${theme.palette.primary.light}` 
+    : theme.shadows[1],
 }));
 
+const PriceTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  fontWeight: 'bold',
+}));
+
+const FeatureItem = ({ text }) => (
+  <ListItem>
+    <ListItemIcon>
+      <CheckCircleIcon color="success" fontSize="small" />
+    </ListItemIcon>
+    <ListItemText primary={text} />
+  </ListItem>
+);
+
+/**
+ * SubscriptionPlans Component
+ * 
+ * @param {Object} props
+ * @param {Array} props.plans - Array of subscription plan objects
+ * @param {string} props.selectedPlan - ID of the currently selected plan
+ * @param {Function} props.onSelectPlan - Function to call when a plan is selected
+ */
 const SubscriptionPlans = ({ plans, selectedPlan, onSelectPlan }) => {
+  // If no plans are provided, return null
+  if (!plans || plans.length === 0) {
+    return null;
+  }
+
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ width: '100%' }}>
       <Typography variant="h6" gutterBottom>
         Select a Subscription Plan
       </Typography>
       
-      <RadioGroup
-        value={selectedPlan}
-        onChange={(e) => onSelectPlan(e.target.value)}
-      >
-        <Grid container spacing={3}>
-          {plans.map((plan) => (
-            <Grid item xs={12} md={4} key={plan.id}>
-              <FormControlLabel
-                value={plan.id}
-                control={<Radio sx={{ display: 'none' }} />}
-                label=""
-                sx={{ m: 0, width: '100%' }}
-              >
-                <StyledCard 
-                  variant="outlined" 
-                  selected={selectedPlan === plan.id}
+      <Grid container spacing={3}>
+        {plans.map((plan) => (
+          <Grid item xs={12} md={4} key={plan.id}>
+            <PlanCard selected={selectedPlan === plan.id}>
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography variant="h5" component="div" gutterBottom>
+                  {plan.name}
+                </Typography>
+                
+                <PriceTypography variant="h4" gutterBottom>
+                  ₹{plan.price}
+                </PriceTypography>
+                
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {plan.duration}
+                </Typography>
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <List dense>
+                  {plan.features && plan.features.map((feature, index) => (
+                    <FeatureItem key={index} text={feature} />
+                  ))}
+                </List>
+              </CardContent>
+              
+              <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
+                <Button 
+                  variant={selectedPlan === plan.id ? "contained" : "outlined"}
+                  color="primary"
                   onClick={() => onSelectPlan(plan.id)}
+                  fullWidth
                 >
-                  <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant="h5" component="div" gutterBottom>
-                      {plan.name}
-                    </Typography>
-                    
-                    <Typography variant="h4" color="primary" sx={{ mb: 2 }}>
-                      ₹{plan.price}
-                    </Typography>
-                    
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Duration: {plan.duration}
-                    </Typography>
-                    
-                    <List dense sx={{ mb: 2 }}>
-                      {plan.features.map((feature, index) => (
-                        <ListItem key={index} disableGutters>
-                          <ListItemIcon sx={{ minWidth: 30 }}>
-                            <CheckCircleIcon color="success" fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary={feature} />
-                        </ListItem>
-                      ))}
-                    </List>
-                    
-                    <Box sx={{ mt: 'auto', textAlign: 'center' }}>
-                      <Button 
-                        variant={selectedPlan === plan.id ? "contained" : "outlined"}
-                        color="primary"
-                        fullWidth
-                        onClick={() => onSelectPlan(plan.id)}
-                      >
-                        {selectedPlan === plan.id ? "Selected" : "Select Plan"}
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </StyledCard>
-              </FormControlLabel>
-            </Grid>
-          ))}
-        </Grid>
-      </RadioGroup>
+                  {selectedPlan === plan.id ? "Selected" : "Select Plan"}
+                </Button>
+              </CardActions>
+            </PlanCard>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 };

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Container, Box, Grid, Paper, Button, Card, CardContent, CardMedia, CardActionArea, Divider, CircularProgress } from '@mui/material';
+import { Typography, Container, Box, Grid, Paper, Button, Card, CardContent, CardMedia, CardActionArea, Divider, CircularProgress, TextField, InputAdornment, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import axios from 'axios';
 import { getContentByType } from '../../features/content/contentSlice';
 import { getServices } from '../../features/services/serviceSlice';
@@ -130,6 +132,12 @@ const Home = () => {
   const [openBookingModal, setOpenBookingModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
+  // State for search and filter
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [filteredServicesByCategory, setFilteredServicesByCategory] = useState({});
+  const [allServices, setAllServices] = useState([]);
+
   // Fetch hero content
   useEffect(() => {
     dispatch(getContentByType('hero'));
@@ -207,6 +215,7 @@ const Home = () => {
   useEffect(() => {
     if (services && services.length > 0 && categories && categories.length > 0) {
       const servicesByCat = {};
+      let allServicesList = [];
       
       // Initialize categories
       categories.forEach(category => {
@@ -215,6 +224,7 @@ const Home = () => {
       
       // Group services by category
       services.forEach(service => {
+        allServicesList.push(service);
         if (servicesByCat[service.category]) {
           servicesByCat[service.category].push(service);
         } else {
@@ -224,11 +234,70 @@ const Home = () => {
       });
       
       setServicesByCategory(servicesByCat);
+      setFilteredServicesByCategory(servicesByCat);
+      setAllServices(allServicesList);
       setIsLoading(false);
     } else if (!servicesLoading && !heroLoading) {
       setIsLoading(false);
     }
   }, [services, categories, servicesLoading, heroLoading]);
+
+  // Filter services based on search query and selected category
+  useEffect(() => {
+    if (services.length === 0) return;
+
+    const filterServices = () => {
+      const query = searchQuery.toLowerCase().trim();
+      
+      if (selectedCategory === 'all' && !query) {
+        // If no filter is applied, show all services by category
+        setFilteredServicesByCategory(servicesByCategory);
+        return;
+      }
+      
+      if (selectedCategory !== 'all' && !query) {
+        // If only category filter is applied
+        const filtered = {};
+        filtered[selectedCategory] = servicesByCategory[selectedCategory] || [];
+        setFilteredServicesByCategory(filtered);
+        return;
+      }
+      
+      // Filter by search query (and category if selected)
+      const filtered = {};
+      
+      if (selectedCategory === 'all') {
+        // Search across all categories
+        Object.keys(servicesByCategory).forEach(category => {
+          const matchingServices = servicesByCategory[category].filter(service => {
+            const nameMatch = (service.title || service.name || '').toLowerCase().includes(query);
+            const descMatch = (service.description || '').toLowerCase().includes(query);
+            const categoryMatch = category.toLowerCase().includes(query);
+            return nameMatch || descMatch || categoryMatch;
+          });
+          
+          if (matchingServices.length > 0) {
+            filtered[category] = matchingServices;
+          }
+        });
+      } else {
+        // Search within selected category
+        const matchingServices = servicesByCategory[selectedCategory]?.filter(service => {
+          const nameMatch = (service.title || service.name || '').toLowerCase().includes(query);
+          const descMatch = (service.description || '').toLowerCase().includes(query);
+          return nameMatch || descMatch;
+        });
+        
+        if (matchingServices && matchingServices.length > 0) {
+          filtered[selectedCategory] = matchingServices;
+        }
+      }
+      
+      setFilteredServicesByCategory(filtered);
+    };
+    
+    filterServices();
+  }, [searchQuery, selectedCategory, servicesByCategory, services]);
 
   if (isLoading) {
     return (
@@ -267,18 +336,64 @@ const Home = () => {
         <Typography variant="h3" component="h2" gutterBottom align="center">
           Our Services
         </Typography>
-        <Typography variant="h6" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
+        <Typography variant="h6" align="center" color="text.secondary" paragraph>
           Discover the wide range of services we offer to make your life easier
         </Typography>
+        
+        {/* Search and Filter Section */}
+        <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 4 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                placeholder="Search by service name or category"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                variant="outlined"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="home-category-filter-label">Filter by Category</InputLabel>
+                <Select
+                  labelId="home-category-filter-label"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  label="Filter by Category"
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <FilterListIcon />
+                    </InputAdornment>
+                  }
+                >
+                  <MenuItem value="all">All Categories</MenuItem>
+                  {categories && categories.map((category) => (
+                    <MenuItem key={category._id || category.id} value={category.name}>
+                      {category.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Paper>
 
-        {Object.keys(servicesByCategory).map((category, index) => (
-          servicesByCategory[category].length > 0 && (
-            <Box key={index} sx={{ mb: 8 }}>
-              <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-                {category}
-              </Typography>
-              <Grid container spacing={4}>
-                {servicesByCategory[category].map((service) => (
+        {Object.keys(filteredServicesByCategory).length > 0 ? (
+          Object.keys(filteredServicesByCategory).map((category, index) => (
+            filteredServicesByCategory[category].length > 0 && (
+              <Box key={index} sx={{ mb: 8 }}>
+                <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
+                  {category}
+                </Typography>
+                <Grid container spacing={4}>
+                  {filteredServicesByCategory[category].map((service) => (
                   <Grid item key={service._id || service.id} xs={12} sm={6} md={4}>
                     <ServiceCard elevation={3}>
                       <CardActionArea sx={{ height: '100%', position: 'relative' }}>
@@ -326,8 +441,77 @@ const Home = () => {
                 ))}
               </Grid>
             </Box>
-          )
-        ))}
+            )
+          ))
+        ) : searchQuery ? (
+          // No results found for search
+          <Box sx={{ textAlign: 'center', py: 5 }}>
+            <Typography variant="h5" color="text.secondary">
+              No services found matching "{searchQuery}"
+            </Typography>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              sx={{ mt: 2 }}
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('all');
+              }}
+            >
+              Clear Search
+            </Button>
+          </Box>
+        ) : (
+          // Display all services if no categories are available
+          <Grid container spacing={4}>
+            {allServices.map((service) => (
+              <Grid item key={service.id || service._id} xs={12} sm={6} md={4}>
+                <ServiceCard elevation={3}>
+                  <CardActionArea sx={{ height: '100%', position: 'relative' }}>
+                    <CardMedia
+                      component="img"
+                      height="160"
+                      image={service.image}
+                      alt={service.name}
+                    />
+                    <CardContent sx={{ flexGrow: 1, pb: 6 }}>
+                      <Typography gutterBottom variant="h5" component="h2">
+                        {service.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" paragraph>
+                        {service.description}
+                      </Typography>
+                      {service.minPrice && (
+                        <Typography variant="body1" color="primary" sx={{ fontWeight: 'bold' }}>
+                          Starting from ₹{service.minPrice}
+                        </Typography>
+                      )}
+                    </CardContent>
+                    <BookNowButton 
+                      variant="contained" 
+                      color="primary" 
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Check if user is logged in
+                        if (!userInfo) {
+                          // Redirect to login page if not authenticated
+                          navigate('/login');
+                          return;
+                        }
+                        // Proceed with booking if authenticated
+                        setSelectedService(service);
+                        setOpenBookingModal(true);
+                      }}
+                    >
+                      Book Now
+                    </BookNowButton>
+                  </CardActionArea>
+                </ServiceCard>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Container>
 
       {/* Why Us Section */}

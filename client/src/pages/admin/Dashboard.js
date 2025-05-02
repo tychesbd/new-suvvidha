@@ -1,23 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 // Material UI imports
-import { Typography, Grid, Paper, Box, Divider } from '@mui/material';
+import { Typography, Grid, Paper, Box, Divider, CircularProgress, Alert } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 // Icons
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CategoryIcon from '@mui/icons-material/Category';
 import PersonIcon from '@mui/icons-material/Person';
-import SettingsIcon from '@mui/icons-material/Settings';
 import HomeIcon from '@mui/icons-material/Home';
-import InfoIcon from '@mui/icons-material/Info';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 
 // Components
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -30,6 +29,7 @@ import AdminServices from './Services';
 import AdminCategories from './Categories';
 import ContentManagement from './ContentManagement';
 import Bookings from './Bookings';
+import VendorSubscriptionManagement from './VendorSubscriptionManagement';
 
 // Common pages
 import Home from '../common/Home';
@@ -70,6 +70,75 @@ const StatsCard = ({ title, value, icon }) => {
 
 const AdminHome = () => {
   const { userInfo } = useSelector((state) => state.auth);
+  const [dashboardData, setDashboardData] = useState({
+    users: 0,
+    bookings: 0,
+    services: 0,
+    vendors: 0,
+    subscriptions: 0,
+    activeSubscriptions: 0,
+    revenue: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        };
+
+        // Fetch dashboard statistics
+        const { data } = await axios.get('/api/admin/dashboard', config);
+        
+        setDashboardData({
+          users: data.users || 0,
+          bookings: data.bookings || 0,
+          services: data.services || 0,
+          vendors: data.vendors || 0,
+          subscriptions: data.subscriptions || 0,
+          activeSubscriptions: data.activeSubscriptions || 0,
+          revenue: data.revenue || 0
+        });
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(
+          err.response && err.response.data.message
+            ? err.response.data.message
+            : 'Failed to load dashboard data'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userInfo && userInfo.token) {
+      fetchData();
+    }
+  }, [userInfo]);
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -80,18 +149,24 @@ const AdminHome = () => {
         System overview and management
       </Typography>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
       <Grid container spacing={4} sx={{ mt: 2 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Users" value="42" icon={<PeopleIcon fontSize="large" />} />
+          <StatsCard title="Users" value={dashboardData.users} icon={<PeopleIcon fontSize="large" />} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Bookings" value="156" icon={<CalendarTodayIcon fontSize="large" />} />
+          <StatsCard title="Bookings" value={dashboardData.bookings} icon={<CalendarTodayIcon fontSize="large" />} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Services" value="18" icon={<MiscellaneousServicesIcon fontSize="large" />} />
+          <StatsCard title="Services" value={dashboardData.services} icon={<MiscellaneousServicesIcon fontSize="large" />} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Vendors" value="12" icon={<StorefrontIcon fontSize="large" />} />
+          <StatsCard title="Vendors" value={dashboardData.vendors} icon={<StorefrontIcon fontSize="large" />} />
         </Grid>
       </Grid>
 
@@ -131,29 +206,90 @@ const AdminHome = () => {
         System Statistics
       </Typography>
       <Grid container spacing={3}>
-        {['Total Revenue', 'Active Products', 'Pending Orders', 'System Health'].map((item, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Paper
-              elevation={2}
-              sx={{
-                p: 2,
-                height: 150,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                bgcolor: 'background.default',
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                {item}
-              </Typography>
-              <Typography variant="h4" color="error.main">
-                {index === 0 ? '₹45,250' : index === 1 ? '324' : index === 2 ? '18' : '98%'}
-              </Typography>
-            </Paper>
-          </Grid>
-        ))}
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper
+            elevation={2}
+            sx={{
+              p: 2,
+              height: 150,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              bgcolor: 'background.default',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Total Revenue
+            </Typography>
+            <Typography variant="h4" color="error.main">
+              {formatCurrency(dashboardData.revenue)}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper
+            elevation={2}
+            sx={{
+              p: 2,
+              height: 150,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              bgcolor: 'background.default',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Active Subscriptions
+            </Typography>
+            <Typography variant="h4" color="error.main">
+              {dashboardData.activeSubscriptions}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper
+            elevation={2}
+            sx={{
+              p: 2,
+              height: 150,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              bgcolor: 'background.default',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              Total Subscriptions
+            </Typography>
+            <Typography variant="h4" color="error.main">
+              {dashboardData.subscriptions}
+            </Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper
+            elevation={2}
+            sx={{
+              p: 2,
+              height: 150,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              bgcolor: 'background.default',
+            }}
+          >
+            <Typography variant="h6" gutterBottom>
+              System Health
+            </Typography>
+            <Typography variant="h4" color="error.main">
+              98%
+            </Typography>
+          </Paper>
+        </Grid>
       </Grid>
     </Box>
   );
@@ -193,9 +329,14 @@ const AdminDashboard = () => {
       path: '/admin/bookings',
     },
     {
-      text: 'Subscriptions',
+      text: 'Vendor Subscriptions',
+      icon: <SubscriptionsIcon />,
+      path: '/admin/vendor-subscriptions',
+    },
+    {
+      text: 'Subscription Plans',
       icon: <StorefrontIcon />,
-      path: '/admin/subscriptions',
+      path: '/admin/subscription-plans',
     },
     {
       text: 'Profile',
@@ -242,11 +383,16 @@ const AdminDashboard = () => {
           <Bookings />
         </DashboardLayout>
       } />
-      <Route path="/subscriptions" element={
+      <Route path="/subscription-plans" element={
         <DashboardLayout title="Admin Dashboard" menuItems={menuItems}>
           <React.Suspense fallback={<Typography>Loading...</Typography>}>
-            {React.createElement(React.lazy(() => import('./Subscriptions')))}
+            {React.createElement(React.lazy(() => import('./SubscriptionPlans')))}
           </React.Suspense>
+        </DashboardLayout>
+      } />
+      <Route path="/vendor-subscriptions" element={
+        <DashboardLayout title="Admin Dashboard" menuItems={menuItems}>
+          <VendorSubscriptionManagement />
         </DashboardLayout>
       } />
       

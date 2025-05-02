@@ -36,6 +36,7 @@ app.use('/api/content', require('./routes/contentRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/subscriptions', require('./routes/subscriptionRoutes'));
+app.use('/api/subscription-plans', require('./routes/subscriptionPlanRoutes'));
 
 // Default API route
 app.get('/api', (req, res) => {

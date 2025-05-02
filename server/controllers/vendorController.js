@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Booking = require('../models/bookingModel');
+const Subscription = require('../models/subscriptionModel');
 
 // @desc    Get vendor's assigned bookings
 // @route   GET /api/bookings/vendor
@@ -37,6 +38,29 @@ const updateBookingStatusByVendor = asyncHandler(async (req, res) => {
   if (booking.vendor.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to update this booking');
+  }
+  
+  // If status is changing to in-progress, check subscription booking limit
+  if (status === 'in-progress' && booking.status !== 'in-progress') {
+    // Get vendor's active subscription
+    const subscription = await Subscription.findOne({
+      vendor: req.user._id,
+      status: 'active',
+    });
+    
+    if (!subscription) {
+      res.status(400);
+      throw new Error('You need an active subscription to accept bookings');
+    }
+    
+    if (subscription.bookingsLeft <= 0) {
+      res.status(400);
+      throw new Error('You have reached your booking limit. Please upgrade your subscription.');
+    }
+    
+    // Decrease booking count
+    subscription.bookingsLeft -= 1;
+    await subscription.save();
   }
 
   // Update booking status

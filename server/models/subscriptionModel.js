@@ -7,6 +7,11 @@ const subscriptionSchema = mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    subscriptionPlan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SubscriptionPlan',
+      required: true,
+    },
     plan: {
       type: String,
       enum: ['basic', 'standard', 'premium'],
@@ -44,12 +49,23 @@ const subscriptionSchema = mongoose.Schema(
     paymentProof: {
       type: String,
     },
+    transactionId: {
+      type: String,
+    },
     paymentDate: {
       type: Date,
     },
     features: {
       type: [String],
       default: [],
+    },
+    selectedServices: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Service',
+    }],
+    bookingsLeft: {
+      type: Number,
+      default: 0,
     },
   },
   {

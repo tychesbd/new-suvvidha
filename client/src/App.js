@@ -10,6 +10,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Plans from './pages/Plans';
 import CustomerDashboard from './pages/customer/Dashboard';
 import VendorDashboard from './pages/vendor/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -76,6 +77,10 @@ const App = () => {
           <SimpleLayout>
             <Home />
           </SimpleLayout>
+        } />
+        
+        <Route path="/plans" element={
+          <Plans />
         } />
         
         {/* Protected Routes */}

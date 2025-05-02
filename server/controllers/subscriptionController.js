@@ -1,13 +1,53 @@
 const asyncHandler = require('express-async-handler');
 const Subscription = require('../models/subscriptionModel');
+const SubscriptionPlan = require('../models/subscriptionPlanModel');
 const User = require('../models/userModel');
+const Service = require('../models/serviceModel');
 
 // @desc    Get all subscriptions
 // @route   GET /api/subscriptions
 // @access  Private/Admin
 const getSubscriptions = asyncHandler(async (req, res) => {
-  const subscriptions = await Subscription.find({})
+  const { status, plan, search } = req.query;
+  
+  let query = {};
+  
+  // Filter by status if provided
+  if (status) {
+    query.status = status;
+  }
+  
+  // Filter by plan if provided
+  if (plan) {
+    query.plan = plan;
+  }
+  
+  // Search by vendor name or phone if provided
+  if (search) {
+    // First find vendors matching the search term
+    const vendors = await User.find({
+      $or: [
+        { name: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+      ],
+    }).select('_id');
+    
+    // Get vendor IDs
+    const vendorIds = vendors.map(vendor => vendor._id);
+    
+    // Add vendor IDs to query
+    if (vendorIds.length > 0) {
+      query.vendor = { $in: vendorIds };
+    } else {
+      // If no vendors match, return empty array
+      return res.json([]);
+    }
+  }
+  
+  const subscriptions = await Subscription.find(query)
     .populate('vendor', 'name email phone pincode isActive')
+    .populate('subscriptionPlan')
+    .populate('selectedServices', 'name category price')
     .sort({ createdAt: -1 });
 
   res.json(subscriptions);
@@ -17,8 +57,16 @@ const getSubscriptions = asyncHandler(async (req, res) => {
 // @route   GET /api/subscriptions/vendor
 // @access  Private/Vendor
 const getVendorSubscription = asyncHandler(async (req, res) => {
-  const subscription = await Subscription.findOne({ vendor: req.user._id })
-    .sort({ createdAt: -1 });
+  const subscription = await Subscription.findOne({ 
+    vendor: req.user._id,
+    $or: [
+      { status: 'active' },
+      { status: 'pending' }
+    ]
+  })
+  .populate('subscriptionPlan')
+  .populate('selectedServices', 'name category price')
+  .sort({ createdAt: -1 });
 
   if (subscription) {
     res.json(subscription);
@@ -32,58 +80,73 @@ const getVendorSubscription = asyncHandler(async (req, res) => {
 // @route   POST /api/subscriptions
 // @access  Private/Vendor
 const createSubscription = asyncHandler(async (req, res) => {
-  const { plan, upiId } = req.body;
+  const { subscriptionPlanId, selectedServiceIds, upiId } = req.body;
 
-  // Set plan details based on selected plan
-  let price, features, durationDays;
-  
-  switch (plan) {
-    case 'basic':
-      price = 999;
-      features = ['Basic service listing', 'Customer support', '30 days validity'];
-      durationDays = 30;
-      break;
-    case 'standard':
-      price = 2499;
-      features = ['Featured service listing', 'Priority customer support', 'Analytics dashboard', '90 days validity'];
-      durationDays = 90;
-      break;
-    case 'premium':
-      price = 4999;
-      features = ['Premium service listing', 'Dedicated customer support', 'Advanced analytics', 'Marketing tools', '180 days validity'];
-      durationDays = 180;
-      break;
-    default:
-      res.status(400);
-      throw new Error('Invalid plan selected');
+  // Validate subscription plan
+  const subscriptionPlan = await SubscriptionPlan.findById(subscriptionPlanId);
+  if (!subscriptionPlan) {
+    res.status(404);
+    throw new Error('Subscription plan not found');
   }
 
-  // Calculate end date
-  const startDate = new Date();
-  const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + durationDays);
+  // Validate selected services
+  if (!selectedServiceIds || selectedServiceIds.length === 0) {
+    res.status(400);
+    throw new Error('Please select at least one service');
+  }
 
-  // Check if vendor already has an active subscription
+  if (selectedServiceIds.length > 10) {
+    res.status(400);
+    throw new Error('You can select up to 10 services only');
+  }
+
+  // Verify all services exist
+  const services = await Service.find({ _id: { $in: selectedServiceIds } });
+  if (services.length !== selectedServiceIds.length) {
+    res.status(400);
+    throw new Error('One or more selected services are invalid');
+  }
+
+  // Check if vendor already has an active or pending subscription
   const existingSubscription = await Subscription.findOne({
     vendor: req.user._id,
-    status: 'active',
+    $or: [
+      { status: 'active' },
+      { status: 'pending' }
+    ],
   });
 
   if (existingSubscription) {
     res.status(400);
-    throw new Error('You already have an active subscription');
+    throw new Error('You already have an active or pending subscription');
+  }
+
+  // Calculate end date based on validity period
+  const startDate = new Date();
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + subscriptionPlan.validityPeriod);
+
+  // Map plan type from subscription plan name
+  let planType = 'basic';
+  if (subscriptionPlan.name.toLowerCase().includes('standard')) {
+    planType = 'standard';
+  } else if (subscriptionPlan.name.toLowerCase().includes('premium')) {
+    planType = 'premium';
   }
 
   const subscription = await Subscription.create({
     vendor: req.user._id,
-    plan,
-    price,
+    subscriptionPlan: subscriptionPlan._id,
+    plan: planType,
+    price: subscriptionPlan.price,
     startDate,
     endDate,
     upiId,
-    features,
+    selectedServices: selectedServiceIds,
+    features: [subscriptionPlan.description, `${subscriptionPlan.bookingLimit} bookings allowed`, `${subscriptionPlan.validityPeriod} days validity`],
     status: 'pending',
     paymentStatus: 'pending',
+    bookingsLeft: 0, // Will be set when approved
   });
 
   if (subscription) {
@@ -111,8 +174,9 @@ const updatePaymentProof = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to update this subscription');
   }
 
-  // Update payment proof
+  // Update payment proof and transaction ID
   subscription.paymentProof = req.body.paymentProof;
+  subscription.transactionId = req.body.transactionId;
   subscription.paymentDate = new Date();
   subscription.paymentStatus = 'pending'; // Admin will verify and change to 'paid'
 
@@ -125,7 +189,8 @@ const updatePaymentProof = asyncHandler(async (req, res) => {
 // @route   PUT /api/subscriptions/:id/verify
 // @access  Private/Admin
 const verifySubscription = asyncHandler(async (req, res) => {
-  const subscription = await Subscription.findById(req.params.id);
+  const subscription = await Subscription.findById(req.params.id)
+    .populate('subscriptionPlan');
 
   if (!subscription) {
     res.status(404);
@@ -137,6 +202,22 @@ const verifySubscription = asyncHandler(async (req, res) => {
   
   if (req.body.paymentStatus === 'paid') {
     subscription.status = 'active';
+    
+    // Set booking limit from subscription plan
+    if (subscription.subscriptionPlan && subscription.subscriptionPlan.bookingLimit) {
+      subscription.bookingsLeft = subscription.subscriptionPlan.bookingLimit;
+    } else {
+      // Fallback if subscription plan is not found
+      let bookingLimit = 10; // Default basic plan
+      if (subscription.plan === 'standard') {
+        bookingLimit = 25;
+      } else if (subscription.plan === 'premium') {
+        bookingLimit = 50;
+      }
+      subscription.bookingsLeft = bookingLimit;
+    }
+  } else if (req.body.paymentStatus === 'failed') {
+    subscription.status = 'cancelled';
   }
 
   const updatedSubscription = await subscription.save();
@@ -148,31 +229,60 @@ const verifySubscription = asyncHandler(async (req, res) => {
 // @route   GET /api/subscriptions/plans
 // @access  Public
 const getSubscriptionPlans = asyncHandler(async (req, res) => {
-  const plans = [
-    {
-      id: 'basic',
-      name: 'Basic Plan',
-      price: 999,
-      duration: '30 days',
-      features: ['Basic service listing', 'Customer support', '30 days validity'],
-    },
-    {
-      id: 'standard',
-      name: 'Standard Plan',
-      price: 2499,
-      duration: '90 days',
-      features: ['Featured service listing', 'Priority customer support', 'Analytics dashboard', '90 days validity'],
-    },
-    {
-      id: 'premium',
-      name: 'Premium Plan',
-      price: 4999,
-      duration: '180 days',
-      features: ['Premium service listing', 'Dedicated customer support', 'Advanced analytics', 'Marketing tools', '180 days validity'],
-    },
-  ];
+  // Get plans from the database instead of hardcoded values
+  const subscriptionPlans = await SubscriptionPlan.find({ isActive: true });
+  
+  // Format plans for frontend
+  const plans = subscriptionPlans.map(plan => ({
+    id: plan._id,
+    name: plan.name,
+    price: plan.price,
+    duration: `${plan.validityPeriod} days`,
+    bookingLimit: plan.bookingLimit,
+    features: [
+      plan.description,
+      `${plan.bookingLimit} bookings allowed`,
+      `${plan.validityPeriod} days validity`
+    ],
+  }));
 
   res.json(plans);
+});
+
+// @desc    Get available services for subscription
+// @route   GET /api/subscriptions/available-services
+// @access  Private/Vendor
+const getAvailableServices = asyncHandler(async (req, res) => {
+  const services = await Service.find({ isActive: true })
+    .select('_id name category price description')
+    .sort({ category: 1, name: 1 });
+
+  res.json(services);
+});
+
+// @desc    Decrease booking count when a booking is made
+// @route   PUT /api/subscriptions/decrease-booking
+// @access  Private/Vendor
+const decreaseBookingCount = asyncHandler(async (req, res) => {
+  const subscription = await Subscription.findOne({
+    vendor: req.user._id,
+    status: 'active',
+  });
+
+  if (!subscription) {
+    res.status(404);
+    throw new Error('No active subscription found');
+  }
+
+  if (subscription.bookingsLeft <= 0) {
+    res.status(400);
+    throw new Error('You have reached your booking limit');
+  }
+
+  subscription.bookingsLeft -= 1;
+  await subscription.save();
+
+  res.json({ success: true, bookingsLeft: subscription.bookingsLeft });
 });
 
 module.exports = {
@@ -182,4 +292,6 @@ module.exports = {
   updatePaymentProof,
   verifySubscription,
   getSubscriptionPlans,
+  getAvailableServices,
+  decreaseBookingCount,
 };
