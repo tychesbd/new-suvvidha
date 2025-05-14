@@ -80,10 +80,16 @@ const getVendorSubscription = asyncHandler(async (req, res) => {
 // @route   POST /api/subscriptions
 // @access  Private/Vendor
 const createSubscription = asyncHandler(async (req, res) => {
-  const { subscriptionPlanId, selectedServiceIds, upiId } = req.body;
+  // Handle form data - parse JSON strings if needed
+  const planId = req.body.planId;
+  const selectedServiceIds = req.body.services ? JSON.parse(req.body.services) : [];
+  const transactionId = req.body.transactionId;
+  
+  // Get the uploaded screenshot file path if it exists
+  const paymentProof = req.file ? req.file.path : null;
 
   // Validate subscription plan
-  const subscriptionPlan = await SubscriptionPlan.findById(subscriptionPlanId);
+  const subscriptionPlan = await SubscriptionPlan.findById(planId);
   if (!subscriptionPlan) {
     res.status(404);
     throw new Error('Subscription plan not found');
@@ -141,11 +147,13 @@ const createSubscription = asyncHandler(async (req, res) => {
     price: subscriptionPlan.price,
     startDate,
     endDate,
-    upiId,
     selectedServices: selectedServiceIds,
     features: [subscriptionPlan.description, `${subscriptionPlan.bookingLimit} bookings allowed`, `${subscriptionPlan.validityPeriod} days validity`],
     status: 'pending',
     paymentStatus: 'pending',
+    paymentProof: paymentProof,
+    transactionId: transactionId,
+    paymentDate: new Date(),
     bookingsLeft: 0, // Will be set when approved
   });
 

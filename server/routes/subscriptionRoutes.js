@@ -11,13 +11,14 @@ const {
   decreaseBookingCount,
 } = require('../controllers/subscriptionController');
 const { protect, admin, vendor } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 // Public routes
 router.get('/plans', getSubscriptionPlans);
 
 // Vendor routes
 router.route('/')
-  .post(protect, vendor, createSubscription);
+  .post(protect, vendor, upload.single('screenshot'), createSubscription);
 
 router.get('/vendor', protect, vendor, getVendorSubscription);
 router.put('/:id/payment', protect, vendor, updatePaymentProof);
