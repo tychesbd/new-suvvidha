@@ -39,6 +39,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import SearchIcon from '@mui/icons-material/Search';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PaymentIcon from '@mui/icons-material/Payment';
+import DownloadIcon from '@mui/icons-material/Download';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 
@@ -102,6 +103,7 @@ const VendorSubscriptions = () => {
   const [selectedSubscription, setSelectedSubscription] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [screenshotOpen, setScreenshotOpen] = useState(false);
   const [actionFeedback, setActionFeedback] = useState({ message: '', severity: 'success', show: false });
 
   // Fetch subscriptions
@@ -139,7 +141,10 @@ const VendorSubscriptions = () => {
     let result = [...subscriptions];
     
     if (filters.plan) {
-      result = result.filter(sub => sub.planName === filters.plan);
+      result = result.filter(sub => 
+        (sub.plan && sub.plan.toLowerCase() === filters.plan.toLowerCase()) || 
+        (sub.planName && sub.planName.toLowerCase() === filters.plan.toLowerCase())
+      );
     }
     
     if (filters.status) {
@@ -152,10 +157,16 @@ const VendorSubscriptions = () => {
     
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      result = result.filter(sub => 
-        sub.vendor.name.toLowerCase().includes(searchLower) ||
-        sub.vendor.email.toLowerCase().includes(searchLower)
-      );
+      result = result.filter(sub => {
+        // Safely access nested properties with optional chaining
+        const vendorName = sub.vendor?.name?.toLowerCase() || '';
+        const vendorEmail = sub.vendor?.email?.toLowerCase() || '';
+        const vendorPhone = sub.vendor?.phone?.toLowerCase() || '';
+        
+        return vendorName.includes(searchLower) || 
+               vendorEmail.includes(searchLower) || 
+               vendorPhone.includes(searchLower);
+      });
     }
     
     setFilteredSubscriptions(result);
@@ -186,6 +197,12 @@ const VendorSubscriptions = () => {
     setDetailsOpen(true);
   };
 
+  // Handle view screenshot
+  const handleViewScreenshot = (subscription) => {
+    setSelectedSubscription(subscription);
+    setScreenshotOpen(true);
+  };
+
   // Handle verify payment dialog
   const handleVerifyPayment = (subscription) => {
     setSelectedSubscription(subscription);
@@ -203,25 +220,41 @@ const VendorSubscriptions = () => {
         },
       };
       
-      await axios.put(
-        `/api/subscriptions/admin/${selectedSubscription._id}/verify`, 
-        { status: 'active', paymentStatus: 'paid' },
+      // Send verification request with status update
+      const response = await axios.put(
+        `/api/subscriptions/${selectedSubscription._id}/verify`, 
+        { 
+          paymentStatus: 'paid',
+          status: 'active'
+        },
         config
       );
       
-      // Update local state
-      const updatedSubscriptions = subscriptions.map(sub => {
-        if (sub._id === selectedSubscription._id) {
-          return {
-            ...sub,
-            status: 'active',
-            paymentStatus: 'paid'
-          };
-        }
-        return sub;
-      });
+      // Update local state with response data or fallback to local update
+      if (response.data) {
+        // If server returns updated subscription, use that
+        const updatedSubscriptions = subscriptions.map(sub => {
+          if (sub._id === selectedSubscription._id) {
+            return response.data;
+          }
+          return sub;
+        });
+        setSubscriptions(updatedSubscriptions);
+      } else {
+        // Fallback to local update if server doesn't return updated data
+        const updatedSubscriptions = subscriptions.map(sub => {
+          if (sub._id === selectedSubscription._id) {
+            return {
+              ...sub,
+              status: 'active',
+              paymentStatus: 'paid'
+            };
+          }
+          return sub;
+        });
+        setSubscriptions(updatedSubscriptions);
+      }
       
-      setSubscriptions(updatedSubscriptions);
       setVerifyDialogOpen(false);
       
       // Show success message
@@ -233,10 +266,14 @@ const VendorSubscriptions = () => {
       
       // Hide message after 3 seconds
       setTimeout(() => {
-        setActionFeedback({ ...actionFeedback, show: false });
+        setActionFeedback(prev => ({ ...prev, show: false }));
       }, 3000);
       
+      // Refresh subscriptions list
+      fetchSubscriptions();
+      
     } catch (err) {
+      console.error('Payment verification error:', err);
       setError(
         err.response && err.response.data.message
           ? err.response.data.message
@@ -252,7 +289,94 @@ const VendorSubscriptions = () => {
       
       // Hide message after 3 seconds
       setTimeout(() => {
-        setActionFeedback({ ...actionFeedback, show: false });
+        setActionFeedback(prev => ({ ...prev, show: false }));
+      }, 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Deny payment
+  const denyPayment = async () => {
+    try {
+      setLoading(true);
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+      
+      // Send denial request with status update
+      const response = await axios.put(
+        `/api/subscriptions/${selectedSubscription._id}/verify`, 
+        { 
+          paymentStatus: 'failed',
+          status: 'cancelled'
+        },
+        config
+      );
+      
+      // Update local state with response data or fallback to local update
+      if (response.data) {
+        // If server returns updated subscription, use that
+        const updatedSubscriptions = subscriptions.map(sub => {
+          if (sub._id === selectedSubscription._id) {
+            return response.data;
+          }
+          return sub;
+        });
+        setSubscriptions(updatedSubscriptions);
+      } else {
+        // Fallback to local update if server doesn't return updated data
+        const updatedSubscriptions = subscriptions.map(sub => {
+          if (sub._id === selectedSubscription._id) {
+            return {
+              ...sub,
+              status: 'cancelled',
+              paymentStatus: 'failed'
+            };
+          }
+          return sub;
+        });
+        setSubscriptions(updatedSubscriptions);
+      }
+      
+      setVerifyDialogOpen(false);
+      
+      // Show success message
+      setActionFeedback({
+        message: 'Payment denied successfully',
+        severity: 'info',
+        show: true
+      });
+      
+      // Hide message after 3 seconds
+      setTimeout(() => {
+        setActionFeedback(prev => ({ ...prev, show: false }));
+      }, 3000);
+      
+      // Refresh subscriptions list
+      fetchSubscriptions();
+      
+    } catch (err) {
+      console.error('Payment denial error:', err);
+      setError(
+        err.response && err.response.data.message
+          ? err.response.data.message
+          : err.message
+      );
+      
+      // Show error message
+      setActionFeedback({
+        message: 'Failed to deny payment',
+        severity: 'error',
+        show: true
+      });
+      
+      // Hide message after 3 seconds
+      setTimeout(() => {
+        setActionFeedback(prev => ({ ...prev, show: false }));
       }, 3000);
     } finally {
       setLoading(false);
@@ -389,20 +513,21 @@ const VendorSubscriptions = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <StyledTableCell>Vendor</StyledTableCell>
-                <StyledTableCell>Plan</StyledTableCell>
-                <StyledTableCell>Price (₹)</StyledTableCell>
-                <StyledTableCell>Start Date</StyledTableCell>
-                <StyledTableCell>End Date</StyledTableCell>
+                <StyledTableCell>Vendor Name</StyledTableCell>
+                <StyledTableCell>Phone</StyledTableCell>
+                <StyledTableCell>Selected Subscription</StyledTableCell>
+                <StyledTableCell>Selected Services</StyledTableCell>
+                <StyledTableCell>Screenshot</StyledTableCell>
+                <StyledTableCell>URN</StyledTableCell>
+                <StyledTableCell>Bookings Left</StyledTableCell>
                 <StyledTableCell>Status</StyledTableCell>
-                <StyledTableCell>Payment</StyledTableCell>
                 <StyledTableCell>Actions</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={9} align="center" sx={{ py: 3 }}>
                     <CircularProgress size={40} />
                   </TableCell>
                 </TableRow>
@@ -411,26 +536,32 @@ const VendorSubscriptions = () => {
                   <TableRow key={subscription._id}>
                     <TableCell>
                       <Typography variant="body2">{subscription.vendor.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {subscription.vendor.email}
-                      </Typography>
                     </TableCell>
+                    <TableCell>{subscription.vendor.phone || 'N/A'}</TableCell>
                     <TableCell sx={{ textTransform: 'capitalize' }}>
-                      {subscription.planName}
+                      {subscription.planName || subscription.plan || 'N/A'}
                     </TableCell>
-                    <TableCell>₹{subscription.price}</TableCell>
-                    <TableCell>{formatDate(subscription.startDate)}</TableCell>
-                    <TableCell>{formatDate(subscription.endDate)}</TableCell>
+                    <TableCell>
+                      {subscription.selectedServices && subscription.selectedServices.length > 0 ? 
+                        `${subscription.selectedServices.length} services` : '0 services'}
+                    </TableCell>
+                    <TableCell>
+                      {subscription.paymentProof ? (
+                        <Button 
+                          size="small" 
+                          variant="text" 
+                          onClick={() => handleViewScreenshot && handleViewScreenshot(subscription)}
+                        >
+                          View
+                        </Button>
+                      ) : (
+                        'Not uploaded'
+                      )}
+                    </TableCell>
+                    <TableCell>{subscription.transactionId || 'N/A'}</TableCell>
+                    <TableCell>{subscription.bookingsLeft || 'N/A'}</TableCell>
                     <TableCell>
                       <StatusChip label={subscription.status} status={subscription.status} size="small" />
-                    </TableCell>
-                    <TableCell>
-                      <StatusChip 
-                        label={subscription.paymentStatus} 
-                        status={subscription.paymentStatus === 'paid' ? 'active' : 
-                               subscription.paymentStatus === 'pending' ? 'pending' : 'expired'} 
-                        size="small" 
-                      />
                     </TableCell>
                     <TableCell>
                       <Tooltip title="View Details">
@@ -439,8 +570,8 @@ const VendorSubscriptions = () => {
                         </IconButton>
                       </Tooltip>
                       
-                      {subscription.paymentStatus === 'pending' && (
-                        <Tooltip title="Verify Payment">
+                      {subscription.status === 'pending' && (
+                        <Tooltip title="Approve">
                           <IconButton 
                             size="small" 
                             color="success" 
@@ -455,7 +586,7 @@ const VendorSubscriptions = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} align="center">
+                  <TableCell colSpan={9} align="center">
                     No subscriptions found matching the filters
                   </TableCell>
                 </TableRow>
@@ -465,19 +596,52 @@ const VendorSubscriptions = () => {
         </TableContainer>
       </Paper>
       
+      {/* Screenshot Dialog */}
+      <Dialog open={screenshotOpen} onClose={() => setScreenshotOpen(false)} maxWidth="md">
+        <DialogTitle>
+          Payment Proof
+          <IconButton
+            aria-label="close"
+            onClick={() => setScreenshotOpen(false)}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CancelIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {selectedSubscription && selectedSubscription.paymentProof && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+              <img 
+                src={`/api/uploads/${selectedSubscription.paymentProof}`} 
+                alt="Payment Proof" 
+                style={{ maxWidth: '100%', maxHeight: '70vh' }} 
+              />
+            </Box>
+          )}
+          {selectedSubscription && !selectedSubscription.paymentProof && (
+            <Typography variant="body1" align="center" color="text.secondary">
+              No payment proof uploaded
+            </Typography>
+          )}
+        </DialogContent>
+      </Dialog>
+      
       {/* Subscription Details Dialog */}
       <Dialog open={detailsOpen} onClose={() => setDetailsOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Subscription Details</DialogTitle>
         <DialogContent dividers>
           {selectedSubscription && (
             <Box>
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ textTransform: 'capitalize' }}
-              >
-                {selectedSubscription.planName} Plan
-              </Typography>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2">Subscription Plan</Typography>
+                <Typography 
+                  variant="h6" 
+                  gutterBottom 
+                  sx={{ textTransform: 'capitalize' }}
+                >
+                  {selectedSubscription.planName || selectedSubscription.plan || 'Unknown'} Plan
+                </Typography>
+              </Box>
               
               <Grid container spacing={2}>
                 <Grid item xs={6}>
@@ -495,9 +659,9 @@ const VendorSubscriptions = () => {
                 </Grid>
                 
                 <Grid item xs={6}>
-                  <Typography variant="subtitle2">Price</Typography>
+                  <Typography variant="subtitle2">Amount Paid</Typography>
                   <Typography variant="body2" gutterBottom>
-                    ₹{selectedSubscription.price}
+                    ₹{selectedSubscription.price || 0}
                   </Typography>
                 </Grid>
                 
@@ -527,15 +691,37 @@ const VendorSubscriptions = () => {
                 <Grid item xs={6}>
                   <Typography variant="subtitle2">Booking Limit</Typography>
                   <Typography variant="body2" gutterBottom>
-                    {selectedSubscription.bookingLimit || 'N/A'}
+                    {selectedSubscription.bookingsLeft || 'N/A'}
                   </Typography>
                 </Grid>
                 
                 <Grid item xs={6}>
-                  <Typography variant="subtitle2">Used Bookings</Typography>
+                  <Typography variant="subtitle2">Transaction ID</Typography>
                   <Typography variant="body2" gutterBottom>
-                    {selectedSubscription.usedBookings || 0}
+                    {selectedSubscription.transactionId || 'N/A'}
                   </Typography>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2">Selected Services</Typography>
+                  <Box sx={{ mt: 1, border: '1px solid #eee', borderRadius: 1, p: 2 }}>
+                    {selectedSubscription.selectedServices && selectedSubscription.selectedServices.length > 0 ? (
+                      <Grid container spacing={1}>
+                        {selectedSubscription.selectedServices.map((service) => (
+                          <Grid item xs={6} key={service._id || service.id || Math.random().toString()}>
+                            <Chip 
+                              label={service.name || service.serviceName || 'Service'} 
+                              size="small" 
+                              sx={{ mr: 1, mb: 1 }}
+                              variant="outlined"
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    ) : (
+                      <Typography variant="body2">No services selected</Typography>
+                    )}
+                  </Box>
                 </Grid>
                 
                 <Grid item xs={12}>
@@ -546,6 +732,47 @@ const VendorSubscriptions = () => {
                         {feature}
                       </Typography>
                     ))}
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="subtitle2" gutterBottom>Payment Proof</Typography>
+                    {selectedSubscription.paymentProof && (
+                      <Tooltip title="Download Payment Proof">
+                        <IconButton 
+                          size="small" 
+                          onClick={() => {
+                            const imgUrl = `/api/uploads/${selectedSubscription.paymentProof}`;
+                            const link = document.createElement('a');
+                            link.href = imgUrl;
+                            link.download = `payment-proof-${selectedSubscription._id}.jpg`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                        >
+                          <DownloadIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                  <Box sx={{ mt: 1, border: '1px solid #ddd', borderRadius: 1, p: 1 }}>
+                    {selectedSubscription.paymentProof ? (
+                      <img 
+                        src={`/api/uploads/${selectedSubscription.paymentProof}`} 
+                        alt="Payment Proof" 
+                        style={{ maxWidth: '100%', maxHeight: '300px' }} 
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = selectedSubscription.paymentProof; // Fallback to direct URL if path is wrong
+                        }}
+                      />
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No payment proof uploaded
+                      </Typography>
+                    )}
                   </Box>
                 </Grid>
               </Grid>
@@ -571,24 +798,82 @@ const VendorSubscriptions = () => {
       
       {/* Verify Payment Dialog */}
       <Dialog open={verifyDialogOpen} onClose={() => setVerifyDialogOpen(false)}>
-        <DialogTitle>Verify Payment</DialogTitle>
+        <DialogTitle>Approve Subscription</DialogTitle>
         <DialogContent>
           <Typography variant="body1">
-            Are you sure you want to verify the payment for this subscription?
+            Do you want to approve or deny this payment?
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            This will mark the payment as paid and activate the subscription.
+            Approving will mark the payment as paid and activate the subscription.
+            Denying will mark the payment as failed and cancel the subscription.
           </Typography>
+          
+          <Box sx={{ mt: 2, border: '1px solid #ddd', borderRadius: 1, p: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="subtitle2">Payment Proof</Typography>
+              {selectedSubscription && selectedSubscription.paymentProof && (
+                <Tooltip title="Download Payment Proof">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => {
+                      const imgUrl = `/api/uploads/${selectedSubscription.paymentProof}`;
+                      const link = document.createElement('a');
+                      link.href = imgUrl;
+                      link.download = `payment-proof-${selectedSubscription._id}.jpg`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                  >
+                    <DownloadIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
+            {selectedSubscription && selectedSubscription.paymentProof ? (
+              <img 
+                src={`/api/uploads/${selectedSubscription.paymentProof}`} 
+                alt="Payment Proof" 
+                style={{ maxWidth: '100%', maxHeight: '300px' }} 
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = selectedSubscription.paymentProof; // Fallback to direct URL if path is wrong
+                }}
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No payment proof uploaded
+              </Typography>
+            )}
+          </Box>
+          
+          {selectedSubscription && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2">Transaction ID</Typography>
+              <Typography variant="body2">
+                {selectedSubscription.transactionId || 'Not provided'}
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setVerifyDialogOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={denyPayment} 
+            color="error" 
+            variant="outlined"
+            disabled={loading}
+            sx={{ mr: 1 }}
+          >
+            {loading ? <CircularProgress size={24} /> : 'Deny Payment'}
+          </Button>
           <Button 
             onClick={confirmVerifyPayment} 
             color="success" 
             variant="contained"
             disabled={loading}
           >
-            {loading ? <CircularProgress size={24} /> : 'Verify Payment'}
+            {loading ? <CircularProgress size={24} /> : 'APPROVE'}
           </Button>
         </DialogActions>
       </Dialog>
