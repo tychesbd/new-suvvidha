@@ -22,22 +22,81 @@ import Home from './pages/common/Home';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#6a1b9a', // Rich purple as primary color
+      light: '#9c4dcc',
+      dark: '#38006b',
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#ff6f00', // Warm orange as secondary color
+      light: '#ffa040',
+      dark: '#c43e00',
+      contrastText: '#ffffff',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#f8f9fa',
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#333333',
+      secondary: '#666666',
     },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    fontSize: 14,
-    fontWeightLight: 300,
-    fontWeightRegular: 400,
-    fontWeightMedium: 500,
-    fontWeightBold: 700,
+    fontSize: 16, // Increased base font size for better readability
+    h1: {
+      fontSize: '2.5rem',
+      fontWeight: 600,
+      color: '#333333',
+    },
+    h2: {
+      fontSize: '2rem',
+      fontWeight: 600,
+      color: '#333333',
+    },
+    h3: {
+      fontSize: '1.75rem',
+      fontWeight: 600,
+      color: '#333333',
+    },
+    h4: {
+      fontSize: '1.5rem',
+      fontWeight: 600,
+      color: '#333333',
+    },
+    h5: {
+      fontSize: '1.25rem',
+      fontWeight: 600,
+      color: '#333333',
+    },
+    h6: {
+      fontSize: '1rem',
+      fontWeight: 600,
+      color: '#333333',
+    },
+    button: {
+      textTransform: 'none', // Prevents all-caps buttons
+      fontWeight: 500,
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          padding: '8px 16px',
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        },
+      },
+    },
   },
 });
 

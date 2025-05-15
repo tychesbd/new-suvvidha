@@ -224,9 +224,11 @@ const SimpleLayout = ({ children, title }) => {
                 variant="contained"
                 sx={{ 
                   bgcolor: 'white', 
-                  color: '#ad6fa9', 
+                  color: '#6a1b9a', 
                   '&:hover': { bgcolor: '#f5f5f5' },
-                  mr: 2
+                  mr: 2,
+                  fontWeight: 600,
+                  boxShadow: '0 4px 10px rgba(106, 27, 154, 0.2)'
                 }}
               >
                 Become a Vendor
@@ -236,12 +238,31 @@ const SimpleLayout = ({ children, title }) => {
             {userInfo ? (
               <>
                 <Tooltip title="Account settings">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 2 }}>
-                    <Avatar alt={userInfo.name} src="/static/images/avatar/2.jpg" />
+                  <IconButton 
+                    onClick={handleOpenUserMenu} 
+                    sx={{ 
+                      p: 0, 
+                      ml: 2,
+                      border: '2px solid #f0f0f0',
+                      '&:hover': { backgroundColor: 'rgba(106, 27, 154, 0.04)' }
+                    }}
+                  >
+                    <Avatar 
+                      alt={userInfo.name} 
+                      src="/static/images/avatar/2.jpg" 
+                      sx={{ width: 38, height: 38 }}
+                    />
                   </IconButton>
                 </Tooltip>
                 <Menu
-                  sx={{ mt: '45px' }}
+                  sx={{ 
+                    mt: '45px',
+                    '& .MuiPaper-root': {
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                      minWidth: '200px'
+                    }
+                  }}
                   id="menu-appbar"
                   anchorEl={anchorElUser}
                   anchorOrigin={{
@@ -256,23 +277,23 @@ const SimpleLayout = ({ children, title }) => {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                  <MenuItem onClick={handleDashboardClick}>
+                  <MenuItem onClick={handleDashboardClick} sx={{ py: 1.5 }}>
                     <ListItemIcon>
-                      <DashboardIcon fontSize="small" />
+                      <DashboardIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                     </ListItemIcon>
-                    <ListItemText>Dashboard</ListItemText>
+                    <ListItemText primary="Dashboard" primaryTypographyProps={{ fontWeight: 500 }} />
                   </MenuItem>
-                  <MenuItem onClick={handleProfileClick}>
+                  <MenuItem onClick={handleProfileClick} sx={{ py: 1.5 }}>
                     <ListItemIcon>
-                      <AccountCircleIcon fontSize="small" />
+                      <AccountCircleIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                     </ListItemIcon>
-                    <ListItemText>Profile</ListItemText>
+                    <ListItemText primary="Profile" primaryTypographyProps={{ fontWeight: 500 }} />
                   </MenuItem>
-                  <MenuItem onClick={handleLogout}>
+                  <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                     <ListItemIcon>
-                      <LogoutIcon fontSize="small" />
+                      <LogoutIcon fontSize="small" sx={{ color: '#ff6f00' }} />
                     </ListItemIcon>
-                    <ListItemText>Logout</ListItemText>
+                    <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 500 }} />
                   </MenuItem>
                 </Menu>
               </>
@@ -282,7 +303,15 @@ const SimpleLayout = ({ children, title }) => {
                   component={Link}
                   to="/login"
                   variant="outlined"
-                  sx={{ color: 'white', borderColor: 'white' }}
+                  sx={{ 
+                    color: '#6a1b9a', 
+                    borderColor: '#6a1b9a',
+                    fontWeight: 500,
+                    '&:hover': {
+                      borderColor: '#6a1b9a',
+                      backgroundColor: 'rgba(106, 27, 154, 0.04)'
+                    }
+                  }}
                 >
                   Login
                 </Button>
@@ -290,7 +319,16 @@ const SimpleLayout = ({ children, title }) => {
                   component={Link}
                   to="/register"
                   variant="contained"
-                  sx={{ bgcolor: 'white', color: '#ad6fa9', '&:hover': { bgcolor: '#f5f5f5' } }}
+                  sx={{ 
+                    bgcolor: '#6a1b9a', 
+                    color: 'white', 
+                    fontWeight: 600,
+                    boxShadow: '0 4px 10px rgba(106, 27, 154, 0.2)',
+                    '&:hover': { 
+                      bgcolor: '#5c1786',
+                      boxShadow: '0 6px 12px rgba(106, 27, 154, 0.25)'
+                    } 
+                  }}
                 >
                   Register
                 </Button>
