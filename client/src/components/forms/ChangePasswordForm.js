@@ -61,6 +61,16 @@ const ChangePasswordForm = () => {
       }
     };
   }, [isError, isSuccess, message, dispatch, passwordChangeSubmitted]);
+  
+  // Clear form when component mounts
+  useEffect(() => {
+    setFormData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setError('');
+  }, []);
 
   const onChange = (e) => {
     setFormData((prevState) => ({

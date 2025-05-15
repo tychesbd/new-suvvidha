@@ -90,12 +90,24 @@ const loginUser = asyncHandler(async (req, res) => {
       throw new Error('Your account has been blocked. Please contact support.');
     }
     
+    // Return complete user profile data
     res.json({
       _id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
+      phone: user.phone,
+      address: user.address,
+      pincode: user.pincode,
+      pincodes: user.pincodes,
+      profileImage: user.profileImage,
       isActive: user.isActive,
+      // Include vendor-specific fields if user is a vendor
+      ...(user.role === 'vendor' && {
+        idProofDocument: user.idProofDocument,
+        yearsOfExperience: user.yearsOfExperience,
+        serviceExpertise: user.serviceExpertise,
+      }),
       token: generateToken(user._id),
     });
   } else {
@@ -111,6 +123,26 @@ const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
+    // Prepare response object with common fields
+    const responseObj = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      address: user.address,
+      pincode: user.pincode,
+      profileImage: user.profileImage,
+      isActive: user.isActive,
+    };
+    
+    // Add vendor-specific fields to response if user is a vendor
+    if (user.role === 'vendor') {
+      responseObj.idProofDocument = user.idProofDocument;
+      responseObj.yearsOfExperience = user.yearsOfExperience;
+      responseObj.serviceExpertise = user.serviceExpertise;
+    }
+    
     res.json({
       _id: user._id,
       name: user.name,
@@ -118,8 +150,16 @@ const getUserProfile = asyncHandler(async (req, res) => {
       role: user.role,
       phone: user.phone,
       address: user.address,
+      pincode: user.pincode,
+      pincodes: user.pincodes,
       profileImage: user.profileImage,
       isActive: user.isActive,
+      // Include vendor-specific fields if user is a vendor
+      ...(user.role === 'vendor' && {
+        idProofDocument: user.idProofDocument,
+        yearsOfExperience: user.yearsOfExperience,
+        serviceExpertise: user.serviceExpertise,
+      }),
     });
   } else {
     res.status(404);
@@ -141,6 +181,20 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.pincode = req.body.pincode || user.pincode;
     user.profileImage = req.body.profileImage || user.profileImage;
     
+    // Handle pincodes array for vendors
+    if (req.body.pincodes && user.role === 'vendor') {
+      try {
+        // Parse the JSON string if it's a string
+        if (typeof req.body.pincodes === 'string') {
+          user.pincodes = JSON.parse(req.body.pincodes);
+        } else {
+          user.pincodes = req.body.pincodes;
+        }
+      } catch (error) {
+        console.error('Error parsing pincodes:', error);
+      }
+    }
+    
     // Update vendor-specific fields if user is a vendor
     if (user.role === 'vendor') {
       // Handle ID proof document if uploaded
@@ -160,11 +214,21 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       
       // Update service expertise if provided
       if (req.body.serviceExpertise) {
-        // If it's a string, convert to array (for handling form data)
-        if (typeof req.body.serviceExpertise === 'string') {
-          user.serviceExpertise = req.body.serviceExpertise.split(',');
-        } else {
-          user.serviceExpertise = req.body.serviceExpertise;
+        try {
+          // If it's a JSON string, parse it
+          if (typeof req.body.serviceExpertise === 'string') {
+            // Check if it's a JSON string
+            if (req.body.serviceExpertise.startsWith('[')) {
+              user.serviceExpertise = JSON.parse(req.body.serviceExpertise);
+            } else {
+              // Fall back to comma-separated string handling
+              user.serviceExpertise = req.body.serviceExpertise.split(',');
+            }
+          } else {
+            user.serviceExpertise = req.body.serviceExpertise;
+          }
+        } catch (error) {
+          console.error('Error parsing serviceExpertise:', error);
         }
       }
     }
@@ -193,6 +257,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       phone: updatedUser.phone,
       address: updatedUser.address,
       pincode: updatedUser.pincode,
+      pincodes: updatedUser.pincodes,
       profileImage: updatedUser.profileImage,
       isActive: updatedUser.isActive,
       token: generateToken(updatedUser._id),
@@ -205,7 +270,24 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       responseObj.serviceExpertise = updatedUser.serviceExpertise;
     }
     
-    res.json(responseObj);
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      address: user.address,
+      pincode: user.pincode,
+      pincodes: user.pincodes,
+      profileImage: user.profileImage,
+      isActive: user.isActive,
+      // Include vendor-specific fields if user is a vendor
+      ...(user.role === 'vendor' && {
+        idProofDocument: user.idProofDocument,
+        yearsOfExperience: user.yearsOfExperience,
+        serviceExpertise: user.serviceExpertise,
+      }),
+    });
   } else {
     res.status(404);
     throw new Error('User not found');

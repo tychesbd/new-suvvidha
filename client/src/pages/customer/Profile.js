@@ -22,6 +22,7 @@ import { styled } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import PersonIcon from '@mui/icons-material/Person';
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
   width: theme.spacing(12),
@@ -35,12 +36,28 @@ const Profile = () => {
   const dispatch = useDispatch();
   const { userInfo, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Initialize form data with user fields
   const [formData, setFormData] = useState({
     name: userInfo?.name || '',
     email: userInfo?.email || '',
     phone: userInfo?.phone || '',
     address: userInfo?.address || '',
+    pincode: userInfo?.pincode || ''
   });
+  
+  // Update form data when userInfo changes
+  useEffect(() => {
+    if (userInfo) {
+      setFormData({
+        name: userInfo.name || '',
+        email: userInfo.email || '',
+        phone: userInfo.phone || '',
+        address: userInfo.address || '',
+        pincode: userInfo.pincode || ''
+      });
+    }
+  }, [userInfo]);
   
   useEffect(() => {
     if (isError) {
@@ -55,7 +72,7 @@ const Profile = () => {
     dispatch(reset());
   }, [isError, isSuccess, message, dispatch, isEditing]);
 
-  const { name, email, phone, address } = formData;
+  const { name, email, phone, address, pincode } = formData;
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -75,6 +92,7 @@ const Profile = () => {
       email: userInfo?.email || '',
       phone: userInfo?.phone || '',
       address: userInfo?.address || '',
+      pincode: userInfo?.pincode || ''
     });
   };
 
@@ -86,6 +104,7 @@ const Profile = () => {
       email,
       phone,
       address,
+      pincode,
     };
     
     dispatch(updateProfile(userData));
@@ -104,7 +123,9 @@ const Profile = () => {
         <Grid item xs={12} md={4}>
           <Card elevation={3}>
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
-              <StyledAvatar>{name.charAt(0)}</StyledAvatar>
+              <StyledAvatar>
+                <PersonIcon fontSize="large" />
+              </StyledAvatar>
               <Typography variant="h5" sx={{ mt: 2 }}>
                 {userInfo?.name}
               </Typography>
@@ -120,6 +141,7 @@ const Profile = () => {
                 startIcon={<EditIcon />}
                 onClick={handleEdit}
                 disabled={isEditing}
+                color="primary"
               >
                 Edit Profile
               </Button>
@@ -168,6 +190,17 @@ const Profile = () => {
                       onChange={onChange}
                     />
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Pincode"
+                      name="pincode"
+                      value={pincode}
+                      onChange={onChange}
+                      inputProps={{ maxLength: 6 }}
+                      placeholder="Enter 6-digit pincode"
+                    />
+                  </Grid>
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -194,6 +227,7 @@ const Profile = () => {
                   <Button
                     type="submit"
                     variant="contained"
+                    color="primary"
                     startIcon={isLoading ? <CircularProgress size={24} /> : <SaveIcon />}
                     disabled={isLoading}
                   >
@@ -204,7 +238,7 @@ const Profile = () => {
             ) : (
               <Box>
                 <Typography variant="h6" gutterBottom>
-                  Profile Information
+                  Personal Information
                 </Typography>
                 <Divider sx={{ mb: 3 }} />
 
@@ -231,10 +265,10 @@ const Profile = () => {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Role
+                      Pincode
                     </Typography>
-                    <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
-                      {userInfo?.role}
+                    <Typography variant="body1">
+                      {userInfo?.pincode || 'Not provided'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>

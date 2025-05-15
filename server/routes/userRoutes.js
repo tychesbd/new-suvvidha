@@ -49,8 +49,11 @@ router.put('/change-password', protect, async (req, res) => {
     
     res.json({ message: 'Password updated successfully' });
   } catch (error) {
-    res.status(error.statusCode || 500);
-    throw new Error(error.message || 'Server error');
+    console.error('Password change error:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      message: error.message || 'Server error'
+    });
   }
 });
 

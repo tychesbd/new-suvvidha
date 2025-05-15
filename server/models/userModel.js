@@ -35,6 +35,10 @@ const userSchema = mongoose.Schema(
     pincode: {
       type: String,
     },
+    pincodes: {
+      type: [String],
+      default: [],
+    },
     profileImage: {
       type: String,
       default: 'default-avatar.png',
