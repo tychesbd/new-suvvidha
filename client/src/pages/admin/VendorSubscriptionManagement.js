@@ -189,9 +189,10 @@ const VendorSubscriptionManagement = () => {
         },
       };
       
+      // Using the correct API endpoint for verifying subscription
       await axios.put(
-        `/api/subscriptions/${subscriptionId}/approve`, 
-        {},
+        `/api/subscriptions/${subscriptionId}/verify`, 
+        { paymentStatus: 'paid' },
         config
       );
       
@@ -205,6 +206,7 @@ const VendorSubscriptionManagement = () => {
       // Refresh subscriptions
       fetchSubscriptions();
     } catch (err) {
+      console.error('Error approving subscription:', err);
       setError(
         err.response && err.response.data.message
           ? err.response.data.message
@@ -226,9 +228,10 @@ const VendorSubscriptionManagement = () => {
         },
       };
       
+      // Using the correct API endpoint for verifying subscription
       await axios.put(
-        `/api/subscriptions/${subscriptionId}/deny`, 
-        {},
+        `/api/subscriptions/${subscriptionId}/verify`, 
+        { paymentStatus: 'failed' },
         config
       );
       
@@ -242,6 +245,7 @@ const VendorSubscriptionManagement = () => {
       // Refresh subscriptions
       fetchSubscriptions();
     } catch (err) {
+      console.error('Error denying subscription:', err);
       setError(
         err.response && err.response.data.message
           ? err.response.data.message
@@ -400,9 +404,9 @@ const VendorSubscriptionManagement = () => {
                 <TableRow key={subscription._id}>
                   <TableCell>{subscription.vendor?.name || 'N/A'}</TableCell>
                   <TableCell>{subscription.vendor?.phone || 'N/A'}</TableCell>
-                  <TableCell>{subscription.planName}</TableCell>
+                  <TableCell>{subscription.planName || subscription.plan || 'N/A'}</TableCell>
                   <TableCell>
-                    {subscription.services?.length || 0} services
+                    {(subscription.services?.length || subscription.selectedServices?.length || 0)} services
                     <Tooltip title="View Details">
                       <IconButton size="small" onClick={() => handleViewDetails(subscription)}>
                         <VisibilityIcon fontSize="small" />
@@ -410,7 +414,7 @@ const VendorSubscriptionManagement = () => {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    {subscription.screenshot ? (
+                    {subscription.screenshot || subscription.paymentProof ? (
                       <Tooltip title="View Screenshot">
                         <IconButton size="small" onClick={() => handleViewScreenshot(subscription)}>
                           <VisibilityIcon fontSize="small" />
@@ -422,7 +426,9 @@ const VendorSubscriptionManagement = () => {
                   </TableCell>
                   <TableCell>{subscription.transactionId || 'N/A'}</TableCell>
                   <TableCell>
-                    {subscription.bookingLimit - (subscription.usedBookings || 0)} / {subscription.bookingLimit}
+                    {(subscription.bookingLimit !== undefined && !isNaN(subscription.bookingLimit)) ? 
+                      `${subscription.bookingLimit - (subscription.usedBookings || 0)} / ${subscription.bookingLimit}` : 
+                      'N/A'}
                   </TableCell>
                   <TableCell>
                     <StatusChip 
@@ -498,7 +504,7 @@ const VendorSubscriptionManagement = () => {
                   Subscription Plan
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  {selectedSubscription.planName}
+                  {selectedSubscription.planName || selectedSubscription.plan || 'N/A'}
                 </Typography>
               </Grid>
               
@@ -553,7 +559,7 @@ const VendorSubscriptionManagement = () => {
                   Selected Services
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                  {selectedSubscription.services?.map((service) => (
+                  {(selectedSubscription.services || selectedSubscription.selectedServices)?.map((service) => (
                     <Chip 
                       key={service._id} 
                       label={service.name} 
@@ -565,14 +571,14 @@ const VendorSubscriptionManagement = () => {
                 </Box>
               </Grid>
               
-              {selectedSubscription.screenshot && (
+              {(selectedSubscription.screenshot || selectedSubscription.paymentProof) && (
                 <Grid item xs={12}>
                   <Typography variant="subtitle2" color="text.secondary">
                     Payment Screenshot
                   </Typography>
                   <Box 
                     component="img" 
-                    src={selectedSubscription.screenshot} 
+                    src={`/api/uploads/${selectedSubscription.screenshot?.split('/').pop() || selectedSubscription.paymentProof?.split('/').pop()}`} 
                     alt="Payment Screenshot" 
                     sx={{ 
                       width: '100%', 
@@ -604,10 +610,10 @@ const VendorSubscriptionManagement = () => {
           Payment Screenshot
         </DialogTitle>
         <DialogContent>
-          {selectedSubscription && selectedSubscription.screenshot && (
+          {selectedSubscription && (selectedSubscription.screenshot || selectedSubscription.paymentProof) && (
             <Box 
               component="img" 
-              src={selectedSubscription.screenshot} 
+              src={`/api/uploads/${selectedSubscription.screenshot?.split('/').pop() || selectedSubscription.paymentProof?.split('/').pop()}`} 
               alt="Payment Screenshot" 
               sx={{ 
                 width: '100%', 
@@ -620,8 +626,15 @@ const VendorSubscriptionManagement = () => {
           <Button 
             startIcon={<DownloadIcon />}
             onClick={() => {
-              if (selectedSubscription && selectedSubscription.screenshot) {
-                window.open(selectedSubscription.screenshot, '_blank');
+              if (selectedSubscription && (selectedSubscription.screenshot || selectedSubscription.paymentProof)) {
+                // Create an anchor element and set the download attribute
+                const link = document.createElement('a');
+                const fileName = selectedSubscription.screenshot?.split('/').pop() || selectedSubscription.paymentProof?.split('/').pop();
+                link.href = `/api/uploads/${fileName}`;
+                link.download = fileName || `payment-proof-${selectedSubscription._id}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
               }
             }}
           >
