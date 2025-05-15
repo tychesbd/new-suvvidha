@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
-import { useLanguage } from '../../contexts/LanguageContext';
-import LanguageSelector from '../language/LanguageSelector';
+// Removed language imports as per requirements
 
 // Material UI imports
 import {
@@ -46,7 +45,7 @@ const SimpleLayout = ({ children, title }) => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { getTranslation } = useLanguage();
+  // Removed language context usage
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -103,7 +102,7 @@ const SimpleLayout = ({ children, title }) => {
               borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
             }}
           >
-            <ListItemText primary={getTranslation('home')} />
+            <ListItemText primary="Home" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -115,7 +114,7 @@ const SimpleLayout = ({ children, title }) => {
               borderBottom: location.pathname.includes(`/${userRole}/services`) ? '2px solid #ad6fa9' : 'none',
             }}
           >
-            <ListItemText primary={getTranslation('services')} />
+            <ListItemText primary="Services" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -127,7 +126,7 @@ const SimpleLayout = ({ children, title }) => {
               borderBottom: location.pathname.includes(`/${userRole}/about`) ? '2px solid #ad6fa9' : 'none',
             }}
           >
-            <ListItemText primary={getTranslation('aboutUs')} />
+            <ListItemText primary="About Us" />
           </ListItemButton>
         </ListItem>
       </List>
@@ -185,7 +184,7 @@ const SimpleLayout = ({ children, title }) => {
               }}
               startIcon={<HomeIcon />}
             >
-              {getTranslation('home')}
+              Home
             </Button>
             <Button
               component={Link}
@@ -199,7 +198,7 @@ const SimpleLayout = ({ children, title }) => {
               }}
               startIcon={<MiscellaneousServicesIcon />}
             >
-              {getTranslation('services')}
+              Services
             </Button>
             <Button
               component={Link}
@@ -213,16 +212,32 @@ const SimpleLayout = ({ children, title }) => {
               }}
               startIcon={<InfoIcon />}
             >
-              {getTranslation('aboutUs')}
+              About Us
             </Button>
           </Box>
           <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-            <LanguageSelector />
+            {/* Added Become a Vendor button */}
+            {!userInfo && (
+              <Button
+                component={Link}
+                to="/vendor-register"
+                variant="contained"
+                sx={{ 
+                  bgcolor: 'white', 
+                  color: '#ad6fa9', 
+                  '&:hover': { bgcolor: '#f5f5f5' },
+                  mr: 2
+                }}
+              >
+                Become a Vendor
+              </Button>
+            )}
+            
             {userInfo ? (
               <>
-                <Tooltip title="Open settings">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt={userInfo?.name} src="/static/images/avatar/2.svg" />
+                <Tooltip title="Account settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 2 }}>
+                    <Avatar alt={userInfo.name} src="/static/images/avatar/2.jpg" />
                   </IconButton>
                 </Tooltip>
                 <Menu
@@ -241,23 +256,23 @@ const SimpleLayout = ({ children, title }) => {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                  <MenuItem onClick={handleProfileClick}>
-                    <ListItemIcon>
-                      <AccountCircleIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText primary={getTranslation('profile')} />
-                  </MenuItem>
                   <MenuItem onClick={handleDashboardClick}>
                     <ListItemIcon>
                       <DashboardIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText primary={getTranslation('dashboard')} />
+                    <ListItemText>Dashboard</ListItemText>
+                  </MenuItem>
+                  <MenuItem onClick={handleProfileClick}>
+                    <ListItemIcon>
+                      <AccountCircleIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Profile</ListItemText>
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>
                     <ListItemIcon>
                       <LogoutIcon fontSize="small" />
                     </ListItemIcon>
-                    <ListItemText primary={getTranslation('logout')} />
+                    <ListItemText>Logout</ListItemText>
                   </MenuItem>
                 </Menu>
               </>
@@ -266,19 +281,18 @@ const SimpleLayout = ({ children, title }) => {
                 <Button
                   component={Link}
                   to="/login"
-                  variant="contained"
-                  color="secondary"
-                  sx={{ fontWeight: 'bold' }}
+                  variant="outlined"
+                  sx={{ color: 'white', borderColor: 'white' }}
                 >
-                  {getTranslation('signIn')}
+                  Login
                 </Button>
                 <Button
                   component={Link}
                   to="/register"
-                  variant="outlined"
-                  sx={{ fontWeight: 'bold', color: 'white', borderColor: 'white' }}
+                  variant="contained"
+                  sx={{ bgcolor: 'white', color: '#ad6fa9', '&:hover': { bgcolor: '#f5f5f5' } }}
                 >
-                  {getTranslation('signUp') || 'Sign Up'}
+                  Register
                 </Button>
               </Box>
             )}

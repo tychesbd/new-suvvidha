@@ -11,6 +11,7 @@ const {
   toggleUserStatus,
   createDefaultUsers,
 } = require('../controllers/userController');
+const { registerVendor } = require('../controllers/vendorController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -18,6 +19,7 @@ const upload = require('../middleware/uploadMiddleware');
 router.post('/', registerUser);
 router.post('/login', loginUser);
 router.post('/create-defaults', createDefaultUsers);
+router.post('/vendor-register', upload.single('idProofDocument'), registerVendor);
 
 // Protected routes
 router.get('/profile', protect, getUserProfile);

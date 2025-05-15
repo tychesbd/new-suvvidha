@@ -10,6 +10,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VendorRegister from './pages/VendorRegister';
 import Plans from './pages/Plans';
 import CustomerDashboard from './pages/customer/Dashboard';
 import VendorDashboard from './pages/vendor/Dashboard';
@@ -71,6 +72,7 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/login" element={userInfo ? <Navigate to="/" replace /> : <Login />} />
         <Route path="/register" element={userInfo ? <Navigate to="/" replace /> : <Register />} />
+        <Route path="/vendor-register" element={userInfo ? <Navigate to="/" replace /> : <VendorRegister />} />
         
         {/* Home Route - Now the default landing page */}
         <Route path="/" element={
