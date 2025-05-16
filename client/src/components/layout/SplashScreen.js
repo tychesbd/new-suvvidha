@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Container, CircularProgress } from '@mui/material';
+import { Box, Typography, Container, CircularProgress, Grid, Paper } from '@mui/material';
 import { keyframes } from '@emotion/react';
 import { styled } from '@mui/material/styles';
+
+// Icons for services
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import PlumbingIcon from '@mui/icons-material/Plumbing';
+import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
+import FormatPaintIcon from '@mui/icons-material/FormatPaint';
 
 // Define animations
 const fadeIn = keyframes`
@@ -20,6 +26,21 @@ const pulse = keyframes`
   100% { transform: scale(1); }
 `;
 
+const slideInFromLeft = keyframes`
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+`;
+
+const slideInFromRight = keyframes`
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+`;
+
+const slideInFromBottom = keyframes`
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
 // Styled components
 const AnimatedContainer = styled(Container)(({ theme, isExiting }) => ({
   height: '100vh',
@@ -27,39 +48,62 @@ const AnimatedContainer = styled(Container)(({ theme, isExiting }) => ({
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
-  background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 50%, ${theme.palette.secondary.main} 100%)`,
+  background: `linear-gradient(135deg, #f5f7fa 0%, #e4ecfb 50%, #f8f0ff 100%)`,
   animation: isExiting
-    ? `${fadeOut} 0.5s ease-out forwards`
+    ? `${fadeOut} 0.8s ease-out forwards`
     : `${fadeIn} 0.8s ease-out forwards`,
   overflow: 'hidden',
 }));
 
 const LogoBox = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
+  marginBottom: theme.spacing(3),
   animation: `${pulse} 2s infinite ease-in-out`,
 }));
 
 const WelcomeText = styled(Typography)(({ theme }) => ({
-  color: '#ffffff',
+  color: theme.palette.primary.main,
   textAlign: 'center',
   fontWeight: 700,
-  textShadow: '0 2px 10px rgba(0,0,0,0.2)',
+  marginBottom: theme.spacing(2),
+}));
+
+const SubText = styled(Typography)(({ theme, delay }) => ({
+  color: theme.palette.text.primary,
+  textAlign: 'center',
   marginBottom: theme.spacing(3),
+  animation: `${slideInFromBottom} 0.8s ease-out forwards`,
+  animationDelay: `${delay}s`,
+  opacity: 0,
+}));
+
+const ServiceCard = styled(Paper)(({ theme, delay, fromLeft }) => ({
+  padding: theme.spacing(2),
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  borderRadius: 12,
+  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+  height: '100%',
+  animation: fromLeft 
+    ? `${slideInFromLeft} 0.8s ease-out forwards`
+    : `${slideInFromRight} 0.8s ease-out forwards`,
+  animationDelay: `${delay}s`,
+  opacity: 0,
 }));
 
 const SplashScreen = ({ onFinished }) => {
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
-    // Start exit animation after 1.5 seconds
+    // Start exit animation after 4.2 seconds (5 seconds total with animation time)
     const exitTimer = setTimeout(() => {
       setIsExiting(true);
-    }, 1500);
+    }, 4200);
 
-    // Call onFinished after 2 seconds (total display time)
+    // Call onFinished after 5 seconds (total display time)
     const finishTimer = setTimeout(() => {
       if (onFinished) onFinished();
-    }, 2000);
+    }, 5000);
 
     return () => {
       clearTimeout(exitTimer);
@@ -74,7 +118,7 @@ const SplashScreen = ({ onFinished }) => {
           component="img"
           src="/logo1.png"
           alt="Suvvidha Logo"
-          sx={{ width: { xs: 120, sm: 150, md: 180 }, height: 'auto' }}
+          sx={{ width: { xs: 150, sm: 180, md: 200 }, height: 'auto' }}
         />
       </LogoBox>
       
@@ -82,11 +126,66 @@ const SplashScreen = ({ onFinished }) => {
         Welcome To Suvvidha
       </WelcomeText>
       
+      <SubText variant="h6" delay={0.3}>
+        Your One-Stop Solution for Home Services
+      </SubText>
+      
+      <SubText variant="body1" delay={0.6}>
+        Quality services at your fingertips - anytime, anywhere
+      </SubText>
+      
+      <Grid container spacing={3} sx={{ maxWidth: 900, mt: 2, mb: 4 }}>
+        <Grid item xs={6} sm={3}>
+          <ServiceCard elevation={2} delay={0.8} fromLeft={true}>
+            <CleaningServicesIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
+              Cleaning
+            </Typography>
+            <Typography variant="body2" align="center" color="text.secondary">
+              Professional cleaning services
+            </Typography>
+          </ServiceCard>
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <ServiceCard elevation={2} delay={1.0} fromLeft={false}>
+            <PlumbingIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
+              Plumbing
+            </Typography>
+            <Typography variant="body2" align="center" color="text.secondary">
+              Expert plumbing solutions
+            </Typography>
+          </ServiceCard>
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <ServiceCard elevation={2} delay={1.2} fromLeft={true}>
+            <ElectricalServicesIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
+              Electrical
+            </Typography>
+            <Typography variant="body2" align="center" color="text.secondary">
+              Reliable electrical repairs
+            </Typography>
+          </ServiceCard>
+        </Grid>
+        <Grid item xs={6} sm={3}>
+          <ServiceCard elevation={2} delay={1.4} fromLeft={false}>
+            <FormatPaintIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
+              Painting
+            </Typography>
+            <Typography variant="body2" align="center" color="text.secondary">
+              Quality painting services
+            </Typography>
+          </ServiceCard>
+        </Grid>
+      </Grid>
+      
       <CircularProgress 
         size={40} 
         thickness={4} 
         sx={{ 
-          color: '#ffffff',
+          color: 'primary.main',
           opacity: 0.8,
         }} 
       />
