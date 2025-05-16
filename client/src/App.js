@@ -4,8 +4,7 @@ import { useSelector } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
-// Language Context
-import { LanguageProvider } from './contexts/LanguageContext';
+
 
 // Pages
 import Login from './pages/Login';
@@ -127,7 +126,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <LanguageProvider>
+      
         <CssBaseline />
         <Routes>
         {/* Public Routes */}
@@ -187,7 +186,7 @@ const App = () => {
         
         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </LanguageProvider>
+      
     </ThemeProvider>
   );
 };

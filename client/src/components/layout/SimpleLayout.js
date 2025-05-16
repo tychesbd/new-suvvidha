@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
-// Removed language imports as per requirements
+// No language functionality needed
 
 // Material UI imports
 import {
@@ -45,7 +45,7 @@ const SimpleLayout = ({ children, title }) => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // Removed language context usage
+  // No language functionality needed
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);

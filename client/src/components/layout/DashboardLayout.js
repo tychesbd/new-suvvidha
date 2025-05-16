@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
-import NotificationIcon from '../notifications/NotificationIcon';
-import { useLanguage } from '../../contexts/LanguageContext';
-import LanguageSelector from '../language/LanguageSelector';
 
 // Material UI imports
 import {
@@ -52,7 +49,6 @@ const DashboardLayout = ({ children, title, menuItems }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { getTranslation } = useLanguage();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -194,7 +190,7 @@ const DashboardLayout = ({ children, title, menuItems }) => {
               }}
               startIcon={<HomeIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('home')}
+              Home
             </Button>
             <Button
               component={Link}
@@ -214,7 +210,7 @@ const DashboardLayout = ({ children, title, menuItems }) => {
               }}
               startIcon={<MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('services')}
+              Services
             </Button>
             <Button
               component={Link}
@@ -234,17 +230,11 @@ const DashboardLayout = ({ children, title, menuItems }) => {
               }}
               startIcon={<InfoIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('aboutUs')}
+              About Us
             </Button>
           </Box>
           
-          {/* Notification Icon */}
-          <Box sx={{ flexGrow: 0, mr: 2 }}>
-            <NotificationIcon sx={{ color: '#6a1b9a' }} />
-          </Box>
-          
           <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-            <LanguageSelector />
             <Box sx={{ ml: 2 }}>
               <Tooltip title="Open settings">
                 <IconButton 
@@ -289,19 +279,19 @@ const DashboardLayout = ({ children, title, menuItems }) => {
                   <ListItemIcon>
                     <AccountCircleIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                   </ListItemIcon>
-                  <Typography textAlign="center" fontWeight={500}>{getTranslation('profile')}</Typography>
+                  <Typography textAlign="center" fontWeight={500}>Profile</Typography>
                 </MenuItem>
                 <MenuItem onClick={handleDashboardClick} sx={{ py: 1.5 }}>
                   <ListItemIcon>
                     <DashboardIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                   </ListItemIcon>
-                  <Typography textAlign="center" fontWeight={500}>{getTranslation('dashboard')}</Typography>
+                  <Typography textAlign="center" fontWeight={500}>Dashboard</Typography>
                 </MenuItem>
                 <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                   <ListItemIcon>
                     <LogoutIcon fontSize="small" sx={{ color: '#ff6f00' }} />
                   </ListItemIcon>
-                  <Typography textAlign="center" fontWeight={500}>{getTranslation('logout')}</Typography>
+                  <Typography textAlign="center" fontWeight={500}>Logout</Typography>
                 </MenuItem>
               </Menu>
             </Box>
