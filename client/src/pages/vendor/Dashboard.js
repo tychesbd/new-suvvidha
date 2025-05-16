@@ -90,31 +90,25 @@ const VendorHome = () => {
           },
         };
 
-        // Fetch booking statistics
-        const { data: bookingStats } = await axios.get('/api/bookings/stats', config);
+        // Fetch dashboard statistics from our new endpoint
+        const { data } = await axios.get('/api/dashboard/vendor', config);
         
         // Fetch subscription data
         const { data: subscriptionData } = await axios.get('/api/subscriptions/vendor', config);
-        
-        // Fetch recent bookings
-        const { data: bookingsData } = await axios.get('/api/bookings?limit=5', config);
-        
-        // Fetch service metrics
-        const { data: serviceStats } = await axios.get('/api/services/stats', config);
 
         setDashboardData({
-          totalBookings: bookingStats.totalBookings || 0,
-          activeBookings: bookingStats.activeBookings || 0,
-          completedBookings: bookingStats.completedBookings || 0,
-          revenue: bookingStats.revenue || 0,
-          totalServices: serviceStats.totalServices || 0,
-          activeServices: serviceStats.activeServices || 0,
-          avgRating: serviceStats.avgRating || 0,
-          reviewCount: serviceStats.reviewCount || 0
+          totalBookings: data.totalBookings || 0,
+          activeBookings: data.activeBookings || 0,
+          completedBookings: data.completedBookings || 0,
+          revenue: data.revenue || 0,
+          totalServices: data.totalServices || 0,
+          activeServices: data.activeServices || 0,
+          avgRating: data.avgRating || 0,
+          reviewCount: data.reviewCount || 0
         });
 
         setSubscription(subscriptionData);
-        setRecentBookings(bookingsData || []);
+        setRecentBookings(data.recentBookings || []);
         setError(null);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);

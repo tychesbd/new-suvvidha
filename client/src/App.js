@@ -17,6 +17,8 @@ import VendorDashboard from './pages/vendor/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 import SimpleLayout from './components/layout/SimpleLayout';
 import Home from './pages/common/Home';
+import Services from './pages/common/Services';
+import AboutUs from './pages/common/AboutUs';
 
 // Create a theme instance
 const theme = createTheme({
@@ -137,6 +139,19 @@ const App = () => {
         <Route path="/" element={
           <SimpleLayout>
             <Home />
+          </SimpleLayout>
+        } />
+        
+        {/* Public Services and About Us Routes */}
+        <Route path="/services" element={
+          <SimpleLayout>
+            <Services />
+          </SimpleLayout>
+        } />
+        
+        <Route path="/about" element={
+          <SimpleLayout>
+            <AboutUs />
           </SimpleLayout>
         } />
         

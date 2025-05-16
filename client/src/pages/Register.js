@@ -244,7 +244,7 @@ const Register = () => {
                       onChange={onChange}
                     >
                       <MenuItem value="customer">Customer</MenuItem>
-                      <MenuItem value="vendor">Vendor</MenuItem>
+                      {/* <MenuItem value="vendor">Vendor</MenuItem> */}
                       {/* <MenuItem value="admin">Admin</MenuItem> */}
                     </Select>
                   </FormControl>

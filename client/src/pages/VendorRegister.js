@@ -192,6 +192,11 @@ const VendorRegister = () => {
 
   return (
     <Container component="main" maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+        <Link to="/">
+          <img src="/logo1.png" alt="Suvvidha Logo" height="60" />
+        </Link>
+      </Box>
       <Grid container spacing={4}>
         <Grid item xs={12} md={5}>
           <Box sx={{ mb: 4 }}>

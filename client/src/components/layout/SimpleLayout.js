@@ -90,8 +90,8 @@ const SimpleLayout = ({ children, title }) => {
   // Mobile drawer content
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', pt: 2, pb: 2 }}>
-      <Link to="/" style={{ textDecoration: 'none' }}>
-      <img src="/logo1.png" alt="Suvvidha Logo" height="40" sx={{ my: 2 }} /> </Link>
+      <Link to="/" style={{ textDecoration: 'none', display: 'block', marginBottom: '10px' }}>
+      <img src="/logo1.png" alt="Suvvidha Logo" height="40" /> </Link>
       <List>
         <ListItem disablePadding>
           <ListItemButton 
@@ -99,34 +99,43 @@ const SimpleLayout = ({ children, title }) => {
             to={userInfo ? `/${userRole}/home` : '/'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
+              borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid #6a1b9a' : 'none',
             }}
           >
-            <ListItemText primary="Home" />
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <HomeIcon sx={{ color: '#6a1b9a' }} />
+            </ListItemIcon>
+            <ListItemText primary="Home" sx={{ color: '#333333' }} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton 
             component={Link} 
-            to={userInfo ? `/${userRole}/services` : '/'}
+            to={userInfo ? `/${userRole}/services` : '/services'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/services`) ? '2px solid #ad6fa9' : 'none',
+              borderBottom: location.pathname.includes(`/${userRole}/services`) || location.pathname === '/services' ? '2px solid #6a1b9a' : 'none',
             }}
           >
-            <ListItemText primary="Services" />
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />
+            </ListItemIcon>
+            <ListItemText primary="Services" sx={{ color: '#333333' }} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton 
             component={Link} 
-            to={userInfo ? `/${userRole}/about` : '/'}
+            to={userInfo ? `/${userRole}/about` : '/about'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/about`) ? '2px solid #ad6fa9' : 'none',
+              borderBottom: location.pathname.includes(`/${userRole}/about`) || location.pathname === '/about' ? '2px solid #6a1b9a' : 'none',
             }}
           >
-            <ListItemText primary="About Us" />
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <InfoIcon sx={{ color: '#6a1b9a' }} />
+            </ListItemIcon>
+            <ListItemText primary="About Us" sx={{ color: '#333333' }} />
           </ListItemButton>
         </ListItem>
       </List>
@@ -152,14 +161,14 @@ const SimpleLayout = ({ children, title }) => {
           {drawer}
         </Drawer>
       </Box>
-      <AppBar position="fixed" sx={{ backgroundColor: '#ad6fa9' }}>
+      <AppBar position="fixed" sx={{ backgroundColor: '#ffffff', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' } }}
+            sx={{ mr: 2, display: { md: 'none' }, color: '#6a1b9a' }}
           >
             <MenuIcon />
           </IconButton>
@@ -176,41 +185,53 @@ const SimpleLayout = ({ children, title }) => {
               component={Link}
               to={userInfo ? `/${userRole}/home` : '/'}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
+                borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<HomeIcon />}
+              startIcon={<HomeIcon sx={{ color: '#6a1b9a' }} />}
             >
               Home
             </Button>
             <Button
               component={Link}
-              to={userInfo ? `/${userRole}/services` : '/'}
+              to={userInfo ? `/${userRole}/services` : '/services'}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userRole}/services`) ? '2px solid white' : 'none',
+                borderBottom: location.pathname.includes(`/${userRole}/services`) || location.pathname === '/services' ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<MiscellaneousServicesIcon />}
+              startIcon={<MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />}
             >
               Services
             </Button>
             <Button
               component={Link}
-              to={userInfo ? `/${userRole}/about` : '/'}
+              to={userInfo ? `/${userRole}/about` : '/about'}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userRole}/about`) ? '2px solid white' : 'none',
+                borderBottom: location.pathname.includes(`/${userRole}/about`) || location.pathname === '/about' ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<InfoIcon />}
+              startIcon={<InfoIcon sx={{ color: '#6a1b9a' }} />}
             >
               About Us
             </Button>
