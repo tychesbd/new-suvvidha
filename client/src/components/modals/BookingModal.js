@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogTitle,
@@ -21,6 +22,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 const BookingModal = ({ open, onClose, service }) => {
+  const navigate = useNavigate();
+  
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -177,12 +180,12 @@ const BookingModal = ({ open, onClose, service }) => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         
         if (!userInfo || !userInfo.token) {
-          setSnackbar({
-            open: true,
-            message: 'You must be logged in to book a service',
-            severity: 'error'
-          });
-          setLoading(false);
+          // Close the modal
+          handleClose();
+          
+          // Redirect to login page with return URL
+          const currentPath = window.location.pathname;
+          navigate(`/login?redirect=${encodeURIComponent(currentPath)}`);
           return;
         }
         

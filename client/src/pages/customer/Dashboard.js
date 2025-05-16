@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 // Material UI imports
-import { Typography, Grid, Paper, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button } from '@mui/material';
+import { Typography, Grid, Paper, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button, CircularProgress, Alert } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 // Icons
@@ -66,6 +67,71 @@ const StatsCard = ({ title, value, icon }) => {
 
 const CustomerHome = () => {
   const { userInfo } = useSelector((state) => state.auth);
+  const [dashboardData, setDashboardData] = useState({
+    activeBookings: 0,
+    completedBookings: 0,
+    cancelledBookings: 0,
+    totalSpent: 0,
+    recentBookings: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        };
+
+        // Fetch dashboard statistics from our new endpoint
+        const { data } = await axios.get('/api/dashboard/customer', config);
+        
+        setDashboardData({
+          activeBookings: data.activeBookings || 0,
+          completedBookings: data.completedBookings || 0,
+          cancelledBookings: data.cancelledBookings || 0,
+          totalSpent: data.totalSpent || 0,
+          recentBookings: data.recentBookings || []
+        });
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(
+          err.response && err.response.data.message
+            ? err.response.data.message
+            : 'Failed to load dashboard data'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userInfo && userInfo.token) {
+      fetchData();
+    }
+  }, [userInfo]);
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>
@@ -76,18 +142,24 @@ const CustomerHome = () => {
         Here's an overview of your activity
       </Typography>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
       <Grid container spacing={4} sx={{ mt: 2 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Active Bookings" value="3" icon={<ShoppingCartIcon fontSize="large" />} />
+          <StatsCard title="Active Bookings" value={dashboardData.activeBookings} icon={<ShoppingCartIcon fontSize="large" />} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Completed" value="8" icon={<CheckCircleIcon fontSize="large" />} />
+          <StatsCard title="Completed" value={dashboardData.completedBookings} icon={<CheckCircleIcon fontSize="large" />} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Cancelled" value="2" icon={<CancelIcon fontSize="large" />} />
+          <StatsCard title="Cancelled" value={dashboardData.cancelledBookings} icon={<CancelIcon fontSize="large" />} />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Total Spent" value="₹4,250" icon={<PaymentIcon fontSize="large" />} />
+          <StatsCard title="Total Spent" value={formatCurrency(dashboardData.totalSpent)} icon={<PaymentIcon fontSize="large" />} />
         </Grid>
       </Grid>
 
@@ -95,8 +167,7 @@ const CustomerHome = () => {
         Recent Bookings
       </Typography>
       <Paper elevation={2} sx={{ p: 3 }}>
-        {/* Mock booking data - in a real app, this would come from an API */}
-        {[1, 2, 3].length > 0 ? (
+        {dashboardData.recentBookings && dashboardData.recentBookings.length > 0 ? (
           <TableContainer component={Paper} elevation={0}>
             <Table sx={{ minWidth: 650 }} size="medium">
               <TableHead>
@@ -110,46 +181,24 @@ const CustomerHome = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {[
-                  {
-                    id: 'BK001',
-                    service: 'Home Cleaning',
-                    date: '2023-12-15',
-                    status: 'completed',
-                    amount: 1200
-                  },
-                  {
-                    id: 'BK002',
-                    service: 'Plumbing Service',
-                    date: '2023-12-20',
-                    status: 'active',
-                    amount: 850
-                  },
-                  {
-                    id: 'BK003',
-                    service: 'Electrical Repair',
-                    date: '2023-12-25',
-                    status: 'pending',
-                    amount: 1500
-                  }
-                ].map((booking) => (
-                  <TableRow key={booking.id}>
-                    <TableCell>{booking.id}</TableCell>
-                    <TableCell>{booking.service}</TableCell>
-                    <TableCell>{new Date(booking.date).toLocaleDateString()}</TableCell>
+                {dashboardData.recentBookings.map((booking) => (
+                  <TableRow key={booking._id}>
+                    <TableCell>{booking._id.substring(0, 8)}</TableCell>
+                    <TableCell>{booking.service ? booking.service.name || booking.service.title : booking.serviceName}</TableCell>
+                    <TableCell>{new Date(booking.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <Chip 
                         label={booking.status} 
                         color={
                           booking.status === 'completed' ? 'success' : 
-                          booking.status === 'active' ? 'primary' : 
+                          booking.status === 'in-progress' || booking.status === 'pending' ? 'primary' : 
                           booking.status === 'cancelled' ? 'error' : 'warning'
                         }
                         size="small"
                         sx={{ textTransform: 'capitalize' }}
                       />
                     </TableCell>
-                    <TableCell>₹{booking.amount}</TableCell>
+                    <TableCell>{formatCurrency(booking.amount || 0)}</TableCell>
                     <TableCell>
                       <Button size="small" variant="outlined">View</Button>
                     </TableCell>

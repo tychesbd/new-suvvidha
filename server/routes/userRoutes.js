@@ -11,6 +11,7 @@ const {
   toggleUserStatus,
   createDefaultUsers,
 } = require('../controllers/userController');
+const { registerVendor } = require('../controllers/vendorController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -18,6 +19,7 @@ const upload = require('../middleware/uploadMiddleware');
 router.post('/', registerUser);
 router.post('/login', loginUser);
 router.post('/create-defaults', createDefaultUsers);
+router.post('/vendor-register', upload.single('idProofDocument'), registerVendor);
 
 // Protected routes
 router.get('/profile', protect, getUserProfile);
@@ -47,8 +49,11 @@ router.put('/change-password', protect, async (req, res) => {
     
     res.json({ message: 'Password updated successfully' });
   } catch (error) {
-    res.status(error.statusCode || 500);
-    throw new Error(error.message || 'Server error');
+    console.error('Password change error:', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({
+      message: error.message || 'Server error'
+    });
   }
 });
 

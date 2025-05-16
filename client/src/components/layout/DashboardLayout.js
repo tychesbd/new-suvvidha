@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
-import NotificationIcon from '../notifications/NotificationIcon';
-import { useLanguage } from '../../contexts/LanguageContext';
-import LanguageSelector from '../language/LanguageSelector';
 
 // Material UI imports
 import {
@@ -52,7 +49,6 @@ const DashboardLayout = ({ children, title, menuItems }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { getTranslation } = useLanguage();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -118,16 +114,24 @@ const DashboardLayout = ({ children, title, menuItems }) => {
             }}>
               <ListItemButton 
                 sx={{
-                  bgcolor: isActive ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                  bgcolor: isActive ? 'rgba(106, 27, 154, 0.08)' : 'transparent',
                   borderLeft: isActive ? '4px solid' : 'none',
-                  borderColor: isActive ? 'primary.main' : 'transparent',
-                  pl: isActive ? 1.5 : 2
+                  borderColor: isActive ? '#6a1b9a' : 'transparent',
+                  pl: isActive ? 1.5 : 2,
+                  py: 1.5,
+                  '&:hover': {
+                    backgroundColor: 'rgba(106, 27, 154, 0.04)'
+                  }
                 }}
               >
-                <ListItemIcon sx={{ color: isActive ? 'primary.main' : 'inherit' }}>
+                <ListItemIcon sx={{ color: isActive ? '#6a1b9a' : '#666666', minWidth: 40 }}>
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText primary={item.text} sx={{ color: isActive ? 'primary.main' : 'inherit' }} />
+                <ListItemText 
+                  primary={item.text} 
+                  sx={{ color: isActive ? '#6a1b9a' : '#333333' }} 
+                  primaryTypographyProps={{ fontWeight: isActive ? 600 : 500 }}
+                />
               </ListItemButton>
             </ListItem>
           );
@@ -144,7 +148,9 @@ const DashboardLayout = ({ children, title, menuItems }) => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          backgroundColor: '#ad6fa9'
+          backgroundColor: '#ffffff',
+          color: '#333333',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.08)'
         }}
       >
         <Toolbar>
@@ -170,61 +176,91 @@ const DashboardLayout = ({ children, title, menuItems }) => {
               component={Link}
               to={`/${userInfo?.role || 'guest'}/home`}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userInfo?.role || 'guest'}/home`) ? '2px solid white' : 'none',
+                fontWeight: 500,
+                fontSize: '1rem',
+                borderBottom: location.pathname.includes(`/${userInfo?.role || 'guest'}/home`) ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<HomeIcon />}
+              startIcon={<HomeIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('home')}
+              Home
             </Button>
             <Button
               component={Link}
               to={`/${userInfo?.role || 'guest'}/services`}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userInfo?.role || 'guest'}/services`) ? '2px solid white' : 'none',
+                fontWeight: 500,
+                fontSize: '1rem',
+                borderBottom: location.pathname.includes(`/${userInfo?.role || 'guest'}/services`) ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<MiscellaneousServicesIcon />}
+              startIcon={<MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('services')}
+              Services
             </Button>
             <Button
               component={Link}
               to={`/${userInfo?.role || 'guest'}/about`}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userInfo?.role || 'guest'}/about`) ? '2px solid white' : 'none',
+                fontWeight: 500,
+                fontSize: '1rem',
+                borderBottom: location.pathname.includes(`/${userInfo?.role || 'guest'}/about`) ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<InfoIcon />}
+              startIcon={<InfoIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('aboutUs')}
+              About Us
             </Button>
           </Box>
           
-          {/* Notification Icon */}
-          <Box sx={{ flexGrow: 0, mr: 2 }}>
-            <NotificationIcon />
-          </Box>
-          
           <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-            <LanguageSelector />
             <Box sx={{ ml: 2 }}>
               <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={userInfo?.name} src="/static/images/avatar/2.svg" />
+                <IconButton 
+                  onClick={handleOpenUserMenu} 
+                  sx={{ 
+                    p: 0,
+                    border: '2px solid #f0f0f0',
+                    '&:hover': { backgroundColor: 'rgba(106, 27, 154, 0.04)' }
+                  }}
+                >
+                  <Avatar 
+                    alt={userInfo?.name} 
+                    src="/static/images/avatar/2.svg" 
+                    sx={{ width: 38, height: 38 }}
+                  />
                 </IconButton>
               </Tooltip>
               <Menu
-                sx={{ mt: '45px' }}
+                sx={{ 
+                  mt: '45px',
+                  '& .MuiPaper-root': {
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    minWidth: '200px'
+                  }
+                }}
                 id="menu-appbar"
                 anchorEl={anchorElUser}
                 anchorOrigin={{
@@ -239,23 +275,23 @@ const DashboardLayout = ({ children, title, menuItems }) => {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                <MenuItem onClick={handleProfileClick}>
+                <MenuItem onClick={handleProfileClick} sx={{ py: 1.5 }}>
                   <ListItemIcon>
-                    <AccountCircleIcon fontSize="small" />
+                    <AccountCircleIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                   </ListItemIcon>
-                  <Typography textAlign="center">{getTranslation('profile')}</Typography>
+                  <Typography textAlign="center" fontWeight={500}>Profile</Typography>
                 </MenuItem>
-                <MenuItem onClick={handleDashboardClick}>
+                <MenuItem onClick={handleDashboardClick} sx={{ py: 1.5 }}>
                   <ListItemIcon>
-                    <DashboardIcon fontSize="small" />
+                    <DashboardIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                   </ListItemIcon>
-                  <Typography textAlign="center">{getTranslation('dashboard')}</Typography>
+                  <Typography textAlign="center" fontWeight={500}>Dashboard</Typography>
                 </MenuItem>
-                <MenuItem onClick={handleLogout}>
+                <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                   <ListItemIcon>
-                    <LogoutIcon fontSize="small" />
+                    <LogoutIcon fontSize="small" sx={{ color: '#ff6f00' }} />
                   </ListItemIcon>
-                  <Typography textAlign="center">{getTranslation('logout')}</Typography>
+                  <Typography textAlign="center" fontWeight={500}>Logout</Typography>
                 </MenuItem>
               </Menu>
             </Box>

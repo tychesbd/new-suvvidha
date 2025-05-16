@@ -19,12 +19,19 @@ import {
   Card,
   CardContent,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
   width: theme.spacing(12),
@@ -41,17 +48,34 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [idProofFile, setIdProofFile] = useState(null);
   const [idProofPreview, setIdProofPreview] = useState('');
+  
+  // Initialize form data with all user fields
   const [formData, setFormData] = useState({
     name: userInfo?.name || '',
     email: userInfo?.email || '',
     phone: userInfo?.phone || '',
     address: userInfo?.address || '',
-    pincode: userInfo?.pincode || '',
+    pincodes: userInfo?.pincodes || [''],
     yearsOfExperience: userInfo?.yearsOfExperience || 0,
     serviceExpertise: userInfo?.serviceExpertise || [],
   });
+  
+  // Update form data when userInfo changes
+  useEffect(() => {
+    if (userInfo) {
+      setFormData({
+        name: userInfo.name || '',
+        email: userInfo.email || '',
+        phone: userInfo.phone || '',
+        address: userInfo.address || '',
+        pincodes: userInfo.pincodes && userInfo.pincodes.length > 0 ? userInfo.pincodes : [''],
+        yearsOfExperience: userInfo.yearsOfExperience || 0,
+        serviceExpertise: userInfo.serviceExpertise || [],
+      });
+    }
+  }, [userInfo]);
 
-  const { name, email, phone, address, yearsOfExperience, serviceExpertise } = formData;
+  const { name, email, phone, address, pincodes, yearsOfExperience, serviceExpertise } = formData;
 
   useEffect(() => {
     if (isError) {
@@ -79,18 +103,9 @@ const Profile = () => {
     const { name, value, type } = e.target;
     
     if (name === 'serviceExpertise') {
-      // Handle multiple select for service expertise
-      const options = e.target.options;
-      const selectedValues = [];
-      for (let i = 0; i < options.length; i++) {
-        if (options[i].selected) {
-          selectedValues.push(options[i].value);
-        }
-      }
-      
       setFormData((prevState) => ({
         ...prevState,
-        [name]: selectedValues,
+        [name]: typeof value === 'string' ? value.split(',') : value,
       }));
     } else {
       setFormData((prevState) => ({
@@ -98,6 +113,34 @@ const Profile = () => {
         [name]: type === 'number' ? Number(value) : value,
       }));
     }
+  };
+  
+  // Handle pincode changes
+  const handlePincodeChange = (index, value) => {
+    const newPincodes = [...pincodes];
+    newPincodes[index] = value;
+    setFormData({
+      ...formData,
+      pincodes: newPincodes,
+    });
+  };
+
+  // Add new pincode field
+  const addPincodeField = () => {
+    setFormData({
+      ...formData,
+      pincodes: [...pincodes, ''],
+    });
+  };
+
+  // Remove pincode field
+  const removePincodeField = (index) => {
+    const newPincodes = [...pincodes];
+    newPincodes.splice(index, 1);
+    setFormData({
+      ...formData,
+      pincodes: newPincodes.length > 0 ? newPincodes : [''],
+    });
   };
   
   // Handle ID proof document upload
@@ -122,7 +165,7 @@ const Profile = () => {
       email: userInfo?.email || '',
       phone: userInfo?.phone || '',
       address: userInfo?.address || '',
-      pincode: userInfo?.pincode || '',
+      pincodes: userInfo?.pincodes && userInfo.pincodes.length > 0 ? userInfo.pincodes : [''],
       yearsOfExperience: userInfo?.yearsOfExperience || 0,
       serviceExpertise: userInfo?.serviceExpertise || [],
     });
@@ -137,25 +180,21 @@ const Profile = () => {
     formDataToSend.append('email', email);
     formDataToSend.append('phone', phone);
     formDataToSend.append('address', address);
-    formDataToSend.append('pincode', formData.pincode);
+    
+    // Append pincodes as JSON string
+    const filteredPincodes = pincodes.filter(pincode => pincode.trim() !== '');
+    formDataToSend.append('pincodes', JSON.stringify(filteredPincodes));
+    
     formDataToSend.append('yearsOfExperience', yearsOfExperience);
     
-    // Append service expertise as comma-separated string
+    // Append service expertise
     if (serviceExpertise && serviceExpertise.length > 0) {
-      formDataToSend.append('serviceExpertise', serviceExpertise.join(','));
+      formDataToSend.append('serviceExpertise', JSON.stringify(serviceExpertise));
     }
     
     // Append ID proof document if selected
     if (idProofFile) {
-      // Make sure the field name matches what the server expects in upload.single()
       formDataToSend.append('idProofDocument', idProofFile);
-      console.log('File being uploaded:', idProofFile.name, 'Size:', idProofFile.size);
-    }
-    
-    // Log the FormData contents for debugging
-    console.log('FormData being sent:');
-    for (let pair of formDataToSend.entries()) {
-      console.log(pair[0] + ': ' + (pair[0] === 'idProofDocument' ? 'File object' : pair[1]));
     }
     
     dispatch(updateProfile(formDataToSend));
@@ -244,17 +283,6 @@ const Profile = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Pincode"
-                      name="pincode"
-                      value={formData.pincode}
-                      onChange={onChange}
-                      inputProps={{ maxLength: 6 }}
-                      placeholder="Enter 6-digit pincode"
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
                       label="Years of Experience"
                       name="yearsOfExperience"
                       type="number"
@@ -263,6 +291,45 @@ const Profile = () => {
                       inputProps={{ min: 0 }}
                     />
                   </Grid>
+                  
+                  {/* Multi-pincode fields */}
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Service Area Pincodes
+                    </Typography>
+                    {pincodes.map((pincode, index) => (
+                      <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <TextField
+                          fullWidth
+                          label={`Pincode ${index + 1}`}
+                          value={pincode}
+                          onChange={(e) => handlePincodeChange(index, e.target.value)}
+                          inputProps={{ maxLength: 6 }}
+                          placeholder="Enter 6-digit pincode"
+                          sx={{ mr: 1 }}
+                        />
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          disabled={pincodes.length <= 1}
+                          onClick={() => removePincodeField(index)}
+                          sx={{ minWidth: '40px', width: '40px', height: '40px', p: 0 }}
+                        >
+                          <DeleteIcon />
+                        </Button>
+                      </Box>
+                    ))}
+                    <Button
+                      variant="outlined"
+                      startIcon={<AddIcon />}
+                      onClick={addPincodeField}
+                      sx={{ mt: 1 }}
+                    >
+                      Add Pincode
+                    </Button>
+                  </Grid>
+                  
                   <Grid item xs={12} sm={6}>
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" gutterBottom>
@@ -303,29 +370,35 @@ const Profile = () => {
                       )}
                     </Box>
                   </Grid>
+                  
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Service Expertise
-                    </Typography>
-                    <TextField
-                      select
-                      fullWidth
-                      name="serviceExpertise"
-                      value={serviceExpertise}
-                      onChange={onChange}
-                      SelectProps={{
-                        multiple: true,
-                        native: true,
-                      }}
-                      helperText="Select one or more service categories"
-                    >
-                      {categories && categories.map((category) => (
-                        <option key={category._id} value={category.name}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </TextField>
+                    <FormControl fullWidth>
+                      <InputLabel id="service-expertise-label">Service Expertise</InputLabel>
+                      <Select
+                        labelId="service-expertise-label"
+                        id="service-expertise"
+                        multiple
+                        value={serviceExpertise}
+                        onChange={onChange}
+                        input={<OutlinedInput label="Service Expertise" />}
+                        name="serviceExpertise"
+                        renderValue={(selected) => (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {selected.map((value) => (
+                              <Chip key={value} label={value} size="small" />
+                            ))}
+                          </Box>
+                        )}
+                      >
+                        {categories && categories.map((category) => (
+                          <MenuItem key={category._id} value={category.name}>
+                            {category.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Grid>
+                  
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -390,27 +463,25 @@ const Profile = () => {
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Pincode
-                    </Typography>
-                    <Typography variant="body1">
-                      {userInfo?.pincode || 'Not provided'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Account Type
-                    </Typography>
-                    <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
-                      {userInfo?.role}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">
                       Years of Experience
                     </Typography>
                     <Typography variant="body1">
                       {userInfo?.yearsOfExperience || '0'}
                     </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Service Area Pincodes
+                    </Typography>
+                    {userInfo?.pincodes && userInfo.pincodes.length > 0 ? (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                        {userInfo.pincodes.map((pincode, index) => (
+                          <Chip key={index} label={pincode} size="small" color="primary" />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body1">No service areas specified</Typography>
+                    )}
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2" color="text.secondary">

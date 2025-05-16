@@ -143,29 +143,17 @@ export const changePassword = createAsyncThunk(
         },
       };
 
-      try {
-        const response = await axios.put('/api/users/change-password', passwordData, config);
-        return response.data;
-      } catch (apiError) {
-        console.error('Password Change Error:', apiError);
-        if (apiError.response) {
-          console.error('Response data:', apiError.response.data);
-          console.error('Response status:', apiError.response.status);
-          
-          // If we have a specific error message from the server, use it
-          if (apiError.response.data && apiError.response.data.message) {
-            throw new Error(apiError.response.data.message);
-          }
-        } else if (apiError.request) {
-          console.error('Request made but no response received:', apiError.request);
-        }
-        throw apiError;
-      }
+      const response = await axios.put('/api/users/change-password', passwordData, config);
+      return response.data;
     } catch (error) {
+      console.error('Password Change Error:', error);
+      
+      // Extract the error message from the response if available
       const message =
         (error.response && error.response.data && error.response.data.message) ||
         error.message ||
-        error.toString();
+        'Failed to change password';
+        
       return thunkAPI.rejectWithValue(message);
     }
   }

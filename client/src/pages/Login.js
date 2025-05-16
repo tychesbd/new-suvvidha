@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { login, reset } from '../features/auth/authSlice';
 import indianFlag from './indianflag.jpg';
@@ -35,7 +35,12 @@ const Login = () => {
   const { email, password } = formData;
 
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
+  
+  // Get redirect path from URL query parameters
+  const searchParams = new URLSearchParams(location.search);
+  const redirect = searchParams.get('redirect') || '/';
 
   const { userInfo, isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth
@@ -47,8 +52,8 @@ const Login = () => {
     }
 
     if (isSuccess || userInfo) {
-      // Redirect to home page after successful login
-      navigate('/');
+      // Redirect to the specified path or home page after successful login
+      navigate(redirect);
     }
 
     dispatch(reset());

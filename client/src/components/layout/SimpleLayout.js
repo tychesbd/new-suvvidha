@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
-import { useLanguage } from '../../contexts/LanguageContext';
-import LanguageSelector from '../language/LanguageSelector';
+// No language functionality needed
 
 // Material UI imports
 import {
@@ -46,7 +45,7 @@ const SimpleLayout = ({ children, title }) => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { getTranslation } = useLanguage();
+  // No language functionality needed
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -91,8 +90,8 @@ const SimpleLayout = ({ children, title }) => {
   // Mobile drawer content
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', pt: 2, pb: 2 }}>
-      <Link to="/" style={{ textDecoration: 'none' }}>
-      <img src="/logo1.png" alt="Suvvidha Logo" height="40" sx={{ my: 2 }} /> </Link>
+      <Link to="/" style={{ textDecoration: 'none', display: 'block', marginBottom: '10px' }}>
+      <img src="/logo1.png" alt="Suvvidha Logo" height="40" /> </Link>
       <List>
         <ListItem disablePadding>
           <ListItemButton 
@@ -100,34 +99,43 @@ const SimpleLayout = ({ children, title }) => {
             to={userInfo ? `/${userRole}/home` : '/'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
+              borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid #6a1b9a' : 'none',
             }}
           >
-            <ListItemText primary={getTranslation('home')} />
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <HomeIcon sx={{ color: '#6a1b9a' }} />
+            </ListItemIcon>
+            <ListItemText primary="Home" sx={{ color: '#333333' }} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton 
             component={Link} 
-            to={userInfo ? `/${userRole}/services` : '/'}
+            to={userInfo ? `/${userRole}/services` : '/services'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/services`) ? '2px solid #ad6fa9' : 'none',
+              borderBottom: location.pathname.includes(`/${userRole}/services`) || location.pathname === '/services' ? '2px solid #6a1b9a' : 'none',
             }}
           >
-            <ListItemText primary={getTranslation('services')} />
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />
+            </ListItemIcon>
+            <ListItemText primary="Services" sx={{ color: '#333333' }} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
           <ListItemButton 
             component={Link} 
-            to={userInfo ? `/${userRole}/about` : '/'}
+            to={userInfo ? `/${userRole}/about` : '/about'}
             sx={{
               textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/about`) ? '2px solid #ad6fa9' : 'none',
+              borderBottom: location.pathname.includes(`/${userRole}/about`) || location.pathname === '/about' ? '2px solid #6a1b9a' : 'none',
             }}
           >
-            <ListItemText primary={getTranslation('aboutUs')} />
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <InfoIcon sx={{ color: '#6a1b9a' }} />
+            </ListItemIcon>
+            <ListItemText primary="About Us" sx={{ color: '#333333' }} />
           </ListItemButton>
         </ListItem>
       </List>
@@ -153,14 +161,14 @@ const SimpleLayout = ({ children, title }) => {
           {drawer}
         </Drawer>
       </Box>
-      <AppBar position="fixed" sx={{ backgroundColor: '#ad6fa9' }}>
+      <AppBar position="fixed" sx={{ backgroundColor: '#ffffff', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' } }}
+            sx={{ mr: 2, display: { md: 'none' }, color: '#6a1b9a' }}
           >
             <MenuIcon />
           </IconButton>
@@ -177,56 +185,105 @@ const SimpleLayout = ({ children, title }) => {
               component={Link}
               to={userInfo ? `/${userRole}/home` : '/'}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid white' : 'none',
+                borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<HomeIcon />}
+              startIcon={<HomeIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('home')}
+              Home
             </Button>
             <Button
               component={Link}
-              to={userInfo ? `/${userRole}/services` : '/'}
+              to={userInfo ? `/${userRole}/services` : '/services'}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userRole}/services`) ? '2px solid white' : 'none',
+                borderBottom: location.pathname.includes(`/${userRole}/services`) || location.pathname === '/services' ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<MiscellaneousServicesIcon />}
+              startIcon={<MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('services')}
+              Services
             </Button>
             <Button
               component={Link}
-              to={userInfo ? `/${userRole}/about` : '/'}
+              to={userInfo ? `/${userRole}/about` : '/about'}
               sx={{
-                color: 'white',
+                color: '#333333',
                 mx: 1,
-                borderBottom: location.pathname.includes(`/${userRole}/about`) ? '2px solid white' : 'none',
+                borderBottom: location.pathname.includes(`/${userRole}/about`) || location.pathname === '/about' ? '2px solid #6a1b9a' : 'none',
                 borderRadius: 0,
-                paddingBottom: '4px'
+                paddingBottom: '4px',
+                '&:hover': {
+                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
+                  color: '#6a1b9a'
+                }
               }}
-              startIcon={<InfoIcon />}
+              startIcon={<InfoIcon sx={{ color: '#6a1b9a' }} />}
             >
-              {getTranslation('aboutUs')}
+              About Us
             </Button>
           </Box>
           <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-            <LanguageSelector />
+            {/* Added Become a Vendor button */}
+            {!userInfo && (
+              <Button
+                component={Link}
+                to="/vendor-register"
+                variant="contained"
+                sx={{ 
+                  bgcolor: 'white', 
+                  color: '#6a1b9a', 
+                  '&:hover': { bgcolor: '#f5f5f5' },
+                  mr: 2,
+                  fontWeight: 600,
+                  boxShadow: '0 4px 10px rgba(106, 27, 154, 0.2)'
+                }}
+              >
+                Become a Vendor
+              </Button>
+            )}
+            
             {userInfo ? (
               <>
-                <Tooltip title="Open settings">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt={userInfo?.name} src="/static/images/avatar/2.svg" />
+                <Tooltip title="Account settings">
+                  <IconButton 
+                    onClick={handleOpenUserMenu} 
+                    sx={{ 
+                      p: 0, 
+                      ml: 2,
+                      border: '2px solid #f0f0f0',
+                      '&:hover': { backgroundColor: 'rgba(106, 27, 154, 0.04)' }
+                    }}
+                  >
+                    <Avatar 
+                      alt={userInfo.name} 
+                      src="/static/images/avatar/2.jpg" 
+                      sx={{ width: 38, height: 38 }}
+                    />
                   </IconButton>
                 </Tooltip>
                 <Menu
-                  sx={{ mt: '45px' }}
+                  sx={{ 
+                    mt: '45px',
+                    '& .MuiPaper-root': {
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                      minWidth: '200px'
+                    }
+                  }}
                   id="menu-appbar"
                   anchorEl={anchorElUser}
                   anchorOrigin={{
@@ -241,23 +298,23 @@ const SimpleLayout = ({ children, title }) => {
                   open={Boolean(anchorElUser)}
                   onClose={handleCloseUserMenu}
                 >
-                  <MenuItem onClick={handleProfileClick}>
+                  <MenuItem onClick={handleDashboardClick} sx={{ py: 1.5 }}>
                     <ListItemIcon>
-                      <AccountCircleIcon fontSize="small" />
+                      <DashboardIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                     </ListItemIcon>
-                    <ListItemText primary={getTranslation('profile')} />
+                    <ListItemText primary="Dashboard" primaryTypographyProps={{ fontWeight: 500 }} />
                   </MenuItem>
-                  <MenuItem onClick={handleDashboardClick}>
+                  <MenuItem onClick={handleProfileClick} sx={{ py: 1.5 }}>
                     <ListItemIcon>
-                      <DashboardIcon fontSize="small" />
+                      <AccountCircleIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
                     </ListItemIcon>
-                    <ListItemText primary={getTranslation('dashboard')} />
+                    <ListItemText primary="Profile" primaryTypographyProps={{ fontWeight: 500 }} />
                   </MenuItem>
-                  <MenuItem onClick={handleLogout}>
+                  <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
                     <ListItemIcon>
-                      <LogoutIcon fontSize="small" />
+                      <LogoutIcon fontSize="small" sx={{ color: '#ff6f00' }} />
                     </ListItemIcon>
-                    <ListItemText primary={getTranslation('logout')} />
+                    <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 500 }} />
                   </MenuItem>
                 </Menu>
               </>
@@ -266,19 +323,35 @@ const SimpleLayout = ({ children, title }) => {
                 <Button
                   component={Link}
                   to="/login"
-                  variant="contained"
-                  color="secondary"
-                  sx={{ fontWeight: 'bold' }}
+                  variant="outlined"
+                  sx={{ 
+                    color: '#6a1b9a', 
+                    borderColor: '#6a1b9a',
+                    fontWeight: 500,
+                    '&:hover': {
+                      borderColor: '#6a1b9a',
+                      backgroundColor: 'rgba(106, 27, 154, 0.04)'
+                    }
+                  }}
                 >
-                  {getTranslation('signIn')}
+                  Login
                 </Button>
                 <Button
                   component={Link}
                   to="/register"
-                  variant="outlined"
-                  sx={{ fontWeight: 'bold', color: 'white', borderColor: 'white' }}
+                  variant="contained"
+                  sx={{ 
+                    bgcolor: '#6a1b9a', 
+                    color: 'white', 
+                    fontWeight: 600,
+                    boxShadow: '0 4px 10px rgba(106, 27, 154, 0.2)',
+                    '&:hover': { 
+                      bgcolor: '#5c1786',
+                      boxShadow: '0 6px 12px rgba(106, 27, 154, 0.25)'
+                    } 
+                  }}
                 >
-                  {getTranslation('signUp') || 'Sign Up'}
+                  Register
                 </Button>
               </Box>
             )}

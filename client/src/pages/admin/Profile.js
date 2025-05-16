@@ -36,14 +36,28 @@ const Profile = () => {
   const dispatch = useDispatch();
   const { userInfo, isLoading, isError, isSuccess, message } = useSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Initialize form data with user fields
   const [formData, setFormData] = useState({
     name: userInfo?.name || '',
     email: userInfo?.email || '',
     phone: userInfo?.phone || '',
     address: userInfo?.address || '',
+    pincode: userInfo?.pincode || ''
   });
-
-  const { name, email, phone, address } = formData;
+  
+  // Update form data when userInfo changes
+  useEffect(() => {
+    if (userInfo) {
+      setFormData({
+        name: userInfo.name || '',
+        email: userInfo.email || '',
+        phone: userInfo.phone || '',
+        address: userInfo.address || '',
+        pincode: userInfo.pincode || ''
+      });
+    }
+  }, [userInfo]);
 
   useEffect(() => {
     if (isError) {
@@ -57,6 +71,8 @@ const Profile = () => {
 
     dispatch(reset());
   }, [isError, isSuccess, message, dispatch, isEditing]);
+
+  const { name, email, phone, address, pincode } = formData;
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -76,6 +92,7 @@ const Profile = () => {
       email: userInfo?.email || '',
       phone: userInfo?.phone || '',
       address: userInfo?.address || '',
+      pincode: userInfo?.pincode || ''
     });
   };
 
@@ -87,6 +104,7 @@ const Profile = () => {
       email,
       phone,
       address,
+      pincode,
     };
     
     dispatch(updateProfile(userData));
@@ -172,6 +190,17 @@ const Profile = () => {
                       onChange={onChange}
                     />
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Pincode"
+                      name="pincode"
+                      value={pincode}
+                      onChange={onChange}
+                      inputProps={{ maxLength: 6 }}
+                      placeholder="Enter 6-digit pincode"
+                    />
+                  </Grid>
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -240,6 +269,14 @@ const Profile = () => {
                     </Typography>
                     <Typography variant="body1" sx={{ textTransform: 'capitalize', color: 'error.main', fontWeight: 'bold' }}>
                       {userInfo?.role}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Pincode
+                    </Typography>
+                    <Typography variant="body1">
+                      {userInfo?.pincode || 'Not provided'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>

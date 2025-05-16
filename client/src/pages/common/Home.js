@@ -568,7 +568,7 @@ const Home = () => {
       </Container>
 
       {/* Footer */}
-      <Footer sx={{ backgroundColor: '#ad6fa9', color: 'white', py: 4 }}>
+      <Footer sx={{ backgroundColor: 'black', color: 'white', py: 4 }}>
   <Container maxWidth="lg">
     <Grid container spacing={4}>
       {/* About Section */}

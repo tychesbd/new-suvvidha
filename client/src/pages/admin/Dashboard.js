@@ -93,8 +93,8 @@ const AdminHome = () => {
           },
         };
 
-        // Fetch dashboard statistics
-        const { data } = await axios.get('/api/admin/dashboard', config);
+        // Fetch dashboard statistics from our new endpoint
+        const { data } = await axios.get('/api/dashboard/admin', config);
         
         setDashboardData({
           users: data.users || 0,
