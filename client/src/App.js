@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import SplashScreen from './components/layout/SplashScreen';
 
 
 
@@ -103,6 +104,7 @@ const theme = createTheme({
 
 const App = () => {
   const { userInfo } = useSelector((state) => state.auth);
+  const [showSplash, setShowSplash] = useState(true);
 
   // Protected route component
   const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -126,8 +128,10 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      
-        <CssBaseline />
+      <CssBaseline />
+      {showSplash ? (
+        <SplashScreen onFinished={() => setShowSplash(false)} />
+      ) : (
         <Routes>
         {/* Public Routes */}
         <Route path="/login" element={userInfo ? <Navigate to="/" replace /> : <Login />} />
@@ -186,7 +190,7 @@ const App = () => {
         
         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      
+      )}
     </ThemeProvider>
   );
 };
