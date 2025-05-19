@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { formatCurrency } from '../../components/ui/utils';
+
+// Custom Components
+import DashboardCard from '../../components/ui/DashboardCard';
 
 // Material UI imports
 import { Typography, Grid, Paper, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button, CircularProgress, Alert } from '@mui/material';
@@ -33,37 +37,14 @@ import Home from '../common/Home';
 import Services from '../common/Services';
 import AboutUs from '../common/AboutUs';
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(3),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-  },
+// Enhanced Paper for recent bookings section
+const EnhancedPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+  overflow: 'hidden',
+  border: '1px solid rgba(0, 0, 0, 0.05)',
 }));
-
-const StatsCard = ({ title, value, icon }) => {
-  return (
-    <Item elevation={3}>
-      <Box sx={{ fontSize: '3rem', color: 'primary.main', mb: 2 }}>{icon}</Box>
-      <Typography variant="h5" component="div" gutterBottom>
-        {title}
-      </Typography>
-      <Typography variant="h3" component="div" color="text.primary">
-        {value}
-      </Typography>
-    </Item>
-  );
-};
 
 const CustomerHome = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -116,14 +97,7 @@ const CustomerHome = () => {
     }
   }, [userInfo]);
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Format currency is now imported at the top of the file
 
   if (loading) {
     return (
@@ -150,23 +124,28 @@ const CustomerHome = () => {
 
       <Grid container spacing={4} sx={{ mt: 2 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Active Bookings" value={dashboardData.activeBookings} icon={<ShoppingCartIcon fontSize="large" />} />
+          <DashboardCard title="Active Bookings" value={dashboardData.activeBookings} icon={<ShoppingCartIcon fontSize="large" />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Completed" value={dashboardData.completedBookings} icon={<CheckCircleIcon fontSize="large" />} />
+          <DashboardCard title="Completed" value={dashboardData.completedBookings} icon={<CheckCircleIcon fontSize="large" />} color="success" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Cancelled" value={dashboardData.cancelledBookings} icon={<CancelIcon fontSize="large" />} />
+          <DashboardCard title="Cancelled" value={dashboardData.cancelledBookings} icon={<CancelIcon fontSize="large" />} color="error" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Total Spent" value={formatCurrency(dashboardData.totalSpent)} icon={<PaymentIcon fontSize="large" />} />
+          <DashboardCard title="Total Spent" value={formatCurrency(dashboardData.totalSpent)} icon={<PaymentIcon fontSize="large" />} color="info" />
         </Grid>
       </Grid>
 
-      <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
-        Recent Bookings
-      </Typography>
-      <Paper elevation={2} sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, mb: 3 }}>
+        <Typography variant="h5">
+          Recent Bookings
+        </Typography>
+        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', fontWeight: 500 }}>
+          View All
+        </Typography>
+      </Box>
+      <EnhancedPaper>
         {dashboardData.recentBookings && dashboardData.recentBookings.length > 0 ? (
           <TableContainer component={Paper} elevation={0}>
             <Table sx={{ minWidth: 650 }} size="medium">
@@ -212,7 +191,7 @@ const CustomerHome = () => {
             You don't have any recent bookings.
           </Typography>
         )}
-      </Paper>
+      </EnhancedPaper>
 
       <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
         Recommended Services

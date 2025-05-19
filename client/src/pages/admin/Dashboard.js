@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { formatCurrency } from '../../components/ui/utils';
 
 // Material UI imports
 import { Typography, Grid, Paper, Box, Divider, CircularProgress, Alert } from '@mui/material';
@@ -17,6 +18,10 @@ import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+
+// Custom Components
+import DashboardCard from '../../components/ui/DashboardCard';
 
 // Components
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -36,37 +41,14 @@ import Home from '../common/Home';
 import Services from '../common/Services';
 import AboutUs from '../common/AboutUs';
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(3),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-  },
+// Enhanced Paper for recent users section
+const EnhancedPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+  overflow: 'hidden',
+  border: '1px solid rgba(0, 0, 0, 0.05)',
 }));
-
-const StatsCard = ({ title, value, icon }) => {
-  return (
-    <Item elevation={3}>
-      <Box sx={{ fontSize: '3rem', color: 'error.main', mb: 2 }}>{icon}</Box>
-      <Typography variant="h5" component="div" gutterBottom>
-        {title}
-      </Typography>
-      <Typography variant="h3" component="div" color="text.primary">
-        {value}
-      </Typography>
-    </Item>
-  );
-};
 
 const AdminHome = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -123,14 +105,7 @@ const AdminHome = () => {
     }
   }, [userInfo]);
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Format currency is now imported at the top of the file
 
   if (loading) {
     return (
@@ -157,50 +132,78 @@ const AdminHome = () => {
 
       <Grid container spacing={4} sx={{ mt: 2 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Users" value={dashboardData.users} icon={<PeopleIcon fontSize="large" />} />
+          <DashboardCard title="Users" value={dashboardData.users} icon={<PeopleIcon fontSize="large" />} color="primary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Bookings" value={dashboardData.bookings} icon={<CalendarTodayIcon fontSize="large" />} />
+          <DashboardCard title="Bookings" value={dashboardData.bookings} icon={<CalendarTodayIcon fontSize="large" />} color="secondary" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Services" value={dashboardData.services} icon={<MiscellaneousServicesIcon fontSize="large" />} />
+          <DashboardCard title="Services" value={dashboardData.services} icon={<MiscellaneousServicesIcon fontSize="large" />} color="error" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Vendors" value={dashboardData.vendors} icon={<StorefrontIcon fontSize="large" />} />
+          <DashboardCard title="Vendors" value={dashboardData.vendors} icon={<StorefrontIcon fontSize="large" />} color="info" />
         </Grid>
       </Grid>
 
-      <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
-        Recent Users
-      </Typography>
-      <Paper elevation={2} sx={{ p: 3 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Name
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Email
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Role
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            <Typography variant="subtitle2" color="text.secondary">
-              Joined
-            </Typography>
-          </Grid>
+      <Grid container spacing={4} sx={{ mt: 4 }}>
+        <Grid item xs={12} sm={6} md={6}>
+          <DashboardCard 
+            title="Total Revenue" 
+            value={formatCurrency(dashboardData.revenue || 0)} 
+            icon={<MonetizationOnIcon fontSize="large" />} 
+            color="success" 
+          />
         </Grid>
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="body1" color="text.secondary" align="center">
+        <Grid item xs={12} sm={6} md={6}>
+          <DashboardCard 
+            title="Active Subscriptions" 
+            value={dashboardData.activeSubscriptions || 0} 
+            icon={<SubscriptionsIcon fontSize="large" />} 
+            color="warning" 
+          />
+        </Grid>
+      </Grid>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, mb: 3 }}>
+        <Typography variant="h5">
+          Recent Users
+        </Typography>
+        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', fontWeight: 500 }}>
+          View All
+        </Typography>
+      </Box>
+      <EnhancedPaper>
+        <Box sx={{ p: 3, bgcolor: 'background.paper' }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={3}>
+              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
+                Name
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
+                Email
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
+                Role
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
+                Joined
+              </Typography>
+            </Grid>
+          </Grid>
+        </Box>
+        <Divider />
+        <Box sx={{ p: 3 }}>
+          <Typography variant="body1" color="text.secondary" align="center">
           No recent users to display.
         </Typography>
-      </Paper>
+        </Box>
+      </EnhancedPaper>
 
       <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
         System Statistics

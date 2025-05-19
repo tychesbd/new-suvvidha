@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { formatCurrency } from '../../components/ui/utils';
+
+// Custom Components
+import DashboardCard from '../../components/ui/DashboardCard';
+import SubscriptionStatusCard from '../../components/ui/SubscriptionStatusCard';
 
 // Material UI imports
 import { Typography, Grid, Paper, Box, Button, Chip, CircularProgress, Alert, LinearProgress } from '@mui/material';
@@ -30,37 +35,14 @@ import Home from '../common/Home';
 import Services from '../common/Services';
 import AboutUs from '../common/AboutUs';
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(3),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-  },
+// Enhanced Paper for recent bookings section
+const EnhancedPaper = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+  overflow: 'hidden',
+  border: '1px solid rgba(0, 0, 0, 0.05)',
 }));
-
-const StatsCard = ({ title, value, icon }) => {
-  return (
-    <Item elevation={3}>
-      <Box sx={{ fontSize: '3rem', color: 'secondary.main', mb: 2 }}>{icon}</Box>
-      <Typography variant="h5" component="div" gutterBottom>
-        {title}
-      </Typography>
-      <Typography variant="h3" component="div" color="text.primary">
-        {value}
-      </Typography>
-    </Item>
-  );
-};
 
 const VendorHome = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -127,14 +109,7 @@ const VendorHome = () => {
     }
   }, [userInfo]);
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Format currency is now imported at the top of the file
 
   if (loading) {
     return (
@@ -160,21 +135,29 @@ const VendorHome = () => {
       )}
 
       <Grid container spacing={4} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={4}>
-          <StatsCard title="Bookings" value={dashboardData.totalBookings} icon={<ShoppingCartIcon fontSize="large" />} />
+        <Grid item xs={12} sm={6} md={3}>
+          <DashboardCard title="Bookings" value={dashboardData.totalBookings} icon={<ShoppingCartIcon fontSize="large" />} color="secondary" />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <StatsCard title="Revenue" value={formatCurrency(dashboardData.revenue)} icon={<AnalyticsIcon fontSize="large" />} />
+        <Grid item xs={12} sm={6} md={3}>
+          <DashboardCard title="Revenue" value={formatCurrency(dashboardData.revenue)} icon={<AnalyticsIcon fontSize="large" />} color="success" />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <StatsCard title="Active Bookings" value={dashboardData.activeBookings} icon={<StorefrontIcon fontSize="large" />} />
+        <Grid item xs={12} sm={6} md={3}>
+          <DashboardCard title="Active Bookings" value={dashboardData.activeBookings} icon={<StorefrontIcon fontSize="large" />} color="primary" />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <DashboardCard title="Services" value={dashboardData.totalServices} icon={<SubscriptionsIcon fontSize="large" />} color="info" />
         </Grid>
       </Grid>
 
-      <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
-        Recent Bookings
-      </Typography>
-      <Paper elevation={2} sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, mb: 3 }}>
+        <Typography variant="h5">
+          Recent Bookings
+        </Typography>
+        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', fontWeight: 500 }}>
+          View All
+        </Typography>
+      </Box>
+      <EnhancedPaper>
         {recentBookings.length > 0 ? (
           <Box>
             {/* Simple list of recent bookings */}
@@ -220,54 +203,21 @@ const VendorHome = () => {
               </Button>
             </Box>
           </Box>
-        ) : (
-          <Typography variant="body1" color="text.secondary" align="center">
-            You don't have any recent bookings.
-          </Typography>
-        )}
-      </Paper>
-
-      <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
-        Subscription Status
+    ) : (
+      <Typography variant="body1" color="text.secondary" align="center">
+        You don't have any recent bookings.
       </Typography>
-      <Grid container spacing={3}>
+    )}
+  </EnhancedPaper>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, mb: 3 }}>
+        <Typography variant="h5">
+          Subscription & Analytics
+        </Typography>
+      </Box>
+      <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
-          {subscription ? (
-            <SubscriptionCard 
-              subscription={{
-                plan: subscription.plan?.name || subscription.plan || 'Basic',
-                price: subscription.price || 0,
-                startDate: new Date(subscription.startDate),
-                endDate: new Date(subscription.endDate),
-                status: subscription.status || 'inactive',
-                paymentStatus: subscription.paymentStatus || 'unpaid',
-                features: subscription.features || subscription.plan?.features || [],
-                bookingLimit: subscription.bookingsLeft || subscription.plan?.bookingLimit || 0,
-                usedBookings: subscription.plan?.bookingLimit ? 
-                  (subscription.plan.bookingLimit - subscription.bookingsLeft) || 0 : 
-                  subscription.usedBookings || 0
-              }}
-              onBuyClick={() => window.location.href = '/plans'}
-              isVendor={true}
-            />
-          ) : (
-            <Paper elevation={2} sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                No Active Subscription
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Subscribe to a plan to start accepting bookings and grow your business.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="primary"
-                component={Link}
-                to="/vendor/subscription-management"
-              >
-                Manage Subscription
-              </Button>
-            </Paper>
-          )}
+          <SubscriptionStatusCard subscription={subscription} />
         </Grid>
         <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
