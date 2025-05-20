@@ -5,6 +5,12 @@
 
 // Import components
 import Alert from './Alert';
+import Slider from './Slider';
+import Checkbox from './Checkbox';
+import RadioButton from './RadioButton';
+import ProgressBar from './ProgressBar';
+import LoginCard from './LoginCard';
+import DashboardTile from './DashboardTile';
 import Avatar from './Avatar';
 import Badge from './Badge';
 import Box from './Box';
@@ -65,6 +71,12 @@ export {
   Tab,
   TextField,
   Typography,
+  Slider,
+  Checkbox,
+  RadioButton,
+  ProgressBar,
+  LoginCard,
+  DashboardTile,
   theme,
   colors,
   shadows,
