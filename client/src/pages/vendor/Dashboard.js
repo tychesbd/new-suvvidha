@@ -3,13 +3,14 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { formatCurrency } from '../../components/ui/utils';
+import '../../components/neumorphic/DashboardTile.css';
 
 // Custom Components
 import DashboardCard from '../../components/ui/DashboardCard';
 import SubscriptionStatusCard from '../../components/ui/SubscriptionStatusCard';
 
 // Material UI imports
-import { Typography, Grid, Paper, Box, Button, Chip, CircularProgress, Alert, LinearProgress } from '@mui/material';
+import { Typography, Grid, Paper, Box, Button, Chip, CircularProgress, Alert, LinearProgress, Container } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 // Icons
@@ -19,6 +20,12 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import PersonIcon from '@mui/icons-material/Person';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
+import StarIcon from '@mui/icons-material/Star';
+import ReviewsIcon from '@mui/icons-material/Reviews';
 
 // Components
 import DashboardLayout from '../../components/layout/DashboardLayout';
@@ -113,177 +120,102 @@ const VendorHome = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress size="large" color="primary" />
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Welcome, {userInfo?.name}!
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary" paragraph>
-        Manage your bookings and analytics
-      </Typography>
+    <Container style={{ padding: '1rem' }}>
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Box mb={1}>
+          <Typography 
+            variant="h4" 
+            style={{ 
+              marginBottom: '4px',
+              color: 'var(--text-primary)',
+              fontSize: '1.75rem',
+              fontWeight: 600
+            }}
+          >
+            Welcome, {userInfo?.name}!
+          </Typography>
+        </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+        {error && (
+          <Alert 
+            severity="error" 
+            variant="convex"
+            style={{ marginBottom: '8px' }}
+          >
+            {error}
+          </Alert>
+        )}
 
-      <Grid container spacing={4} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Bookings" value={dashboardData.totalBookings} icon={<ShoppingCartIcon fontSize="large" />} color="secondary" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Revenue" value={formatCurrency(dashboardData.revenue)} icon={<AnalyticsIcon fontSize="large" />} color="success" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Active Bookings" value={dashboardData.activeBookings} icon={<StorefrontIcon fontSize="large" />} color="primary" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Services" value={dashboardData.totalServices} icon={<SubscriptionsIcon fontSize="large" />} color="info" />
-        </Grid>
-      </Grid>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, mb: 3 }}>
-        <Typography variant="h5">
-          Recent Bookings
-        </Typography>
-        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', fontWeight: 500 }}>
-          View All
-        </Typography>
-      </Box>
-      <EnhancedPaper>
-        {recentBookings.length > 0 ? (
-          <Box>
-            {/* Simple list of recent bookings */}
-            {recentBookings.map((booking) => (
-              <Box 
-                key={booking._id} 
-                sx={{ 
-                  p: 2, 
-                  mb: 1, 
-                  borderRadius: 1, 
-                  bgcolor: 'background.default',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2">{booking.serviceName}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {new Date(booking.bookingDate).toLocaleDateString()} | {booking.customer?.name}
-                  </Typography>
-                </Box>
-                <Chip 
-                  label={booking.status} 
-                  color={
-                    booking.status === 'completed' ? 'success' :
-                    booking.status === 'cancelled' ? 'error' :
-                    booking.status === 'in-progress' ? 'warning' : 'info'
-                  } 
-                  size="small" 
-                  sx={{ textTransform: 'capitalize' }}
-                />
-              </Box>
-            ))}
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <Button 
-                component={Link} 
-                to="/vendor/booking" 
-                variant="outlined" 
-                size="small"
-              >
-                View All Bookings
-              </Button>
+        <Grid container spacing={2}>
+          {/* Total Bookings */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile">
+              <div className="dashboard-tile-icon">
+                <CalendarTodayIcon style={{ fontSize: '1.75rem', color: 'var(--primary-main)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Total Bookings</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--primary-main)' }}>
+                {dashboardData.totalBookings}
+              </Typography>
             </Box>
-          </Box>
-    ) : (
-      <Typography variant="body1" color="text.secondary" align="center">
-        You don't have any recent bookings.
-      </Typography>
-    )}
-  </EnhancedPaper>
+          </Grid>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, mb: 3 }}>
-        <Typography variant="h5">
-          Subscription & Analytics
-        </Typography>
+          {/* Completed Bookings */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile">
+              <div className="dashboard-tile-icon">
+                <CheckCircleIcon style={{ fontSize: '1.75rem', color: 'var(--success-main)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Completed Bookings</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--success-main)' }}>
+                {dashboardData.completedBookings}
+              </Typography>
+            </Box>
+          </Grid>
+
+          {/* Revenue */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile revenue">
+              <div className="dashboard-tile-icon">
+                <MonetizationOnIcon style={{ fontSize: '1.75rem', color: 'var(--success-dark)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Total Revenue</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--success-dark)' }}>
+                {formatCurrency(dashboardData.revenue)}
+              </Typography>
+            </Box>
+          </Grid>
+
+          {/* Active Services */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile">
+              <div className="dashboard-tile-icon">
+                <MiscellaneousServicesIcon style={{ fontSize: '1.75rem', color: 'var(--info-main)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Active Services</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--info-main)' }}>
+                {dashboardData.activeServices}
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
+
+        {/* Subscription Status */}
+        {subscription && (
+          <Box mt={3}>
+            <Typography variant="h6" mb={2}>Subscription Status</Typography>
+            <SubscriptionStatusCard subscription={subscription} />
+          </Box>
+        )}
       </Box>
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={6}>
-          <SubscriptionStatusCard subscription={subscription} />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="h6" gutterBottom>Service Metrics</Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Paper 
-                  elevation={0} 
-                  sx={{ 
-                    p: 2, 
-                    bgcolor: 'background.default',
-                    textAlign: 'center',
-                    borderRadius: 2
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">Total Services</Typography>
-                  <Typography variant="h4" color="secondary.main">{dashboardData.totalServices}</Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={6}>
-                <Paper 
-                  elevation={0} 
-                  sx={{ 
-                    p: 2, 
-                    bgcolor: 'background.default',
-                    textAlign: 'center',
-                    borderRadius: 2
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">Active Services</Typography>
-                  <Typography variant="h4" color="secondary.main">{dashboardData.activeServices}</Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={6}>
-                <Paper 
-                  elevation={0} 
-                  sx={{ 
-                    p: 2, 
-                    bgcolor: 'background.default',
-                    textAlign: 'center',
-                    borderRadius: 2
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">Avg. Rating</Typography>
-                  <Typography variant="h4" color="secondary.main">{dashboardData.avgRating.toFixed(1)}</Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={6}>
-                <Paper 
-                  elevation={0} 
-                  sx={{ 
-                    p: 2, 
-                    bgcolor: 'background.default',
-                    textAlign: 'center',
-                    borderRadius: 2
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">Reviews</Typography>
-                  <Typography variant="h4" color="secondary.main">{dashboardData.reviewCount}</Typography>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+    </Container>
   );
 };
 

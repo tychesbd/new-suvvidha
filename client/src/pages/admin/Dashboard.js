@@ -3,10 +3,21 @@ import { Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { formatCurrency } from '../../components/ui/utils';
+import '../../components/neumorphic/DashboardTile.css';
 
-// Material UI imports
-import { Typography, Grid, Paper, Box, Divider, CircularProgress, Alert } from '@mui/material';
-import { styled } from '@mui/material/styles';
+// Neumorphic components
+import {
+  Typography,
+  Grid,
+  Box,
+  Divider,
+  Alert,
+  DashboardTile,
+  Container,
+  CircularProgress,
+  Card,
+  Paper
+} from '../../components/neumorphic';
 
 // Icons
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -41,14 +52,7 @@ import Home from '../common/Home';
 import Services from '../common/Services';
 import AboutUs from '../common/AboutUs';
 
-// Enhanced Paper for recent users section
-const EnhancedPaper = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-  overflow: 'hidden',
-  border: '1px solid rgba(0, 0, 0, 0.05)',
-}));
+// Custom styles are now handled by neumorphic components
 
 const AdminHome = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -75,7 +79,6 @@ const AdminHome = () => {
           },
         };
 
-        // Fetch dashboard statistics from our new endpoint
         const { data } = await axios.get('/api/dashboard/admin', config);
         
         setDashboardData({
@@ -105,196 +108,158 @@ const AdminHome = () => {
     }
   }, [userInfo]);
 
-  // Format currency is now imported at the top of the file
-
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress size="large" color="primary" />
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Welcome, {userInfo?.name}!
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary" paragraph>
-        System overview and management
-      </Typography>
+    <Container style={{ padding: '1rem' }}>
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Box mb={1}>
+          <Typography 
+            variant="h4" 
+            style={{ 
+              marginBottom: '4px',
+              color: 'var(--text-primary)',
+              fontSize: '1.75rem',
+              fontWeight: 600
+            }}
+          >
+            Welcome, {userInfo?.name}!
+          </Typography>
+        </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+        {error && (
+          <Alert 
+            severity="error" 
+            variant="convex"
+            style={{ marginBottom: '8px' }}
+          >
+            {error}
+          </Alert>
+        )}
 
-      <Grid container spacing={4} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Users" value={dashboardData.users} icon={<PeopleIcon fontSize="large" />} color="primary" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Bookings" value={dashboardData.bookings} icon={<CalendarTodayIcon fontSize="large" />} color="secondary" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Services" value={dashboardData.services} icon={<MiscellaneousServicesIcon fontSize="large" />} color="error" />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <DashboardCard title="Vendors" value={dashboardData.vendors} icon={<StorefrontIcon fontSize="large" />} color="info" />
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={4} sx={{ mt: 4 }}>
-        <Grid item xs={12} sm={6} md={6}>
-          <DashboardCard 
-            title="Total Revenue" 
-            value={formatCurrency(dashboardData.revenue || 0)} 
-            icon={<MonetizationOnIcon fontSize="large" />} 
-            color="success" 
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={6}>
-          <DashboardCard 
-            title="Active Subscriptions" 
-            value={dashboardData.activeSubscriptions || 0} 
-            icon={<SubscriptionsIcon fontSize="large" />} 
-            color="warning" 
-          />
-        </Grid>
-      </Grid>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 6, mb: 3 }}>
-        <Typography variant="h5">
-          Recent Users
-        </Typography>
-        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', fontWeight: 500 }}>
-          View All
-        </Typography>
-      </Box>
-      <EnhancedPaper>
-        <Box sx={{ p: 3, bgcolor: 'background.paper' }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
-                Name
+        <Grid container spacing={2}>
+          <Grid item xs={6} sm={6} md={3}>
+            <DashboardTile
+              variant="convex"
+              icon={
+                <div className="dashboard-tile-icon">
+                  <PeopleIcon style={{ fontSize: '1.75rem', color: 'var(--primary-main)' }} />
+                </div>
+              }
+              title="Total Users"
+              className="dashboard-tile"
+            >
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--primary-main)' }}>
+                {dashboardData.users}
               </Typography>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
-                Email
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
-                Role
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-              <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
-                Joined
-              </Typography>
-            </Grid>
+            </DashboardTile>
           </Grid>
-        </Box>
-        <Divider />
-        <Box sx={{ p: 3 }}>
-          <Typography variant="body1" color="text.secondary" align="center">
-          No recent users to display.
-        </Typography>
-        </Box>
-      </EnhancedPaper>
+          <Grid item xs={6} sm={6} md={3}>
+            <DashboardTile
+              variant="convex"
+              icon={
+                <div className="dashboard-tile-icon">
+                  <CalendarTodayIcon style={{ fontSize: '1.75rem', color: 'var(--info-main)' }} />
+                </div>
+              }
+              title="Bookings"
+              className="dashboard-tile"
+            >
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--info-main)' }}>
+                {dashboardData.bookings}
+              </Typography>
+            </DashboardTile>
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <DashboardTile
+              variant="convex"
+              icon={
+                <div className="dashboard-tile-icon">
+                  <MiscellaneousServicesIcon style={{ fontSize: '1.75rem', color: 'var(--success-main)' }} />
+                </div>
+              }
+              title="Services"
+              className="dashboard-tile"
+            >
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--success-main)' }}>
+                {dashboardData.services}
+              </Typography>
+            </DashboardTile>
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <DashboardTile
+              variant="convex"
+              icon={
+                <div className="dashboard-tile-icon">
+                  <StorefrontIcon style={{ fontSize: '1.75rem', color: 'var(--primary-main)' }} />
+                </div>
+              }
+              title="Vendors"
+              className="dashboard-tile"
+            >
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--primary-main)' }}>
+                {dashboardData.vendors}
+              </Typography>
+            </DashboardTile>
+          </Grid>
+        </Grid>
 
-      <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
-        System Statistics
-      </Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper
-            elevation={2}
-            sx={{
-              p: 2,
-              height: 150,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              bgcolor: 'background.default',
+        <Box my={2}>
+          <Typography 
+            variant="h5" 
+            style={{
+              color: 'var(--text-primary)',
+              fontSize: '1.25rem',
+              fontWeight: 600,
+              marginBottom: '0.5rem'
             }}
           >
-            <Typography variant="h6" gutterBottom>
-              Total Revenue
-            </Typography>
-            <Typography variant="h4" color="error.main">
-              {formatCurrency(dashboardData.revenue)}
-            </Typography>
-          </Paper>
+            Revenue & Subscriptions
+          </Typography>
+        </Box>
+
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <DashboardTile
+              variant="concave"
+              title="Total Revenue"
+              icon={
+                <div className="dashboard-tile-icon">
+                  <MonetizationOnIcon style={{ fontSize: '1.75rem', color: 'var(--success-main)' }} />
+                </div>
+              }
+              className="dashboard-tile revenue"
+            >
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--success-main)' }}>
+                {formatCurrency(dashboardData.revenue)}
+              </Typography>
+            </DashboardTile>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <DashboardTile
+              variant="concave"
+              title="Active Subscriptions"
+              icon={
+                <div className="dashboard-tile-icon">
+                  <SubscriptionsIcon style={{ fontSize: '1.75rem', color: 'var(--success-main)' }} />
+                </div>
+              }
+              className="dashboard-tile subscriptions"
+            >
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--success-main)' }}>
+                {dashboardData.activeSubscriptions} / {dashboardData.subscriptions}
+              </Typography>
+            </DashboardTile>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper
-            elevation={2}
-            sx={{
-              p: 2,
-              height: 150,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              bgcolor: 'background.default',
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Active Subscriptions
-            </Typography>
-            <Typography variant="h4" color="error.main">
-              {dashboardData.activeSubscriptions}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper
-            elevation={2}
-            sx={{
-              p: 2,
-              height: 150,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              bgcolor: 'background.default',
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Total Subscriptions
-            </Typography>
-            <Typography variant="h4" color="error.main">
-              {dashboardData.subscriptions}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper
-            elevation={2}
-            sx={{
-              p: 2,
-              height: 150,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              bgcolor: 'background.default',
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              System Health
-            </Typography>
-            <Typography variant="h4" color="error.main">
-              98%
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+      </Box>
+    </Container>
   );
 };
 

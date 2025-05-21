@@ -1,104 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Container, Box, Grid, Paper, Button, Card, CardContent, CardMedia, CardActionArea, Divider, CircularProgress, TextField, InputAdornment, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import axios from 'axios';
 import { getContentByType } from '../../features/content/contentSlice';
 import { getServices } from '../../features/services/serviceSlice';
 import { getCategories } from '../../features/categories/categorySlice';
 import BookingModal from '../../components/modals/BookingModal';
-
-// Styled components
-const HeroSection = styled(Box)(({ theme, backgroundImage }) => ({
-  position: 'relative',
-  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${backgroundImage})`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  color: 'white',
-  padding: theme.spacing(12, 0, 10),
-  marginBottom: theme.spacing(8),
-  borderRadius: theme.shape.borderRadius,
-  boxShadow: `
-    12px 12px 24px 0 rgba(0, 0, 0, 0.3),
-    -12px -12px 24px 0 rgba(255, 255, 255, 0.05)
-  `,
-  overflow: 'hidden',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
-  backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  backdropFilter: 'blur(10px)',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%)',
-    zIndex: 1
-  },
-  '& > *': {
-    position: 'relative',
-    zIndex: 2
-  }
-}));
-
-const ServiceCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 12px 20px rgba(0,0,0,0.15)',
-  },
-}));
-
-const BookNowButton = styled(Button)(({ theme }) => ({
-  position: 'absolute',
-  bottom: '16px',
-  right: '16px',
-  opacity: 0,
-  transition: 'opacity 0.3s ease-in-out',
-  '.MuiCardActionArea-root:hover &': {
-    opacity: 1,
-  },
-}));
-
-const WhyUsCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  textAlign: 'center',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-  },
-}));
-
-const AdBanner = styled(Paper)(({ theme, backgroundImage }) => ({
-  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(${backgroundImage})`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  color: 'white',
-  padding: theme.spacing(6),
-  marginTop: theme.spacing(6),
-  marginBottom: theme.spacing(6),
-  borderRadius: theme.spacing(1),
-  textAlign: 'center',
-}));
-
-const Footer = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  color: 'white',
-  padding: theme.spacing(6, 0),
-  marginTop: theme.spacing(8),
-}));
+import '../../components/neumorphic/HomePage.css';
+import '../../components/neumorphic/ServiceCard.css';
 
 // Fallback content in case API fails
 const fallbackHero = {
@@ -323,9 +232,9 @@ const Home = () => {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
-      </Box>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+      </div>
     );
   }
 
@@ -335,374 +244,140 @@ const Home = () => {
   const ads = adsContent || fallbackAds;
 
   return (
-    <Box>      {/* Hero Section - Admin Editable */}
-      <HeroSection backgroundImage={hero.image}>
-        <Container maxWidth="md">
-          <Box sx={{ 
-            textAlign: 'center',
-            maxWidth: '800px',
-            margin: '0 auto',
-            padding: '0 16px'
-          }}>
-            <Typography 
-              variant="h2" 
-              component="h1" 
-              gutterBottom
-              sx={{
-                fontSize: { xs: '2.5rem', md: '3.5rem' },
-                fontWeight: 'bold',
-                letterSpacing: '-0.5px',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                marginBottom: '1.5rem'
-              }}
-            >
-              {hero.title}
-            </Typography>
-            <Typography 
-              variant="h5" 
-              paragraph
-              sx={{
-                fontSize: { xs: '1.2rem', md: '1.5rem' },
-                fontWeight: '300',
-                marginBottom: '2rem',
-                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-                lineHeight: '1.6'
-              }}
-            >
-              {hero.subtitle}
-            </Typography>
-            {hero.buttonText && (
-              <Paper
-                variant="flat"
-                sx={{
-                  display: 'inline-block',
-                  background: 'transparent',
-                  padding: '4px',
-                  borderRadius: '12px',
-                  boxShadow: `
-                    8px 8px 16px 0 rgba(0, 0, 0, 0.3),
-                    -8px -8px 16px 0 rgba(255, 255, 255, 0.1)
-                  `
-                }}
-              >
-                <Button 
-                  variant="contained" 
-                  color="secondary" 
-                  size="large"
-                  sx={{
-                    padding: '12px 32px',
-                    fontSize: '1.1rem',
-                    textTransform: 'none',
-                    borderRadius: '8px',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 12px rgba(0,0,0,0.2)'
-                    }
-                  }}
-                >
-                  {hero.buttonText}
-                </Button>
-              </Paper>
-            )}
-          </Box>
-        </Container>
-      </HeroSection>
+    <div>
+      {/* Hero Section */}
+      <div 
+        className="hero-section"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${hero.image})`
+        }}
+      >
+        <div className="hero-content">
+          <h1 className="hero-title">{hero.title}</h1>
+          <p className="hero-subtitle">{hero.subtitle}</p>
+          {hero.buttonText && (
+            <button className="hero-button">{hero.buttonText}</button>
+          )}
+        </div>
+      </div>
 
-      {/* Services Section - Card View with Categories */}
-      <Container maxWidth="lg">
-        <Typography variant="h3" component="h2" gutterBottom align="center">
-          Our Services
-        </Typography>
-        <Typography variant="h6" align="center" color="text.secondary" paragraph>
+      {/* Services Section */}
+      <div className="featured-services">
+        <h2 className="section-title">Our Services</h2>
+        <p className="section-subtitle">
           Discover the wide range of services we offer to make your life easier
-        </Typography>
-        
-        {/* Search and Filter Section */}
-        <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 4 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                placeholder="Search by service name or category"
+        </p>
+
+        {/* Search and Filter */}
+        <div className="search-filter-container">
+          <div className="search-row">
+            <div className="search-group">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                variant="outlined"
               />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel id="home-category-filter-label">Filter by Category</InputLabel>
-                <Select
-                  labelId="home-category-filter-label"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  label="Filter by Category"
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <FilterListIcon />
-                    </InputAdornment>
-                  }
-                >
-                  <MenuItem value="all">All Categories</MenuItem>
-                  {categories && categories.map((category) => (
-                    <MenuItem key={category._id || category.id} value={category.name}>
-                      {category.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </Paper>
-
-        {Object.keys(filteredServicesByCategory).length > 0 ? (
-          Object.keys(filteredServicesByCategory).map((category, index) => (
-            filteredServicesByCategory[category].length > 0 && (
-              <Box key={index} sx={{ mb: 8 }}>
-                <Typography variant="h4" component="h3" gutterBottom sx={{ mb: 3 }}>
-                  {category}
-                </Typography>
-                <Grid container spacing={4}>
-                  {filteredServicesByCategory[category].map((service) => (
-                  <Grid item key={service._id || service.id} xs={12} sm={6} md={4}>
-                    <ServiceCard elevation={3}>
-                      <CardActionArea sx={{ height: '100%', position: 'relative' }}>
-                        <CardMedia
-                          component="img"
-                          height="160"
-                          image={service.image}
-                          alt={service.name}
-                        />
-                        <CardContent sx={{ flexGrow: 1, pb: 6 }}>
-                          <Typography gutterBottom variant="h5" component="h2">
-                            {service.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" paragraph>
-                            {service.description}
-                          </Typography>
-                          {service.minPrice && (
-                            <Typography variant="body1" color="primary" sx={{ fontWeight: 'bold' }}>
-                              Starting from ₹{service.minPrice}
-                            </Typography>
-                          )}
-                        </CardContent>
-                        <BookNowButton 
-                          variant="contained" 
-                          color="primary" 
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Check if user is logged in
-                            if (!userInfo) {
-                              // Redirect to login page if not authenticated
-                              navigate('/login');
-                              return;
-                            }
-                            // Proceed with booking if authenticated
-                            setSelectedService(service);
-                            setOpenBookingModal(true);
-                          }}
-                        >
-                          Book Now
-                        </BookNowButton>
-                      </CardActionArea>
-                    </ServiceCard>
-                  </Grid>
+            </div>
+            <div className="search-group">
+              <span className="search-icon">🏷️</span>
+              <select
+                className="filter-select"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="all">All Categories</option>
+                {categories && categories.map((category) => (
+                  <option key={category._id || category.id} value={category.name}>
+                    {category.name}
+                  </option>
                 ))}
-              </Grid>
-            </Box>
-            )
-          ))
-        ) : searchQuery ? (
-          // No results found for search
-          <Box sx={{ textAlign: 'center', py: 5 }}>
-            <Typography variant="h5" color="text.secondary">
-              No services found matching "{searchQuery}"
-            </Typography>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              sx={{ mt: 2 }}
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-              }}
-            >
-              Clear Search
-            </Button>
-          </Box>
-        ) : (
-          // Display all services if no categories are available
-          <Grid container spacing={4}>
-            {allServices.map((service) => (
-              <Grid item key={service.id || service._id} xs={12} sm={6} md={4}>
-                <ServiceCard elevation={3}>
-                  <CardActionArea sx={{ height: '100%', position: 'relative' }}>
-                    <CardMedia
-                      component="img"
-                      height="160"
-                      image={service.image}
-                      alt={service.name}
-                    />
-                    <CardContent sx={{ flexGrow: 1, pb: 6 }}>
-                      <Typography gutterBottom variant="h5" component="h2">
-                        {service.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" paragraph>
-                        {service.description}
-                      </Typography>
-                      {service.minPrice && (
-                        <Typography variant="body1" color="primary" sx={{ fontWeight: 'bold' }}>
-                          Starting from ₹{service.minPrice}
-                        </Typography>
-                      )}
-                    </CardContent>
-                    <BookNowButton 
-                      variant="contained" 
-                      color="primary" 
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Check if user is logged in
-                        if (!userInfo) {
-                          // Redirect to login page if not authenticated
-                          navigate('/login');
-                          return;
-                        }
-                        // Proceed with booking if authenticated
-                        setSelectedService(service);
-                        setOpenBookingModal(true);
-                      }}
-                    >
-                      Book Now
-                    </BookNowButton>
-                  </CardActionArea>
-                </ServiceCard>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Container>
+              </select>
+            </div>
+          </div>
+        </div>
 
-      {/* Why Us Section */}
-      <Container maxWidth="lg">
-        <Typography variant="h3" component="h2" gutterBottom align="center">
-          {whyUs.title}
-        </Typography>
-        <Typography variant="h6" align="center" color="text.secondary" paragraph sx={{ mb: 6 }}>
-          {whyUs.subtitle}
-        </Typography>
-
-        <Grid container spacing={4} sx={{ mb: 6 }}>
-          {whyUsFeatures.map((feature, index) => (
-            <Grid item xs={12} md={4} key={index}>
-              <WhyUsCard elevation={2}>
-                <Typography variant="h5" component="h3" gutterBottom>
-                  {feature.title}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {feature.description}
-                </Typography>
-              </WhyUsCard>
-            </Grid>
+        {/* Services Grid */}
+        <div className="services-grid">
+          {Object.keys(filteredServicesByCategory).map((category) => (
+            filteredServicesByCategory[category].map((service) => (
+              <div key={service.id || service._id} className="service-card">
+                <img
+                  src={service.image}
+                  alt={service.name}
+                  className="service-image"
+                />
+                <div className="service-content">
+                  <h3 className="service-title">{service.name}</h3>
+                  <p className="service-description">{service.description}</p>
+                  {service.minPrice && (
+                    <p className="service-price">Starting from ₹{service.minPrice}</p>
+                  )}
+                  <button
+                    className="book-now-button"
+                    onClick={() => {
+                      if (!userInfo) {
+                        navigate('/login');
+                        return;
+                      }
+                      setSelectedService(service);
+                      setOpenBookingModal(true);
+                    }}
+                  >
+                    Book Now
+                  </button>
+                </div>
+              </div>
+            ))
           ))}
-        </Grid>
+        </div>
 
-        {/* Ads Banner */}
-        <AdBanner elevation={4} backgroundImage={ads.image}>
-          <Typography variant="h4" gutterBottom>
-            {ads.title}
-          </Typography>
-          <Typography variant="subtitle1" paragraph>
-            {ads.subtitle}
-          </Typography>
-          {ads.buttonText && (
-            <Button 
-              variant="contained" 
-              color="secondary" 
-              size="large"
-              onClick={() => {
-                // Check if user is logged in before booking
-                if (!userInfo) {
-                  navigate('/login');
-                  return;
-                }
-                // Open booking modal if authenticated
-                setOpenBookingModal(true);
-              }}
-            >
-              {ads.buttonText}
-            </Button>
-          )}
-        </AdBanner>
-      </Container>
+        {/* Why Us Section */}
+        <div className="why-us-section">
+          <h2 className="section-title">{whyUs.title}</h2>
+          <p className="section-subtitle">{whyUs.subtitle}</p>
+          <div className="services-grid">
+            {whyUsFeatures.map((feature, index) => (
+              <div key={index} className="why-us-card">
+                <h3 className="why-us-title">{feature.title}</h3>
+                <p className="why-us-description">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      {/* Footer */}
-      <Footer sx={{ backgroundColor: 'black', color: 'white', py: 4 }}>
-  <Container maxWidth="lg">
-    <Grid container spacing={4}>
-      {/* About Section */}
-      <Grid item xs={12} md={4}>
-        <Typography variant="h6" gutterBottom>
-          About Suvvidha
-        </Typography>
-        <Typography variant="body2">
-          Suvvidha is your one-stop solution for all your service needs. We provide high-quality services at affordable prices.
-        </Typography>
-      </Grid>
+        {/* Ad Banner */}
+        <div className="ad-banner">
+          <div className="ad-content">
+            <h2 className="ad-title">{ads.title}</h2>
+            <p className="ad-subtitle">{ads.subtitle}</p>
+            {ads.buttonText && (
+              <button 
+                className="hero-button"
+                onClick={() => {
+                  if (!userInfo) {
+                    navigate('/login');
+                    return;
+                  }
+                  setOpenBookingModal(true);
+                }}
+              >
+                {ads.buttonText}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
-      {/* Quick Links Section */}
-      <Grid item xs={12} md={4}>
-        <Typography variant="h6" gutterBottom>
-          Quick Links
-        </Typography>
-        <Typography variant="body2" paragraph>
-          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>Home</Link>
-        </Typography>
-        <Typography variant="body2" paragraph>
-          <Link to="/services" style={{ textDecoration: 'none', color: 'inherit' }}>Services</Link>
-        </Typography>
-        <Typography variant="body2" paragraph>
-          <Link to="/about us" style={{ textDecoration: 'none', color: 'inherit' }}>About Us</Link>
-        </Typography>
-      </Grid>
-
-      {/* Contact Us Section */}
-      <Grid item xs={12} md={4}>
-        <Typography variant="h6" gutterBottom>
-          Contact Us
-        </Typography>
-        <Typography variant="body2" paragraph>Email: info@suvvidha.com</Typography>
-        <Typography variant="body2" paragraph>Phone: +91 xxxxxxxxxx</Typography>
-        <Typography variant="body2" paragraph>Address: Patna, Bihar, India</Typography>
-      </Grid>
-    </Grid>
-
-    {/* Divider */}
-    <Divider sx={{ my: 3, backgroundColor: 'rgba(255,255,255,0.2)' }} />
-
-    {/* Footer Bottom */}
-    <Typography variant="body2" align="center" sx={{ pt: 2 }}>
-      © {new Date().getFullYear()} Suvvidha & Shiv Bijay Deep. All rights reserved.
-    </Typography>
-  </Container>
-</Footer>
-      
       {/* Booking Modal */}
       <BookingModal 
         open={openBookingModal} 
         onClose={() => setOpenBookingModal(false)} 
         service={selectedService}
       />
-    </Box>
+    </div>
   );
 };
 
