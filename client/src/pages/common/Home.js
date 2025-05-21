@@ -13,14 +13,36 @@ import BookingModal from '../../components/modals/BookingModal';
 
 // Styled components
 const HeroSection = styled(Box)(({ theme, backgroundImage }) => ({
-  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${backgroundImage})`,
+  position: 'relative',
+  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${backgroundImage})`,
   backgroundSize: 'cover',
   backgroundPosition: 'center',
   color: 'white',
-  padding: theme.spacing(10, 0, 8),
-  marginBottom: theme.spacing(6),
-  borderRadius: theme.spacing(1),
-  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+  padding: theme.spacing(12, 0, 10),
+  marginBottom: theme.spacing(8),
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: `
+    12px 12px 24px 0 rgba(0, 0, 0, 0.3),
+    -12px -12px 24px 0 rgba(255, 255, 255, 0.05)
+  `,
+  overflow: 'hidden',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  backdropFilter: 'blur(10px)',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%)',
+    zIndex: 1
+  },
+  '& > *': {
+    position: 'relative',
+    zIndex: 2
+  }
 }));
 
 const ServiceCard = styled(Card)(({ theme }) => ({
@@ -313,21 +335,77 @@ const Home = () => {
   const ads = adsContent || fallbackAds;
 
   return (
-    <Box>
-      {/* Hero Section - Admin Editable */}
+    <Box>      {/* Hero Section - Admin Editable */}
       <HeroSection backgroundImage={hero.image}>
         <Container maxWidth="md">
-          <Typography variant="h2" component="h1" gutterBottom>
-            {hero.title}
-          </Typography>
-          <Typography variant="h5" paragraph>
-            {hero.subtitle}
-          </Typography>
-          {hero.buttonText && (
-            <Button variant="contained" color="secondary" size="large">
-              {hero.buttonText}
-            </Button>
-          )}
+          <Box sx={{ 
+            textAlign: 'center',
+            maxWidth: '800px',
+            margin: '0 auto',
+            padding: '0 16px'
+          }}>
+            <Typography 
+              variant="h2" 
+              component="h1" 
+              gutterBottom
+              sx={{
+                fontSize: { xs: '2.5rem', md: '3.5rem' },
+                fontWeight: 'bold',
+                letterSpacing: '-0.5px',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+                marginBottom: '1.5rem'
+              }}
+            >
+              {hero.title}
+            </Typography>
+            <Typography 
+              variant="h5" 
+              paragraph
+              sx={{
+                fontSize: { xs: '1.2rem', md: '1.5rem' },
+                fontWeight: '300',
+                marginBottom: '2rem',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
+                lineHeight: '1.6'
+              }}
+            >
+              {hero.subtitle}
+            </Typography>
+            {hero.buttonText && (
+              <Paper
+                variant="flat"
+                sx={{
+                  display: 'inline-block',
+                  background: 'transparent',
+                  padding: '4px',
+                  borderRadius: '12px',
+                  boxShadow: `
+                    8px 8px 16px 0 rgba(0, 0, 0, 0.3),
+                    -8px -8px 16px 0 rgba(255, 255, 255, 0.1)
+                  `
+                }}
+              >
+                <Button 
+                  variant="contained" 
+                  color="secondary" 
+                  size="large"
+                  sx={{
+                    padding: '12px 32px',
+                    fontSize: '1.1rem',
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 12px rgba(0,0,0,0.2)'
+                    }
+                  }}
+                >
+                  {hero.buttonText}
+                </Button>
+              </Paper>
+            )}
+          </Box>
         </Container>
       </HeroSection>
 

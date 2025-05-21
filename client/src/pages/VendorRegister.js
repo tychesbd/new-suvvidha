@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { register, reset } from '../features/auth/authSlice';
+import { reset } from '../features/auth/authSlice';
 
 // Material UI imports
 import {
@@ -21,7 +21,6 @@ import {
   CircularProgress,
   Card,
   CardContent,
-  Fade,
   Divider,
   OutlinedInput,
   Chip,

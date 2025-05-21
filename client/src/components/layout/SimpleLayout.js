@@ -2,29 +2,13 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { logout } from '../../features/auth/authSlice';
-// No language functionality needed
+import useMediaQuery from '../../hooks/useMediaQuery';
 
-// Material UI imports
-import {
-  AppBar,
-  Box,
-  Button,
-  CssBaseline,
-  Toolbar,
-  Avatar,
-  Menu,
-  MenuItem,
-  Tooltip,
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+// Neumorphic components
+import Box from '../neumorphic/Box';
+import Button from '../neumorphic/Button';
+import Container from '../neumorphic/Container';
+import Paper from '../neumorphic/Paper';
 
 // Icons
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -35,340 +19,388 @@ import InfoIcon from '@mui/icons-material/Info';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import MenuIcon from '@mui/icons-material/Menu';
 
-const SimpleLayout = ({ children, title }) => {
-  const [anchorElUser, setAnchorElUser] = useState(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+const SimpleLayout = ({ children }) => {
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // No language functionality needed
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  const userRole = userInfo?.role || 'guest';
 
   const handleLogout = () => {
     dispatch(logout());
     navigate('/login');
+    setShowUserMenu(false);
   };
 
   const handleProfileClick = () => {
-    handleCloseUserMenu();
-    // Navigate to profile page based on user role
-    if (userInfo && userInfo.role) {
-      navigate(`/${userInfo.role}/profile`);
-    } else {
-      navigate('/login');
-    }
+    navigate(`/${userRole}/profile`);
+    setShowUserMenu(false);
   };
-
   const handleDashboardClick = () => {
-    handleCloseUserMenu();
-    // Navigate to dashboard based on user role
-    if (userInfo && userInfo.role) {
-      navigate(`/${userInfo.role}`);
-    } else {
-      navigate('/login');
-    }
+    navigate(userRole === 'admin' ? '/admin' : 
+            userRole === 'vendor' ? '/vendor' : 
+            userRole === 'customer' ? '/customer' : '/');
+    setShowUserMenu(false);
   };
-
-  // Check if userInfo exists before accessing properties
-  const userRole = userInfo?.role || 'guest';
-  
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-  
-  // Mobile drawer content
-  const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', pt: 2, pb: 2 }}>
-      <Link to="/" style={{ textDecoration: 'none', display: 'block', marginBottom: '10px' }}>
-      <img src="/logo1.png" alt="Suvvidha Logo" height="40" /> </Link>
-      <List>
-        <ListItem disablePadding>
-          <ListItemButton 
-            component={Link} 
-            to={userInfo ? `/${userRole}/home` : '/'}
-            sx={{
-              textAlign: 'center',
-              borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid #6a1b9a' : 'none',
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <HomeIcon sx={{ color: '#6a1b9a' }} />
-            </ListItemIcon>
-            <ListItemText primary="Home" sx={{ color: '#333333' }} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton 
-            component={Link} 
-            to={userInfo ? `/${userRole}/services` : '/services'}
-            sx={{
-              textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/services`) || location.pathname === '/services' ? '2px solid #6a1b9a' : 'none',
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />
-            </ListItemIcon>
-            <ListItemText primary="Services" sx={{ color: '#333333' }} />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton 
-            component={Link} 
-            to={userInfo ? `/${userRole}/about` : '/about'}
-            sx={{
-              textAlign: 'center',
-              borderBottom: location.pathname.includes(`/${userRole}/about`) || location.pathname === '/about' ? '2px solid #6a1b9a' : 'none',
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40 }}>
-              <InfoIcon sx={{ color: '#6a1b9a' }} />
-            </ListItemIcon>
-            <ListItemText primary="About Us" sx={{ color: '#333333' }} />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Box>
-  );
+  // Navigation links
+  const navLinks = [
+    { to: userInfo ? `/${userRole}` : '/', label: 'Home', icon: <HomeIcon /> },
+    { to: '/services', label: 'Services', icon: <MiscellaneousServicesIcon /> },
+    { to: '/about', label: 'About Us', icon: <InfoIcon /> },
+  ];
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <Box component="nav">
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile
-          }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
-          }}
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-      <AppBar position="fixed" sx={{ backgroundColor: '#ffffff', boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { md: 'none' }, color: '#6a1b9a' }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 0, mr: 3 }}>
-            <Link to={'/'}>
-              <img src="/logo1.png" alt="Suvvidha Logo" height="40" />
-            </Link>
-            {/* Title removed as requested */}
-          </Box>
-          
-          {/* Navbar Links */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button
-              component={Link}
-              to={userInfo ? `/${userRole}/home` : '/'}
-              sx={{
-                color: '#333333',
-                mx: 1,
-                borderBottom: location.pathname === '/' || location.pathname.includes(`/${userRole}/home`) ? '2px solid #6a1b9a' : 'none',
-                borderRadius: 0,
-                paddingBottom: '4px',
-                '&:hover': {
-                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
-                  color: '#6a1b9a'
-                }
-              }}
-              startIcon={<HomeIcon sx={{ color: '#6a1b9a' }} />}
-            >
-              Home
-            </Button>
-            <Button
-              component={Link}
-              to={userInfo ? `/${userRole}/services` : '/services'}
-              sx={{
-                color: '#333333',
-                mx: 1,
-                borderBottom: location.pathname.includes(`/${userRole}/services`) || location.pathname === '/services' ? '2px solid #6a1b9a' : 'none',
-                borderRadius: 0,
-                paddingBottom: '4px',
-                '&:hover': {
-                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
-                  color: '#6a1b9a'
-                }
-              }}
-              startIcon={<MiscellaneousServicesIcon sx={{ color: '#6a1b9a' }} />}
-            >
-              Services
-            </Button>
-            <Button
-              component={Link}
-              to={userInfo ? `/${userRole}/about` : '/about'}
-              sx={{
-                color: '#333333',
-                mx: 1,
-                borderBottom: location.pathname.includes(`/${userRole}/about`) || location.pathname === '/about' ? '2px solid #6a1b9a' : 'none',
-                borderRadius: 0,
-                paddingBottom: '4px',
-                '&:hover': {
-                  backgroundColor: 'rgba(106, 27, 154, 0.04)',
-                  color: '#6a1b9a'
-                }
-              }}
-              startIcon={<InfoIcon sx={{ color: '#6a1b9a' }} />}
-            >
-              About Us
-            </Button>
-          </Box>
-          <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center' }}>
-            {/* Added Become a Vendor button */}
-            {!userInfo && (
-              <Button
-                component={Link}
-                to="/vendor-register"
-                variant="contained"
-                sx={{ 
-                  bgcolor: 'white', 
-                  color: '#6a1b9a', 
-                  '&:hover': { bgcolor: '#f5f5f5' },
-                  mr: 2,
-                  fontWeight: 600,
-                  boxShadow: '0 4px 10px rgba(106, 27, 154, 0.2)'
-                }}
-              >
-                Become a Vendor
-              </Button>
-            )}
-            
-            {userInfo ? (
-              <>
-                <Tooltip title="Account settings">
-                  <IconButton 
-                    onClick={handleOpenUserMenu} 
-                    sx={{ 
-                      p: 0, 
-                      ml: 2,
-                      border: '2px solid #f0f0f0',
-                      '&:hover': { backgroundColor: 'rgba(106, 27, 154, 0.04)' }
-                    }}
-                  >
-                    <Avatar 
-                      alt={userInfo.name} 
-                      src="/static/images/avatar/2.jpg" 
-                      sx={{ width: 38, height: 38 }}
-                    />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  sx={{ 
-                    mt: '45px',
-                    '& .MuiPaper-root': {
-                      borderRadius: '12px',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                      minWidth: '200px'
-                    }
-                  }}
-                  id="menu-appbar"
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                >
-                  <MenuItem onClick={handleDashboardClick} sx={{ py: 1.5 }}>
-                    <ListItemIcon>
-                      <DashboardIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Dashboard" primaryTypographyProps={{ fontWeight: 500 }} />
-                  </MenuItem>
-                  <MenuItem onClick={handleProfileClick} sx={{ py: 1.5 }}>
-                    <ListItemIcon>
-                      <AccountCircleIcon fontSize="small" sx={{ color: '#6a1b9a' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Profile" primaryTypographyProps={{ fontWeight: 500 }} />
-                  </MenuItem>
-                  <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
-                    <ListItemIcon>
-                      <LogoutIcon fontSize="small" sx={{ color: '#ff6f00' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: 500 }} />
-                  </MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  component={Link}
-                  to="/login"
-                  variant="outlined"
-                  sx={{ 
-                    color: '#6a1b9a', 
-                    borderColor: '#6a1b9a',
-                    fontWeight: 500,
-                    '&:hover': {
-                      borderColor: '#6a1b9a',
-                      backgroundColor: 'rgba(106, 27, 154, 0.04)'
-                    }
-                  }}
-                >
-                  Login
-                </Button>
-                <Button
-                  component={Link}
-                  to="/register"
-                  variant="contained"
-                  sx={{ 
-                    bgcolor: '#6a1b9a', 
-                    color: 'white', 
-                    fontWeight: 600,
-                    boxShadow: '0 4px 10px rgba(106, 27, 154, 0.2)',
-                    '&:hover': { 
-                      bgcolor: '#5c1786',
-                      boxShadow: '0 6px 12px rgba(106, 27, 154, 0.25)'
-                    } 
-                  }}
-                >
-                  Register
-                </Button>
-              </Box>
-            )}
-          </Box>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: '100%',
-          minHeight: '100vh',
+    <Box style={{ minHeight: '100vh', backgroundColor: 'var(--background)' }}>
+      {/* Header */}      <Paper
+        variant="flat"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          padding: isMobile ? '0.5rem' : '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: '60px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}
       >
-        <Toolbar />
-        {children}
+        {/* Logo and mobile menu button */}
+        <Box style={{ display: 'flex', alignItems: 'center' }}>
+          {isMobile && (
+            <Button
+              variant="text"
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              style={{ marginRight: '1rem' }}
+            >
+              <MenuIcon />
+            </Button>
+          )}
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <img src="/logo1.png" alt="Suvvidha Logo" height="40" />
+          </Link>
+        </Box>
+
+        {/* Desktop Navigation */}
+        {!isMobile && (
+          <Box style={{ display: 'flex', gap: '1rem' }}>
+            {navLinks.map((link) => (              <Button
+                key={link.to}
+                onClick={() => navigate(link.to)}
+                variant={location.pathname === link.to ? 'primary' : 'text'}
+                startIcon={link.icon}
+                style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <span style={{ color: 'var(--text-primary)' }}>{link.label}</span>
+              </Button>
+            ))}
+          </Box>
+        )}        {/* Auth Buttons */}
+        <Box style={{ 
+          display: 'flex', 
+          gap: isMobile ? '0.5rem' : '1rem', 
+          alignItems: 'center',
+          flexWrap: isMobile ? 'nowrap' : 'wrap'
+        }}>
+          {userInfo ? (
+            <Box style={{ position: 'relative' }}>
+              <Button
+                variant="text"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                style={{ padding: '0.5rem' }}
+              >
+                <AccountCircleIcon />
+              </Button>
+              {showUserMenu && (
+                <Paper
+                  variant="flat"
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: '0.5rem',
+                    minWidth: '200px',
+                    padding: '0.5rem'
+                  }}
+                >                  <Button
+                    variant="text"
+                    fullWidth
+                    onClick={handleDashboardClick}
+                    startIcon={<DashboardIcon />}
+                    style={{ 
+                      justifyContent: 'flex-start', 
+                      marginBottom: '0.5rem',
+                      color: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Dashboard</span>
+                  </Button>
+                  <Button
+                    variant="text"
+                    fullWidth
+                    onClick={handleProfileClick}
+                    startIcon={<AccountCircleIcon />}
+                    style={{ 
+                      justifyContent: 'flex-start', 
+                      marginBottom: '0.5rem',
+                      color: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Profile</span>
+                  </Button>
+                  <Button
+                    variant="text"
+                    fullWidth
+                    onClick={handleLogout}
+                    startIcon={<LogoutIcon />}
+                    style={{ 
+                      justifyContent: 'flex-start',
+                      color: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Logout</span>
+                  </Button>
+                </Paper>
+              )}
+            </Box>          ) : (
+            <Box style={{
+              display: 'flex',
+              gap: isMobile ? '0.5rem' : '1rem',
+              alignItems: 'center'
+            }}>
+              {!isMobile && (
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate('/vendor-register')}
+                  style={{ 
+                    color: 'inherit', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.5rem',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-primary)' }}>Become a Vendor</span>
+                </Button>
+              )}
+              <Button
+                variant="text"
+                onClick={() => navigate('/login')}
+                style={{ 
+                  color: 'inherit', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem',
+                  minWidth: isMobile ? 'auto' : undefined
+                }}
+              >
+                <span style={{ color: 'var(--text-primary)' }}>{isMobile ? 'Log in' : 'Login'}</span>
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => navigate('/register')}
+                style={{ 
+                  color: 'inherit', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem',
+                  minWidth: isMobile ? 'auto' : undefined
+                }}
+              >
+                <span style={{ color: 'var(--text-primary)' }}>Register</span>
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Paper>      {/* Mobile Menu */}
+      {isMobile && (
+        <Paper
+          variant="flat"
+          style={{
+            position: 'fixed',
+            top: '60px',
+            left: 0,
+            right: 0,
+            zIndex: 99,
+            padding: '0.5rem',
+            transform: showMobileMenu ? 'translateY(0)' : 'translateY(-100%)',
+            opacity: showMobileMenu ? 1 : 0,
+            transition: 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            maxHeight: showMobileMenu ? 'calc(100vh - 60px)' : '0',
+            overflow: 'auto'
+          }}
+        >
+          {navLinks.map((link) => (            <Button
+              key={link.to}
+              variant={location.pathname === link.to ? 'primary' : 'text'}
+              fullWidth
+              startIcon={link.icon}
+              style={{ 
+                marginBottom: '0.5rem', 
+                color: 'inherit', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem'
+              }}
+              onClick={() => {
+                navigate(link.to);
+                setShowMobileMenu(false);
+              }}
+            >
+              <span style={{ color: 'var(--text-primary)' }}>{link.label}</span>
+            </Button>
+          ))}
+        </Paper>
+      )}      {/* Main Content */}      <Box style={{ 
+        paddingTop: '60px', 
+        minHeight: 'calc(100vh - 60px)',
+        width: '100%',
+        maxWidth: '100%',
+        overflowX: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <Container style={{
+          padding: isMobile ? '1rem' : '2rem',
+          width: '100%',
+          maxWidth: '100%',
+          flex: 1
+        }}>
+          {children}
+        </Container>
+
+        {/* Neumorphic Footer */}
+        <Paper
+          variant="flat"
+          style={{
+            padding: isMobile ? '2rem 1rem' : '3rem 2rem',
+            marginTop: 'auto',
+            backgroundColor: 'var(--background)',
+            width: '100%'
+          }}
+        >
+          <Container>
+            <Box style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
+              gap: isMobile ? '2rem' : '3rem'
+            }}>
+              {/* About Section */}
+              <Box>
+                <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '40px', marginBottom: '1rem' }} />
+                <Box style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>
+                  Your one-stop solution for all your service needs. We provide high-quality services at affordable prices.
+                </Box>
+              </Box>
+
+              {/* Quick Links */}
+              <Box>
+                <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Quick Links</h3>
+                <Box style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '0.5rem' 
+                }}>
+                  <Button
+                    variant="text"
+                    onClick={() => navigate('/')}
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Home</span>
+                  </Button>
+                  <Button
+                    variant="text"
+                    onClick={() => navigate('/services')}
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Services</span>
+                  </Button>
+                  <Button
+                    variant="text"
+                    onClick={() => navigate('/about')}
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>About Us</span>
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Services */}
+              <Box>
+                <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Our Services</h3>
+                <Box style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  gap: '0.5rem'
+                }}>
+                  <Button
+                    variant="text"
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Home Cleaning</span>
+                  </Button>
+                  <Button
+                    variant="text"
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Electrical Services</span>
+                  </Button>
+                  <Button
+                    variant="text"
+                    style={{ justifyContent: 'flex-start' }}
+                  >
+                    <span style={{ color: 'var(--text-primary)' }}>Plumbing</span>
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Contact Info */}
+              <Box>
+                <h3 style={{ color: 'var(--text-primary)', marginBottom: '1rem' }}>Contact Us</h3>
+                <Box style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                  color: 'var(--text-primary)'
+                }}>
+                  <div>Email: info@suvvidha.com</div>
+                  <div>Phone: +91 xxxxxxxxxx</div>
+                  <div>Location: Patna, Bihar, India</div>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Copyright Section */}
+            <Paper
+              variant="flat"
+              style={{
+                marginTop: isMobile ? '2rem' : '3rem',
+                padding: '1rem',
+                textAlign: 'center',
+                color: 'var(--text-primary)'
+              }}
+            >
+              © {new Date().getFullYear()} Suvvidha & Shiv Bijay Deep. All rights reserved.
+            </Paper>
+          </Container>
+        </Paper>
       </Box>
     </Box>
   );

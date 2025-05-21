@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { colors, typography } from './theme';
+import theme from './theme';
 
 /**
  * Neumorphic Typography Component
@@ -15,74 +15,75 @@ const Typography = ({
   className,
   ...props
 }) => {
-  // Get variant styles
+  // Get variant styles from theme
   const getVariantStyles = () => {
     switch (variant) {
       case 'h1':
-        return typography.h1;
+        return theme.typography.h1;
       case 'h2':
-        return typography.h2;
+        return theme.typography.h2;
       case 'h3':
-        return typography.h3;
+        return theme.typography.h3;
       case 'h4':
-        return typography.h4;
+        return theme.typography.h4;
       case 'h5':
-        return typography.h5;
+        return theme.typography.h5;
       case 'h6':
-        return typography.h6;
+        return theme.typography.h6;
       case 'subtitle1':
-        return typography.subtitle1;
+        return theme.typography.subtitle1;
       case 'subtitle2':
-        return typography.subtitle2;
-      case 'body2':
-        return typography.body2;
-      case 'caption':
-        return typography.caption;
-      case 'button':
-        return typography.button;
-      case 'overline':
-        return typography.overline;
+        return theme.typography.subtitle2;
       case 'body1':
+        return theme.typography.body1;
+      case 'body2':
+        return theme.typography.body2;
+      case 'button':
+        return theme.typography.button;
+      case 'caption':
+        return theme.typography.caption;
+      case 'overline':
+        return theme.typography.overline;
       default:
-        return typography.body1;
+        return theme.typography.body1;
     }
   };
 
-  // Get color based on prop
+  // Get color from theme
   const getColor = () => {
     switch (color) {
       case 'primary':
-        return colors.text.primary;
+        return theme.colors.text.primary;
       case 'secondary':
-        return colors.text.secondary;
+        return theme.colors.text.secondary;
       case 'disabled':
-        return colors.text.disabled;
+        return theme.colors.text.disabled;
       case 'error':
-        return colors.error.main;
-      case 'success':
-        return colors.success.main;
+        return theme.colors.error.main;
       case 'warning':
-        return colors.warning.main;
+        return theme.colors.warning.main;
       case 'info':
-        return colors.info.main;
+        return theme.colors.info.main;
+      case 'success':
+        return theme.colors.success.main;
       default:
-        return color; // Allow custom color strings
+        return color;
     }
   };
 
-  // Base typography styles
+  // Base styles
   const baseStyles = {
     margin: 0,
-    fontFamily: typography.fontFamily,
+    fontFamily: theme.typography.fontFamily,
     textAlign: align,
     color: getColor(),
     ...getVariantStyles(),
   };
 
-  // Determine which HTML element to use based on variant
+  // Determine which HTML element to use
   const Component = (() => {
-    if (variant.startsWith('h')) {
-      return variant; // h1, h2, etc.
+    if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(variant)) {
+      return variant;
     }
     return 'p';
   })();

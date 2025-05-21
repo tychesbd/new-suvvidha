@@ -5,32 +5,27 @@ import { toast } from 'react-toastify';
 import { login, reset } from '../features/auth/authSlice';
 import indianFlag from './indianflag.jpg';
 
-// Material UI imports
+// Neumorphic UI imports
 import {
-  Button,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  Paper,
-  Box,
-  Grid,
-  Typography,
   Container,
-  CircularProgress,
+  Grid,
   Card,
-  CardContent,
-  Fade,
-} from '@mui/material';
-import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
-import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
-import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
-import PlumbingIcon from '@mui/icons-material/Plumbing';
+  TextField,
+  Button,
+  Checkbox,
+  Typography,
+  Box,
+  CircularProgress,
+  // Assuming a simple neumorphic card can be used for service display
+} from '../components/neumorphic'; 
+import '../neumorphic.css'; // Ensure neumorphic styles are loaded
 
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const [rememberMe, setRememberMe] = useState(false);
 
   const { email, password } = formData;
 
@@ -38,7 +33,6 @@ const Login = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   
-  // Get redirect path from URL query parameters
   const searchParams = new URLSearchParams(location.search);
   const redirect = searchParams.get('redirect') || '/';
 
@@ -52,12 +46,11 @@ const Login = () => {
     }
 
     if (isSuccess || userInfo) {
-      // Redirect to the specified path or home page after successful login
       navigate(redirect);
     }
 
     dispatch(reset());
-  }, [userInfo, isError, isSuccess, message, navigate, dispatch]);
+  }, [userInfo, isError, isSuccess, message, navigate, dispatch, redirect]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -66,172 +59,187 @@ const Login = () => {
     }));
   };
 
+  const handleRememberMeChange = (e) => {
+    setRememberMe(e.target.checked);
+  };
+
   const onSubmit = (e) => {
     e.preventDefault();
-
     const userData = {
       email,
       password,
     };
-
+    // Include rememberMe logic if needed for backend
     dispatch(login(userData));
   };
 
-  // Service icons with animation
   const services = [
-    { icon: <HomeRepairServiceIcon sx={{ fontSize: 40 }} />, name: "Home Repair" },
-    { icon: <CleaningServicesIcon sx={{ fontSize: 40 }} />, name: "Cleaning" },
-    { icon: <ElectricalServicesIcon sx={{ fontSize: 40 }} />, name: "Electrical" },
-    { icon: <PlumbingIcon sx={{ fontSize: 40 }} />, name: "Plumbing" },
+    { name: "Home Repair" },
+    { name: "Cleaning" },
+    { name: "Electrical" },
+    { name: "Plumbing" },
   ];
 
   return (
-    <Container component="main" maxWidth="lg">
-      <Grid container spacing={2} sx={{ height: '100vh' }}>
-        <Grid
-          item
-          xs={false}
-          sm={4}
-          md={7}
-          sx={{
-            backgroundImage: `url(${indianFlag})`,
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 4,
-          }}
-        >
+    <Container style={{ paddingTop: '2rem', paddingBottom: '2rem', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <Grid container spacing={2} style={{ flexGrow: 1, alignItems: 'stretch' }}>
+        {/* Left Panel: Promotional Content */}
+        <Grid item xs={12} md={7} style={{ display: { xs: 'none', md: 'flex' }, position: 'relative', borderRadius: '15px', overflow: 'hidden' }}>
           <Box
-            sx={{
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundImage: `url(${indianFlag})`,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              zIndex: 1,
+            }}
+          />
+          <Box
+            style={{
               position: 'absolute',
               top: 0,
               left: 0,
               right: 0,
               bottom: 0,
               backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              zIndex: 1,
+              zIndex: 2,
             }}
           />
           <Box
-            sx={{
+            style={{
               position: 'relative',
-              zIndex: 2,
+              zIndex: 3,
               textAlign: 'center',
               color: 'white',
+              padding: '32px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
               width: '100%',
             }}
           >
             <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '80px', marginBottom: '20px' }} />
-            <Typography variant="h3" component="h1" gutterBottom>
+            <Typography variant="h3" component="h1" style={{ marginBottom: '16px' }}>
               Welcome to Suvvidha
             </Typography>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" style={{ marginBottom: '32px' }}>
               Your One-Stop Solution for All Home Services
             </Typography>
-            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 3 }}>
+            <Grid container spacing={2} justifyContent="center">
               {services.map((service, index) => (
-                <Fade in={true} style={{ transitionDelay: `${index * 300}ms` }} key={index}>
-                  <Card sx={{ 
-                    width: 120, 
-                    height: 120, 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    justifyContent: 'center', 
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    transition: 'transform 0.3s',
-                    '&:hover': { transform: 'scale(1.05)' }
-                  }}>
-                    <CardContent>
-                      <Box sx={{ color: 'primary.main' }}>{service.icon}</Box>
-                      <Typography variant="body2" sx={{ mt: 1 }}>{service.name}</Typography>
-                    </CardContent>
+                <Grid item key={index} xs={6} sm={4} md={3}>
+                  <Card 
+                    variant="convex" 
+                    style={{ 
+                      padding: '16px', 
+                      textAlign: 'center',
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)', // Light neumorphic card on dark bg
+                      backdropFilter: 'blur(5px)',
+                      color: 'white',
+                      height: '100px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <Typography variant="body1">{service.name}</Typography>
                   </Card>
-                </Fade>
+                </Grid>
               ))}
-            </Box>
+            </Grid>
           </Box>
         </Grid>
-        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-          <Box
-            sx={{
-              my: 8,
-              mx: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+
+        {/* Right Panel: Login Form */}
+        <Grid item xs={12} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Card 
+            variant="convex" // or "concave" or "flat" based on your neumorphic Card's API
+            style={{ 
+              padding: '32px', 
+              width: '100%', 
+              maxWidth: '450px', 
+              margin: 'auto' 
             }}
           >
-            <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px' }} />
-            <Typography component="h1" variant="h5" gutterBottom>
-              Sign in to your account
-            </Typography>
-            <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3 }}>
-              Access all your home service needs in one place
-            </Typography>
-            <Box component="form" noValidate onSubmit={onSubmit} sx={{ mt: 1 }}>
+            <Box style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px', display: { xs: 'block', md: 'none' } }} />
+              <Typography variant="h4" component="h1" style={{ marginBottom: '8px' }}>
+                Sign In
+              </Typography>
+              <Typography variant="body1" color="textSecondary">
+                Access your Suvvidha account
+              </Typography>
+            </Box>
+            
+            <form onSubmit={onSubmit}>
               <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
                 label="Email Address"
                 name="email"
-                autoComplete="email"
-                autoFocus
+                type="email"
+                fullWidth
                 value={email}
                 onChange={onChange}
+                required
+                style={{ marginBottom: '20px' }}
+                disabled={isLoading}
               />
               <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
                 label="Password"
+                name="password"
                 type="password"
-                id="password"
-                autoComplete="current-password"
+                fullWidth
                 value={password}
                 onChange={onChange}
-              />
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
+                required
+                style={{ marginBottom: '20px' }}
                 disabled={isLoading}
+              />
+              <Box style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+                <Checkbox
+                  checked={rememberMe}
+                  onChange={handleRememberMeChange}
+                  name="rememberMe"
+                  id="rememberMe"
+                  disabled={isLoading}
+                />
+                <label htmlFor="rememberMe" style={{ marginLeft: '8px', cursor: 'pointer' }}>
+                  <Typography variant="body2">Remember me</Typography>
+                </label>
+              </Box>
+              
+              <Button 
+                type="submit" 
+                variant="primary" // Assuming 'primary' is a valid neumorphic button style
+                fullWidth 
+                disabled={isLoading}
+                style={{ marginBottom: '24px', minHeight: '44px' }}
               >
-                {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
+                {isLoading ? <CircularProgress size="small" /> : 'Sign In'}
               </Button>
-              <Grid container justifyContent="space-between" alignItems="center">
-                <Grid item>
-                  <Link to="/register" style={{ textDecoration: 'none' }}>
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
-                <Grid item>
-                  <Button
-                    component={Link}
-                    to="/"
-                    variant="outlined"
-                    color="primary"
-                    sx={{ mt: 1 }}
-                  >
-                    Return to Home
-                  </Button>
-                </Grid>
+            </form>
+            
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item>
+                <Link to="/register" style={{ textDecoration: 'none' }}>
+                  <Typography variant="link">{"Don't have an account? Sign Up"}</Typography>
+                </Link>
               </Grid>
-            </Box>
-          </Box>
+              <Grid item>
+                 <Link to="/" style={{ textDecoration: 'none' }}>
+                    <Button variant="secondary" size="small"> {/* Assuming 'secondary' is a style */}
+                        Return to Home
+                    </Button>
+                 </Link>
+              </Grid>
+            </Grid>
+          </Card>
         </Grid>
       </Grid>
     </Container>

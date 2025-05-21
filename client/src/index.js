@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import App from './App';
 import store from './store';
 import './index.css';
+import './neumorphic.css'; // Import neumorphic styles
 import setupAxios from './utils/axiosConfig';
 
 // Configure axios for the current environment
@@ -18,7 +19,17 @@ root.render(
     <Provider store={store}>
       <BrowserRouter>
         <App />
-        <ToastContainer position="top-right" autoClose={3000} />
+        <ToastContainer 
+          position="top-right" 
+          autoClose={3000}
+          theme="light"
+          toastStyle={{
+            backgroundColor: 'var(--surface)',
+            color: 'var(--text-primary)',
+            borderRadius: 'var(--border-radius)',
+            boxShadow: 'var(--shadow-light), var(--shadow-dark)'
+          }}
+        />
       </BrowserRouter>
     </Provider>
   </React.StrictMode>

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { colors, spacing, createNeumorphicStyle } from './theme';
+import theme from './theme';
 
 /**
  * Neumorphic Box Component
@@ -8,67 +8,65 @@ import { colors, spacing, createNeumorphicStyle } from './theme';
  */
 const Box = ({
   children,
-  display = 'block',
+  variant = 'flat',
+  display,
   flexDirection,
-  flexWrap,
-  justifyContent,
   alignItems,
-  alignContent,
-  flexGrow,
-  flexShrink,
-  flexBasis,
-  padding,
-  margin,
+  justifyContent,
+  gap,
+  p,
+  px,
+  py,
+  m,
+  mx,
+  my,
   width,
   height,
-  maxWidth,
-  maxHeight,
   minWidth,
   minHeight,
-  bgcolor = 'transparent',
+  bgcolor = theme.colors.background,
   color,
   borderRadius,
-  neumorphic = false,
-  variant = 'flat',
+  neumorphic = true,
   style,
   className,
   ...props
 }) => {
-  // Base box styles
+  // Base styles
   const baseStyles = {
     display,
-    ...(flexDirection && { flexDirection }),
-    ...(flexWrap && { flexWrap }),
-    ...(justifyContent && { justifyContent }),
-    ...(alignItems && { alignItems }),
-    ...(alignContent && { alignContent }),
-    ...(flexGrow !== undefined && { flexGrow }),
-    ...(flexShrink !== undefined && { flexShrink }),
-    ...(flexBasis !== undefined && { flexBasis }),
-    ...(padding !== undefined && { padding }),
-    ...(margin !== undefined && { margin }),
-    ...(width !== undefined && { width }),
-    ...(height !== undefined && { height }),
-    ...(maxWidth !== undefined && { maxWidth }),
-    ...(maxHeight !== undefined && { maxHeight }),
-    ...(minWidth !== undefined && { minWidth }),
-    ...(minHeight !== undefined && { minHeight }),
-    ...(bgcolor && { backgroundColor: bgcolor }),
-    ...(color && { color }),
-    ...(borderRadius && { borderRadius }),
+    flexDirection,
+    alignItems,
+    justifyContent,
+    gap,
+    padding: p,
+    paddingLeft: px,
+    paddingRight: px,
+    paddingTop: py,
+    paddingBottom: py,
+    margin: m,
+    marginLeft: mx,
+    marginRight: mx,
+    marginTop: my,
+    marginBottom: my,
+    width,
+    height,
+    minWidth,
+    minHeight,
+    backgroundColor: bgcolor,
+    color: color || theme.colors.text.primary,
+    borderRadius: borderRadius || theme.borderRadius.medium,
   };
 
-  // Apply neumorphic styling if requested
-  const neumorphicStyles = neumorphic
-    ? createNeumorphicStyle(variant, bgcolor !== 'transparent' ? bgcolor : colors.background)
-    : {};
+  // Apply neumorphic effect if enabled
+  const combinedStyles = {
+    ...baseStyles,
+    ...(neumorphic ? theme.createNeumorphicStyle(variant, bgcolor) : {}),
+    ...style,
+  };
 
   return (
-    <div
-      style={{ ...baseStyles, ...neumorphicStyles, ...style }}
-      className={className}
-      {...props}
-    >
+    <div style={combinedStyles} className={className} {...props}>
       {children}
     </div>
   );
@@ -78,19 +76,17 @@ Box.propTypes = {
   children: PropTypes.node,
   display: PropTypes.string,
   flexDirection: PropTypes.string,
-  flexWrap: PropTypes.string,
-  justifyContent: PropTypes.string,
   alignItems: PropTypes.string,
-  alignContent: PropTypes.string,
-  flexGrow: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  flexShrink: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  flexBasis: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  padding: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  margin: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  justifyContent: PropTypes.string,
+  gap: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  p: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  px: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  py: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  m: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  mx: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  my: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  maxWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  maxHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   minWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   minHeight: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   bgcolor: PropTypes.string,

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Typography,
   Box,
@@ -39,7 +39,6 @@ import {
 import axios from 'axios';
 
 const Users = () => {
-  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
   
   // State for users data
@@ -62,9 +61,8 @@ const Users = () => {
   
   // State for action feedback
   const [actionFeedback, setActionFeedback] = useState({ message: '', severity: 'success', show: false });
-
   // Fetch users data
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const config = {
@@ -84,11 +82,10 @@ const Users = () => {
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [userInfo]);
   useEffect(() => {
     fetchUsers();
-  }, [userInfo]);
+  }, [userInfo, fetchUsers]);
 
   // Handle pagination changes
   const handleChangePage = (event, newPage) => {
