@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
-import { colors, spacing, borderRadius, createNeumorphicStyle } from './theme';
+import theme from './theme';
+
+const { colors, spacing, borderRadius, createNeumorphicStyle } = theme;
 
 /**
  * Neumorphic Sidebar Component

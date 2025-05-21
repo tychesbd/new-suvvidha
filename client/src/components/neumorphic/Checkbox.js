@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { colors, borderRadius, createNeumorphicStyle } from './theme';
+import theme from './theme';
+
+const { colors, borderRadius, createNeumorphicStyle } = theme;
+
 
 /**
  * Neumorphic Checkbox Component

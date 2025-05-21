@@ -3,7 +3,10 @@ import PropTypes from 'prop-types';
 import Card from './Card';
 import Typography from './Typography';
 import Box from './Box';
-import { colors, spacing } from './theme';
+import theme from './theme';
+
+const { colors, spacing } = theme;
+
 
 /**
  * Neumorphic Dashboard Tile Component

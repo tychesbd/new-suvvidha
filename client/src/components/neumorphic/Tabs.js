@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { colors, borderRadius, spacing, createNeumorphicStyle } from './theme';
+import theme from './theme';
 
+const {  colors, borderRadius, spacing, createNeumorphicStyle } = theme;
 /**
  * Neumorphic Tabs Component
  * A soft, extruded tab navigation with subtle shadows for content organization

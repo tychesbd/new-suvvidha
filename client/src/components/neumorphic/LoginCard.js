@@ -5,7 +5,10 @@ import TextField from './TextField';
 import Button from './Button';
 import Typography from './Typography';
 import Box from './Box';
-import { colors } from './theme';
+import theme from './theme';
+
+const { colors } = theme;
+
 
 /**
  * Neumorphic Login Card Component

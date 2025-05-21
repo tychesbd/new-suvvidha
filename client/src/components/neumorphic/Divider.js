@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { colors, spacing } from './theme';
+import theme from './theme';
+
+const { colors, spacing } = theme;
+
 
 /**
  * Neumorphic Divider Component

@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createNeumorphicStyle, colors } from './theme';
+import theme from './theme';
+
+const { createNeumorphicStyle, colors } = theme;
+
 
 /**
  * Neumorphic Badge Component

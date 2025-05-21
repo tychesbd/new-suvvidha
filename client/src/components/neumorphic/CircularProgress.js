@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { colors, createNeumorphicStyle } from './theme';
+import theme from './theme';
+
+const { colors, createNeumorphicStyle } = theme;
+
 
 /**
  * Neumorphic CircularProgress Component

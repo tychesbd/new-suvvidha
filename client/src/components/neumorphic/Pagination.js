@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createNeumorphicStyle, colors, spacing } from './theme';
+import theme from './theme';
+
+const {  createNeumorphicStyle, colors, spacing } = theme;
+
 
 /**
  * Neumorphic Pagination Component

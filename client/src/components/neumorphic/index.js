@@ -35,7 +35,10 @@ import Table, { TableHead, TableBody, TableRow, TableCell, TableContainer } from
 import Tabs, { Tab } from './Tabs';
 import TextField from './TextField';
 import Typography from './Typography';
-import theme, { colors, shadows, borderRadius, spacing, createNeumorphicStyle } from './theme';
+import theme from './theme';
+
+const {  colors, shadows, borderRadius, spacing, createNeumorphicStyle } = theme;
+
 
 // Export all components
 export {

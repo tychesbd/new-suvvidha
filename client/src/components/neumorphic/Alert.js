@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { colors, spacing, borderRadius, createNeumorphicStyle } from './theme';
+import theme from './theme';
+
+const { colors, spacing, borderRadius, createNeumorphicStyle } = theme;
 
 /**
  * Neumorphic Alert Component
- * A soft, extruded alert with subtle shadows for displaying messages
- * Enhanced with tactile feedback and improved neumorphic styling
  */
 const Alert = ({
   severity = 'info',
@@ -18,8 +18,7 @@ const Alert = ({
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  
-  // Get color based on severity
+
   const getColor = () => {
     switch (severity) {
       case 'error':
@@ -35,15 +34,13 @@ const Alert = ({
   };
 
   const color = getColor();
-  
-  // Determine neumorphic style based on variant
+
   const getNeumorphicType = () => {
     if (variant === 'filled') return 'flat';
     if (variant === 'outlined') return 'pressed';
     return isHovered ? 'convex' : 'flat';
   };
-  
-  // Base alert styles
+
   const baseStyles = {
     display: 'flex',
     alignItems: 'center',
@@ -58,7 +55,6 @@ const Alert = ({
     transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
   };
 
-  // Icon container styles with neumorphic effect
   const iconContainerStyles = {
     marginRight: spacing.sm,
     display: 'flex',
@@ -70,7 +66,6 @@ const Alert = ({
     ...createNeumorphicStyle(variant === 'filled' ? 'flat' : 'pressed', variant === 'filled' ? color.light : colors.background),
   };
 
-  // Icon styles
   const iconStyles = {
     display: 'flex',
     alignItems: 'center',
@@ -78,13 +73,11 @@ const Alert = ({
     fontSize: '0.875rem',
   };
 
-  // Content styles
   const contentStyles = {
     flex: 1,
     padding: `${spacing.xs} 0`,
   };
 
-  // Close button styles with neumorphic effect
   const closeButtonStyles = {
     cursor: 'pointer',
     fontSize: '1rem',
@@ -100,11 +93,9 @@ const Alert = ({
     ...createNeumorphicStyle(variant === 'filled' ? 'pressed' : 'pressed', variant === 'filled' ? color.dark : colors.background),
   };
 
-  // Get icon based on severity
   const getIcon = () => {
     switch (severity) {
       case 'error':
-        return '⚠️';
       case 'warning':
         return '⚠️';
       case 'success':
@@ -116,9 +107,9 @@ const Alert = ({
   };
 
   return (
-    <div 
-      style={{ ...baseStyles, ...style }} 
-      className={className} 
+    <div
+      style={{ ...baseStyles, ...style }}
+      className={className}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       {...props}

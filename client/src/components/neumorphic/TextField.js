@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { colors, borderRadius, spacing, createNeumorphicStyle } from './theme';
+import theme from './theme';
+
+const {  colors, borderRadius, spacing, createNeumorphicStyle } = theme;
 
 /**
  * Neumorphic TextField Component

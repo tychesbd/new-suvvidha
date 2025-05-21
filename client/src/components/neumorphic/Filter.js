@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { colors, spacing, borderRadius, createNeumorphicStyle } from './theme';
+import theme from './theme';
 
 // Import icon from Material UI
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CheckIcon from '@mui/icons-material/Check';
 
+const { colors, spacing, borderRadius, createNeumorphicStyle } = theme;
 /**
  * Neumorphic Filter Component
  * A soft, extruded filter dropdown with subtle shadows and monochromatic styling

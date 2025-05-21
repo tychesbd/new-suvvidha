@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { colors, spacing, borderRadius, createNeumorphicStyle } from './theme';
 
 // Import Material UI icons
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import theme from './theme';
+
+const { colors, spacing, borderRadius, createNeumorphicStyle } = theme;
 
 /**
  * Neumorphic Navbar Component

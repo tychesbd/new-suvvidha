@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { colors, spacing, borderRadius, createNeumorphicStyle } from './theme';
+import theme from './theme';
 
 // Import icon from Material UI
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 
+const {  colors, spacing, borderRadius, createNeumorphicStyle } = theme;
 /**
  * Neumorphic SearchBar Component
  * A soft, extruded search input with subtle shadows and monochromatic styling
