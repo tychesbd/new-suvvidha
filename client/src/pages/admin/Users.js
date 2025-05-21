@@ -30,6 +30,7 @@ import {
   Block as BlockIcon,
   CheckCircle as CheckCircleIcon,
   Download as DownloadIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -53,6 +54,10 @@ const Users = () => {
   // State for user detail dialog
   const [selectedUser, setSelectedUser] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  
+  // State for delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   
   // State for action feedback
   const [actionFeedback, setActionFeedback] = useState({ message: '', severity: 'success', show: false });
@@ -120,6 +125,59 @@ const Users = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  // Handle delete user
+  const handleDeleteUser = (user) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+
+      await axios.delete(`/api/users/${userToDelete._id}`, config);
+      
+      // Update users list by removing the deleted user
+      setUsers(users.filter(user => user._id !== userToDelete._id));
+      
+      // Show feedback message
+      setActionFeedback({
+        message: 'User deleted successfully',
+        severity: 'success',
+        show: true
+      });
+
+      // Close the dialog
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+
+      // Hide feedback after 3 seconds
+      setTimeout(() => {
+        setActionFeedback({ ...actionFeedback, show: false });
+      }, 3000);
+
+    } catch (error) {
+      setActionFeedback({
+        message: error.response && error.response.data.message
+          ? error.response.data.message
+          : 'Failed to delete user',
+        severity: 'error',
+        show: true
+      });
+
+      // Hide feedback after 3 seconds
+      setTimeout(() => {
+        setActionFeedback({ ...actionFeedback, show: false });
+      }, 3000);
+    } finally {
+      setDeleteDialogOpen(false);
+    }
   };
 
   // Handle block/unblock user
@@ -335,12 +393,21 @@ const Users = () => {
                             onClick={() => handleToggleUserStatus(user._id, user.isActive)}
                             title={user.isActive ? 'Block User' : 'Unblock User'}
                             disabled={user.role === 'admin' && userInfo._id === user._id}
+                            style={{ marginRight: '0.5rem' }}
                           >
                             {user.isActive ? (
                               <BlockIcon style={{ fontSize: '1.25rem' }} />
                             ) : (
                               <CheckCircleIcon style={{ fontSize: '1.25rem' }} />
                             )}
+                          </Button>
+                          <Button
+                            variant="error"
+                            onClick={() => handleDeleteUser(user)}
+                            title="Delete User"
+                            disabled={user.role === 'admin' && userInfo._id === user._id}
+                          >
+                            <DeleteIcon style={{ fontSize: '1.25rem' }} />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -598,6 +665,37 @@ const Users = () => {
                 </Button>
                 <Button variant="text" onClick={handleCloseDialog}>
                   Close
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          title="Confirm Delete"
+          maxWidth="sm"
+        >
+          {userToDelete && (
+            <Box>
+              <Typography variant="body1" style={{ marginBottom: '1rem' }}>
+                Are you sure you want to delete the user <strong>{userToDelete.name}</strong>?
+              </Typography>
+              <Typography variant="body2" color={colors.text.secondary} style={{ marginBottom: '1rem' }}>
+                This action cannot be undone. All data associated with this user will be permanently removed from the system.
+              </Typography>
+              
+              <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+                <Button
+                  variant="error"
+                  onClick={confirmDeleteUser}
+                >
+                  Delete User
+                </Button>
+                <Button variant="text" onClick={() => setDeleteDialogOpen(false)}>
+                  Cancel
                 </Button>
               </Box>
             </Box>

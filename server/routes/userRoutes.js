@@ -9,6 +9,7 @@ const {
   getUsers,
   getVendors,
   toggleUserStatus,
+  deleteUser,
   createDefaultUsers,
 } = require('../controllers/userController');
 const { registerVendor } = require('../controllers/vendorController');
@@ -61,5 +62,6 @@ router.put('/change-password', protect, async (req, res) => {
 router.get('/', protect, admin, getUsers);
 router.get('/vendors', protect, getVendors); // Allow all authenticated users to access vendors
 router.put('/:id/toggle-status', protect, admin, toggleUserStatus);
+router.delete('/:id', protect, admin, deleteUser);
 
 module.exports = router;

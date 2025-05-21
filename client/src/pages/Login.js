@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { login, reset } from '../features/auth/authSlice';
-import indianFlag from './indianflag.jpg';
 
 // Neumorphic UI imports
 import {
@@ -73,10 +72,10 @@ const Login = () => {
     dispatch(login(userData));
   };
 
-  const services = [
-    { name: "Home Repair" },
+  const categories = [
+    { name: "Home Maintanance" },
     { name: "Cleaning" },
-    { name: "Electrical" },
+    { name: "Appliances Repair" },
     { name: "Plumbing" },
   ];
 
@@ -85,31 +84,6 @@ const Login = () => {
       <Grid container spacing={2} style={{ flexGrow: 1, alignItems: 'stretch' }}>
         {/* Left Panel: Promotional Content */}
         <Grid item xs={12} md={7} style={{ display: { xs: 'none', md: 'flex' }, position: 'relative', borderRadius: '15px', overflow: 'hidden' }}>
-          <Box
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: `url(${indianFlag})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              zIndex: 1,
-            }}
-          />
-          <Box
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              zIndex: 2,
-            }}
-          />
           <Box
             style={{
               position: 'relative',
@@ -129,10 +103,10 @@ const Login = () => {
               Welcome to Suvvidha
             </Typography>
             <Typography variant="h6" style={{ marginBottom: '32px' }}>
-              Your One-Stop Solution for All Home Services
+              Your One-Stop Solution for All Services
             </Typography>
             <Grid container spacing={2} justifyContent="center">
-              {services.map((service, index) => (
+              {categories.map((categories, index) => (
                 <Grid item key={index} xs={6} sm={4} md={3}>
                   <Card 
                     variant="convex" 
@@ -149,7 +123,7 @@ const Login = () => {
                       alignItems: 'center'
                     }}
                   >
-                    <Typography variant="body1">{service.name}</Typography>
+                    <Typography variant="body1">{categories.name}</Typography>
                   </Card>
                 </Grid>
               ))}
@@ -170,12 +144,6 @@ const Login = () => {
           >
             <Box style={{ textAlign: 'center', marginBottom: '24px' }}>
               <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px', display: { xs: 'block', md: 'none' } }} />
-              <Typography variant="h4" component="h1" style={{ marginBottom: '8px' }}>
-                Sign In
-              </Typography>
-              <Typography variant="body1" color="textSecondary">
-                Access your Suvvidha account
-              </Typography>
             </Box>
             
             <form onSubmit={onSubmit}>
@@ -227,9 +195,19 @@ const Login = () => {
             
             <Grid container justifyContent="space-between" alignItems="center">
               <Grid item>
-                <Link to="/register" style={{ textDecoration: 'none' }}>
-                  <Typography variant="link">{"Don't have an account? Sign Up"}</Typography>
-                </Link>
+              <Button
+                variant="primary"
+                onClick={() => navigate('/register')}
+                style={{ 
+                  color: 'inherit', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem',
+                  minWidth: 'auto'
+                }}
+              >
+                <span style={{ color: 'var(--text-primary)' }}>Register</span>
+              </Button>
               </Grid>
               <Grid item>
                  <Link to="/" style={{ textDecoration: 'none' }}>

@@ -92,31 +92,6 @@ const Register = () => {
         <Grid item xs={12} md={7} style={{ display: { xs: 'none', md: 'flex' }, position: 'relative', borderRadius: '15px', overflow: 'hidden' }}>
           <Box
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundImage: `url(${indianFlag})`,
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              zIndex: 1,
-            }}
-          />
-          <Box
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              zIndex: 2,
-            }}
-          />
-          <Box
-            style={{
               position: 'relative',
               zIndex: 3,
               textAlign: 'center',
@@ -134,7 +109,7 @@ const Register = () => {
               Join Suvvidha Today
             </Typography>
             <Typography variant="h6" style={{ marginBottom: '32px' }}>
-              Register for Quality Home Services at Your Fingertips
+              Register for Quality Services at Your Fingertips
             </Typography>
             <Grid container spacing={2} justifyContent="center">
               {services.map((service, index) => (
@@ -175,9 +150,6 @@ const Register = () => {
           >
             <Box style={{ textAlign: 'center', marginBottom: '24px' }}>
               <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px', display: { xs: 'block', md: 'none' } }} />
-              <Typography variant="h4" component="h1" style={{ marginBottom: '8px' }}>
-                Create Account
-              </Typography>
               <Typography variant="body1" color="textSecondary">
                 Get started with Suvvidha
               </Typography>
@@ -228,17 +200,6 @@ const Register = () => {
                 style={{ marginBottom: '20px' }}
                 disabled={isLoading}
               />
-              <Select
-                label="Role"
-                name="role"
-                value={role}
-                onChange={onChange}
-                options={roleOptions}
-                fullWidth
-                required
-                style={{ marginBottom: '24px' }}
-                disabled={isLoading}
-              />
               
               <Button 
                 type="submit" 
@@ -253,9 +214,19 @@ const Register = () => {
             
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link to="/login" style={{ textDecoration: 'none' }}>
-                  <Typography variant="link">Already have an account? Sign In</Typography>
-                </Link>
+              <Button
+                variant="secondary"
+                onClick={() => navigate('/login')}
+                style={{ 
+                  color: 'inherit', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem',
+                  minWidth: 'auto'
+                }}
+              >
+                <span style={{ color: 'var(--text-primary)' }}>Login</span>
+              </Button>
               </Grid>
             </Grid>
           </Card>
