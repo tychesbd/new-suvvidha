@@ -1,140 +1,399 @@
 import React from 'react';
-import { Typography, Container, Box, Grid, Avatar, Card, CardContent, Divider } from '@mui/material';
+import {
+  Typography,
+  Container,
+  Box,
+  Grid,
+  Card,
+  Divider,
+  theme,
+  colors
+} from '../../components/neumorphic';
+import { LinkedIn, Twitter, Email } from '@mui/icons-material';
 
-const team = [
+const leadership = [
   {
     name: 'Mohit Kumar Singh',
-    position: 'CEO & Founder',
-    bio: 'With over 5 years of experience in the service industry, John founded Suvvidha with a vision to transform how services are delivered.',
-    avatar: 'https://source.unsplash.com/random/300x300/?man,portrait,1',
+    position: 'CEO & Co-Founder',
+    bio: 'With over 5 years of experience in the service industry, Mohit founded Suvvidha with a vision to transform how services are delivered.',
+    avatar: '/images/team/mohit.jpg',
+    socialLinks: {
+      linkedin: 'https://linkedin.com/in/mohit-kumar-singh',
+      twitter: 'https://twitter.com/mohitksingh',
+      email: 'mohit@suvvidha.com'
+    }
   },
   {
     name: 'Shiv Bijay Deep',
-    position: 'Head of Information Technology',
-    bio: 'Shiv Bijay Deep oversees all the information technology, ensuring that every customer receives the highest quality of services and experience.',
-    avatar: 'https://unsplash.com/photos/CN4OM64B12U',
-  },
+    position: 'CTO & Co-Founder',
+    bio: 'Leading the technological innovation at Suvvidha, Shiv brings extensive experience in building scalable platforms that transform user experiences.',
+    avatar: '/images/team/shiv.jpg',
+    socialLinks: {
+      linkedin: 'www.linkedin.com/in/shivbijaydeep',
+      twitter: 'https://twitter.com/shivbijaydeep2',
+      email: 'shiv@suvvidha.com'
+    }
+  }
 ];
 
 const AboutUs = () => {
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center">
-          About Suvvidha
-        </Typography>
-        <Typography variant="h6" align="center" color="text.secondary" paragraph>
-          Your Trusted Partner for Quality Services
-        </Typography>
+    <Container>
+      {/* Hero Section */}
+      <Box style={{ padding: '2rem' }}>
+        <Card
+          variant="flat"
+          style={{
+            padding: '3rem',
+            textAlign: 'center',
+            backgroundColor: colors.background
+          }}
+        >
+          <Typography 
+            variant="h2" 
+            style={{ 
+              color: colors.text.primary,
+              marginBottom: '1rem',
+              fontWeight: 600
+            }}
+          >
+            About Suvvidha
+          </Typography>
+          <Typography 
+            variant="h5" 
+            style={{ 
+              color: colors.text.secondary,
+              marginBottom: '2rem'
+            }}
+          >
+            Your Trusted Partner for Quality Services
+          </Typography>
+        </Card>
       </Box>
 
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Our Story
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Founded in 2020, Suvvidha was born out of a simple idea: to make quality services accessible to everyone. 
-          We noticed a gap in the market where finding reliable service providers was a challenge for many households.
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Starting with just a handful of services and providers, we've grown to become a comprehensive platform 
-          connecting thousands of customers with skilled professionals across multiple service categories.
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Our journey has been driven by our commitment to excellence, reliability, and customer satisfaction. 
-          Today, we're proud to be one of the leading service platforms in the region.
-        </Typography>
+      {/* Story Section */}
+      <Box style={{ margin: '3rem 0' }}>
+        <Card 
+          variant="convex" 
+          style={{ 
+            padding: '2.5rem',
+            backgroundColor: colors.background
+          }}
+        >
+          <Typography 
+            variant="h3" 
+            style={{ 
+              color: colors.text.primary,
+              marginBottom: '1.5rem',
+              fontWeight: 600
+            }}
+          >
+            Our Story
+          </Typography>
+          <Typography 
+            style={{ 
+              color: colors.text.secondary,
+              marginBottom: '1.5rem',
+              fontSize: '1.1rem',
+              lineHeight: '1.8'
+            }}
+          >
+            Founded in 2024, Suvvidha was born out of a simple idea: to make quality services accessible to everyone. 
+            We noticed a gap in the market where finding reliable service providers was a challenge for many households.
+          </Typography>
+          <Typography 
+            style={{ 
+              color: colors.text.secondary,
+              marginBottom: '1.5rem',
+              fontSize: '1.1rem',
+              lineHeight: '1.8'
+            }}
+          >
+            Starting with just a handful of services and providers, we've grown to become a comprehensive platform 
+            connecting thousands of customers with skilled professionals across multiple service categories.
+          </Typography>
+          <Typography 
+            style={{ 
+              color: colors.text.secondary,
+              fontSize: '1.1rem',
+              lineHeight: '1.8'
+            }}
+          >
+            Our journey has been driven by our commitment to excellence, reliability, and customer satisfaction. 
+            Today, we're proud to be one of the leading service platforms in the region.
+          </Typography>
+        </Card>
       </Box>
 
-      <Divider sx={{ my: 6 }} />
-
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" gutterBottom>
-          Our Mission
-        </Typography>
-        <Typography variant="body1" paragraph>
-          At Suvvidha, our mission is to revolutionize the service industry by creating a seamless connection between 
-          customers and service providers. We aim to deliver convenience, quality, and reliability in every service interaction.
-        </Typography>
-        <Typography variant="body1" paragraph>
-          We believe in empowering service professionals by providing them with a platform to showcase their skills and 
-          grow their business, while simultaneously offering customers access to a wide range of verified and skilled professionals.
-        </Typography>
+      {/* Mission Section */}
+      <Box style={{ margin: '3rem 0' }}>
+        <Card 
+          variant="pressed" 
+          style={{ 
+            padding: '2.5rem',
+            backgroundColor: colors.background
+          }}
+        >
+          <Typography 
+            variant="h3" 
+            style={{ 
+              color: colors.text.primary,
+              marginBottom: '1.5rem',
+              fontWeight: 600
+            }}
+          >
+            Our Mission
+          </Typography>
+          <Typography 
+            style={{ 
+              color: colors.text.secondary,
+              marginBottom: '1.5rem',
+              fontSize: '1.1rem',
+              lineHeight: '1.8'
+            }}
+          >
+            At Suvvidha, our mission is to revolutionize the service industry by creating a seamless connection between 
+            customers and service providers. We aim to deliver convenience, quality, and reliability in every service interaction.
+          </Typography>
+          <Typography 
+            style={{ 
+              color: colors.text.secondary,
+              fontSize: '1.1rem',
+              lineHeight: '1.8'
+            }}
+          >
+            We believe in empowering service professionals by providing them with a platform to showcase their skills and 
+            grow their business, while simultaneously offering customers access to a wide range of verified and skilled professionals.
+          </Typography>
+        </Card>
       </Box>
 
-      <Divider sx={{ my: 6 }} />
+      {/* Leadership Section */}
+      <Box style={{ margin: '3rem 0' }}>
+        <Card 
+          variant="flat" 
+          style={{ 
+            padding: '2.5rem',
+            backgroundColor: colors.background
+          }}
+        >
+          <Typography 
+            variant="h3" 
+            style={{ 
+              color: colors.text.primary,
+              marginBottom: '0.5rem',
+              fontWeight: 600,
+              textAlign: 'center'
+            }}
+          >
+            Our Leadership
+          </Typography>
+          <Typography 
+            style={{ 
+              color: colors.text.secondary,
+              marginBottom: '3rem',
+              fontSize: '1.1rem',
+              textAlign: 'center'
+            }}
+          >
+            Meet the team driving innovation and excellence at Suvvidha
+          </Typography>
 
-      <Box sx={{ my: 6 }}>
-        <Typography variant="h4" gutterBottom align="center">
-          Meet Our Team
-        </Typography>
-        <Typography variant="body1" align="center" paragraph sx={{ mb: 4 }}>
-          The dedicated professionals behind Suvvidha
-        </Typography>
-
-        <Grid container spacing={4}>
-          {team.map((member, index) => (
-            <Grid item key={index} xs={12} sm={6} md={3}>
-              <Card 
-                sx={{ 
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  p: 2,
-                  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-                  },
-                }}
-                elevation={2}
-              >
-                <Avatar 
-                  src={member.avatar} 
-                  alt={member.name}
-                  sx={{ width: 120, height: 120, mb: 2 }}
-                />
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Typography gutterBottom variant="h6" component="div">
-                    {member.name}
+          <Grid container spacing={4}>
+            {leadership.map((leader, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card 
+                  variant="convex" 
+                  style={{ 
+                    height: '100%',
+                    padding: '2rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    transition: 'transform 0.3s ease',
+                    cursor: 'pointer',
+                    backgroundColor: colors.background,
+                    '&:hover': {
+                      transform: 'translateY(-8px)'
+                    }
+                  }}
+                >
+                  <div 
+                    style={{
+                      width: 160,
+                      height: 160,
+                      borderRadius: '50%',
+                      marginBottom: '1.5rem',
+                      overflow: 'hidden',
+                      backgroundColor: colors.background
+                    }}
+                  >
+                    <Card
+                      variant="pressed"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <img 
+                        src={leader.avatar} 
+                        alt={leader.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </Card>
+                  </div>
+                  <Typography 
+                    style={{ 
+                      color: colors.text.primary,
+                      marginBottom: '0.5rem',
+                      fontSize: '1.5rem',
+                      fontWeight: 600,
+                      textAlign: 'center'
+                    }}
+                  >
+                    {leader.name}
                   </Typography>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                    {member.position}
+                  <Typography 
+                    style={{ 
+                      color: colors.primary.main,
+                      marginBottom: '1rem',
+                      fontSize: '1rem',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {leader.position}
                   </Typography>
-                  <Typography variant="body2">
-                    {member.bio}
+                  <Typography 
+                    style={{ 
+                      color: colors.text.secondary,
+                      marginBottom: '1.5rem',
+                      fontSize: '0.95rem',
+                      textAlign: 'center',
+                      lineHeight: '1.6'
+                    }}
+                  >
+                    {leader.bio}
                   </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
+                    <Card
+                      variant="pressed"
+                      style={{
+                        padding: '0.5rem',
+                        borderRadius: '50%',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.open(leader.socialLinks.linkedin, '_blank')}
+                    >
+                      <LinkedIn style={{ color: colors.text.primary }} />
+                    </Card>
+                    <Card
+                      variant="pressed"
+                      style={{
+                        padding: '0.5rem',
+                        borderRadius: '50%',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.open(leader.socialLinks.twitter, '_blank')}
+                    >
+                      <Twitter style={{ color: colors.text.primary }} />
+                    </Card>
+                    <Card
+                      variant="pressed"
+                      style={{
+                        padding: '0.5rem',
+                        borderRadius: '50%',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => window.location.href = `mailto:${leader.socialLinks.email}`}
+                    >
+                      <Email style={{ color: colors.text.primary }} />
+                    </Card>
+                  </div>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Card>
       </Box>
 
-      <Box sx={{ my: 6, textAlign: 'center' }}>
-        <Typography variant="h4" gutterBottom>
-          Our Values
-        </Typography>
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          {[
-            { title: 'Quality', description: 'We are committed to delivering the highest quality services.' },
-            { title: 'Integrity', description: 'We operate with honesty, transparency, and ethical standards.' },
-            { title: 'Customer Focus', description: 'Our customers are at the heart of everything we do.' },
-            { title: 'Innovation', description: 'We continuously evolve to improve our service offerings.' },
-          ].map((value, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Box sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom>
-                  {value.title}
-                </Typography>
-                <Typography variant="body2">
-                  {value.description}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+      {/* Values Section */}
+      <Box style={{ margin: '3rem 0' }}>
+        <Card 
+          variant="convex" 
+          style={{ 
+            padding: '2.5rem',
+            backgroundColor: colors.background
+          }}
+        >
+          <Typography 
+            variant="h3" 
+            style={{ 
+              color: colors.text.primary,
+              marginBottom: '2rem',
+              fontWeight: 600,
+              textAlign: 'center'
+            }}
+          >
+            Our Values
+          </Typography>
+          <Grid container spacing={4}>
+            {[
+              { 
+                title: 'Quality',
+                description: 'We are committed to delivering the highest quality services through rigorous verification and continuous monitoring of our service providers.'
+              },
+              { 
+                title: 'Integrity',
+                description: 'We operate with complete transparency and maintain the highest ethical standards in all our dealings with customers and service providers.'
+              },
+              { 
+                title: 'Customer Focus',
+                description: 'Our customers are at the heart of everything we do. We continuously strive to exceed their expectations and enhance their experience.'
+              },
+              { 
+                title: 'Innovation',
+                description: 'We embrace technology and innovative solutions to improve our service offerings and make the service booking experience more convenient.'
+              }
+            ].map((value, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card 
+                  variant="pressed" 
+                  style={{ 
+                    height: '100%',
+                    padding: '2rem',
+                    backgroundColor: colors.background
+                  }}
+                >
+                  <Typography 
+                    style={{ 
+                      color: colors.text.primary,
+                      marginBottom: '1rem',
+                      fontSize: '1.25rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {value.title}
+                  </Typography>
+                  <Typography 
+                    style={{ 
+                      color: colors.text.secondary,
+                      fontSize: '1rem',
+                      lineHeight: '1.6'
+                    }}
+                  >
+                    {value.description}
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Card>
       </Box>
     </Container>
   );

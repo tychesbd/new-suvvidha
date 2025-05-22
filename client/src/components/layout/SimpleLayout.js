@@ -381,8 +381,8 @@ const SimpleLayout = ({ children }) => {
                   color: 'var(--text-primary)'
                 }}>
                   <div>Email: info@suvvidha.com</div>
-                  <div>Phone: +91 xxxxxxxxxx</div>
-                  <div>Location: Patna, Bihar, India</div>
+                  <div>Phone: +91 9731146047</div>
+                  <div>Location: Bangalore, Karnataka, India</div>
                 </Box>
               </Box>
             </Box>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Box, Grid } from '@mui/material';
+import { Typography } from '@mui/material';
 import '../../components/neumorphic/ServiceCard.css';
 
 const ServiceCard = ({ service, onBookNow }) => {
