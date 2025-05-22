@@ -83,7 +83,7 @@ const registerVendor = asyncHandler(async (req, res) => {
     password, 
     phone, 
     address, 
-    pincode, 
+    pincodes, 
     yearsOfExperience, 
     serviceExpertise 
   } = req.body;
@@ -101,13 +101,13 @@ const registerVendor = asyncHandler(async (req, res) => {
     throw new Error('User already exists');
   }
 
-  // Handle ID proof document if uploaded
-  let idProofDocument = '';
-  if (req.file) {
-    idProofDocument = `/uploads/${req.file.filename}`;
+  // Handle multiple document uploads
+  let documents = [];
+  if (req.files && req.files.length > 0) {
+    documents = req.files.map(file => `/uploads/${file.filename}`);
   } else {
     res.status(400);
-    throw new Error('ID proof document is required');
+    throw new Error('At least one ID proof document is required');
   }
 
   // Parse service expertise if it's a string
@@ -116,6 +116,19 @@ const registerVendor = asyncHandler(async (req, res) => {
     parsedServiceExpertise = typeof serviceExpertise === 'string' 
       ? serviceExpertise.split(',') 
       : serviceExpertise;
+  }
+  
+  // Parse pincodes if it's a JSON string
+  let parsedPincodes = [];
+  if (pincodes) {
+    try {
+      parsedPincodes = typeof pincodes === 'string' 
+        ? JSON.parse(pincodes) 
+        : pincodes;
+    } catch (error) {
+      console.error('Error parsing pincodes:', error);
+      // If parsing fails, use empty array
+    }
   }
 
   // Create vendor user
@@ -126,8 +139,8 @@ const registerVendor = asyncHandler(async (req, res) => {
     role: 'vendor',
     phone,
     address,
-    pincode,
-    idProofDocument,
+    pincodes: parsedPincodes,
+    documents: documents, // Store all uploaded documents
     yearsOfExperience: Number(yearsOfExperience) || 0,
     serviceExpertise: parsedServiceExpertise,
     isActive: true, // Set default status to active

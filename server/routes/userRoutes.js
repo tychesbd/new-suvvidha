@@ -20,7 +20,7 @@ const upload = require('../middleware/uploadMiddleware');
 router.post('/', registerUser);
 router.post('/login', loginUser);
 router.post('/create-defaults', createDefaultUsers);
-router.post('/vendor-register', upload.single('idProofDocument'), registerVendor);
+router.post('/vendor-register', upload.array('documents', 5), registerVendor);
 
 // Protected routes
 router.get('/profile', protect, getUserProfile);

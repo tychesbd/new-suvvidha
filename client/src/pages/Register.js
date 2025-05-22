@@ -23,12 +23,13 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '', // Added phone field
     password: '',
     confirmPassword: '',
     role: 'customer', // Default role
   });
 
-  const { name, email, password, confirmPassword, role } = formData;
+  const { name, email, phone, password, confirmPassword, role } = formData;
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -65,6 +66,7 @@ const Register = () => {
       const userData = {
         name,
         email,
+        phone,
         password,
         role,
       };
@@ -177,6 +179,19 @@ const Register = () => {
                 required
                 style={{ marginBottom: '20px' }}
                 disabled={isLoading}
+                placeholder="Enter your E-mail"
+              />
+              <TextField
+                label="Phone Number"
+                name="phone"
+                type="tel"
+                fullWidth
+                value={phone}
+                onChange={onChange}
+                required
+                style={{ marginBottom: '20px' }}
+                disabled={isLoading}
+                placeholder="Enter your phone number"
               />
               <TextField
                 label="Password"

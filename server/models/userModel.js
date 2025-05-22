@@ -48,6 +48,10 @@ const userSchema = mongoose.Schema(
       type: String,
       // Only required for vendors
     },
+    documents: {
+      type: [String],
+      default: [],
+    },
     yearsOfExperience: {
       type: Number,
       default: 0,

@@ -5,54 +5,21 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { reset } from '../features/auth/authSlice';
 
-// Material UI imports
+// Neumorphic UI imports
 import {
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Paper,
-  Box,
-  Grid,
-  Typography,
   Container,
-  CircularProgress,
+  Grid,
   Card,
-  CardContent,
+  TextField,
+  Button,
+  Select,
+  Typography,
+  Box,
+  CircularProgress,
   Divider,
-  OutlinedInput,
   Chip,
-  ListItemText,
-  Checkbox,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
-import StorefrontIcon from '@mui/icons-material/Storefront';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
-const VisuallyHiddenInput = styled('input')(({ theme }) => ({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-}));
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
+} from '../components/neumorphic';
+import '../neumorphic.css'; // Ensure neumorphic styles are loaded
 
 const VendorRegister = () => {
   const [formData, setFormData] = useState({
@@ -62,17 +29,19 @@ const VendorRegister = () => {
     confirmPassword: '',
     phone: '',
     address: '',
-    pincode: '',
+    pincodes: [], // Changed to array for multiple pincodes
     yearsOfExperience: 0,
     serviceExpertise: [],
   });
 
-  const [idProofFile, setIdProofFile] = useState(null);
-  const [idProofPreview, setIdProofPreview] = useState('');
+  // State for file uploads
+  const [files, setFiles] = useState([]);
+  const [filePreview, setFilePreview] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [newPincode, setNewPincode] = useState('');
 
-  const { name, email, password, confirmPassword, phone, address, pincode, yearsOfExperience, serviceExpertise } = formData;
+  const { name, email, password, confirmPassword, phone, address, pincodes, yearsOfExperience, serviceExpertise } = formData;
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -126,13 +95,54 @@ const VendorRegister = () => {
     }
   };
 
-  // Handle ID proof document upload
-  const handleIdProofUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setIdProofFile(file);
-      setIdProofPreview(URL.createObjectURL(file));
+  // Handle file uploads
+  const handleFileUpload = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length > 0) {
+      // Add new files to existing files
+      setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+      
+      // Create preview URLs for new files
+      const newPreviews = selectedFiles.map(file => ({
+        name: file.name,
+        url: URL.createObjectURL(file),
+        type: file.type
+      }));
+      
+      setFilePreview(prevPreviews => [...prevPreviews, ...newPreviews]);
     }
+  };
+
+  // Remove a file
+  const removeFile = (index) => {
+    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+    
+    // Revoke the object URL to avoid memory leaks
+    URL.revokeObjectURL(filePreview[index].url);
+    setFilePreview(prevPreviews => prevPreviews.filter((_, i) => i !== index));
+  };
+
+  // Handle adding a new pincode
+  const handleAddPincode = () => {
+    if (newPincode && newPincode.length === 6 && !pincodes.includes(newPincode)) {
+      setFormData(prevState => ({
+        ...prevState,
+        pincodes: [...prevState.pincodes, newPincode]
+      }));
+      setNewPincode('');
+    } else if (newPincode.length !== 6) {
+      toast.error('Pincode must be 6 digits');
+    } else if (pincodes.includes(newPincode)) {
+      toast.error('Pincode already added');
+    }
+  };
+
+  // Handle removing a pincode
+  const handleRemovePincode = (pincode) => {
+    setFormData(prevState => ({
+      ...prevState,
+      pincodes: prevState.pincodes.filter(p => p !== pincode)
+    }));
   };
 
   const onSubmit = async (e) => {
@@ -145,8 +155,8 @@ const VendorRegister = () => {
       return;
     }
 
-    if (!idProofFile) {
-      toast.error('Please upload an ID proof document');
+    if (files.length === 0) {
+      toast.error('Please upload at least one ID proof document');
       setLoading(false);
       return;
     }
@@ -160,7 +170,10 @@ const VendorRegister = () => {
       formDataToSend.append('role', 'vendor');
       formDataToSend.append('phone', phone);
       formDataToSend.append('address', address);
-      formDataToSend.append('pincode', pincode);
+      
+      // Append pincodes as JSON string
+      formDataToSend.append('pincodes', JSON.stringify(pincodes));
+      
       formDataToSend.append('yearsOfExperience', yearsOfExperience);
       
       // Append service expertise as comma-separated string
@@ -168,8 +181,10 @@ const VendorRegister = () => {
         formDataToSend.append('serviceExpertise', serviceExpertise.join(','));
       }
       
-      // Append ID proof document
-      formDataToSend.append('idProofDocument', idProofFile);
+      // Append all files
+      files.forEach((file, index) => {
+        formDataToSend.append('documents', file);
+      });
       
       // Register the vendor
       const response = await axios.post('/api/users/vendor-register', formDataToSend);
@@ -190,265 +205,301 @@ const VendorRegister = () => {
   };
 
   return (
-    <Container component="main" maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-        <Link to="/">
-          <img src="/logo1.png" alt="Suvvidha Logo" height="60" />
-        </Link>
-      </Box>
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={5}>
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h4" component="h1" gutterBottom>
+    <Container style={{ paddingTop: '2rem', paddingBottom: '2rem', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <Grid container spacing={3} style={{ flexGrow: 1, alignItems: 'stretch' }}>
+        {/* Left Panel: Benefits */}
+        <Grid item xs={12} md={5} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Box style={{ marginBottom: '2rem', textAlign: 'center' }}>
+            <Link to="/">
+              <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '1rem' }} />
+            </Link>
+            <Typography variant="h3" component="h1" style={{ marginBottom: '1rem' }}>
               Become a Vendor
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary" paragraph>
+            <Typography variant="body1" style={{ marginBottom: '2rem' }}>
               Join our platform as a service provider and grow your business
             </Typography>
-            <Divider sx={{ my: 2 }} />
           </Box>
           
-          <Card elevation={3} sx={{ mb: 4 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Benefits of becoming a vendor:
+          <Card variant="convex" style={{ padding: '2rem', marginBottom: '2rem' }}>
+            <Typography variant="h5" style={{ marginBottom: '1rem' }}>
+              Benefits of becoming a vendor:
+            </Typography>
+            <Box component="ul" style={{ paddingLeft: '1.5rem', marginBottom: '1rem' }}>
+              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
+                Access to a large customer base
               </Typography>
-              <Box component="ul" sx={{ pl: 2 }}>
-                <Typography component="li" sx={{ mb: 1 }}>
-                  Access to a large customer base
-                </Typography>
-                <Typography component="li" sx={{ mb: 1 }}>
-                  Easy booking management
-                </Typography>
-                <Typography component="li" sx={{ mb: 1 }}>
-                  Flexible subscription plans
-                </Typography>
-                <Typography component="li" sx={{ mb: 1 }}>
-                  Increased visibility for your services
-                </Typography>
-                <Typography component="li">
-                  Professional profile to showcase your expertise
-                </Typography>
-              </Box>
-            </CardContent>
+              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
+                Easy booking management
+              </Typography>
+              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
+                Flexible subscription plans
+              </Typography>
+              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
+                Increased visibility for your services
+              </Typography>
+              <Typography component="li">
+                Professional profile to showcase your expertise
+              </Typography>
+            </Box>
           </Card>
           
-          <Card elevation={3}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Already registered?
-              </Typography>
-              <Button 
-                component={Link} 
-                to="/login" 
-                variant="contained" 
-                color="primary" 
-                fullWidth
-                sx={{ mt: 2 }}
-              >
-                Login to your account
-              </Button>
-            </CardContent>
+          <Card variant="convex" style={{ padding: '2rem' }}>
+            <Typography variant="h5" style={{ marginBottom: '1rem' }}>
+              Already registered?
+            </Typography>
+            <Button 
+              variant="primary"
+              onClick={() => navigate('/login')}
+              style={{ width: '100%', marginTop: '1rem' }}
+            >
+              Login to your account
+            </Button>
           </Card>
         </Grid>
         
+        {/* Right Panel: Registration Form */}
         <Grid item xs={12} md={7}>
-          <Paper elevation={3} sx={{ p: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <StorefrontIcon color="primary" sx={{ fontSize: 30, mr: 2 }} />
-              <Typography variant="h5">
-                Vendor Registration Form
-              </Typography>
-            </Box>
+          <Card variant="convex" style={{ padding: '2rem' }}>
+            <Typography variant="h4" style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+              Vendor Registration Form
+            </Typography>
+            <Divider style={{ marginBottom: '1.5rem' }} />
             
             <form onSubmit={onSubmit}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    name="name"
                     label="Full Name"
+                    name="name"
                     value={name}
                     onChange={onChange}
                     fullWidth
                     required
-                    margin="normal"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    name="email"
                     label="Email Address"
+                    name="email"
                     type="email"
                     value={email}
                     onChange={onChange}
                     fullWidth
                     required
-                    margin="normal"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    name="password"
                     label="Password"
+                    name="password"
                     type="password"
                     value={password}
                     onChange={onChange}
                     fullWidth
                     required
-                    margin="normal"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    name="confirmPassword"
                     label="Confirm Password"
+                    name="confirmPassword"
                     type="password"
                     value={confirmPassword}
                     onChange={onChange}
                     fullWidth
                     required
-                    margin="normal"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    name="phone"
                     label="Phone Number"
+                    name="phone"
                     value={phone}
                     onChange={onChange}
                     fullWidth
                     required
-                    margin="normal"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    name="pincode"
-                    label="Pincode"
-                    value={pincode}
-                    onChange={onChange}
-                    fullWidth
-                    required
-                    margin="normal"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    name="address"
-                    label="Address"
-                    value={address}
-                    onChange={onChange}
-                    fullWidth
-                    required
-                    margin="normal"
-                    multiline
-                    rows={2}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="yearsOfExperience"
                     label="Years of Experience"
+                    name="yearsOfExperience"
                     type="number"
                     value={yearsOfExperience}
                     onChange={onChange}
                     fullWidth
                     required
-                    margin="normal"
-                    inputProps={{ min: 0 }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth margin="normal" required>
-                    <InputLabel id="service-expertise-label">Service Expertise</InputLabel>
-                    <Select
-                      labelId="service-expertise-label"
-                      id="service-expertise"
-                      multiple
-                      name="serviceExpertise"
-                      value={serviceExpertise}
-                      onChange={onChange}
-                      input={<OutlinedInput label="Service Expertise" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {selected.map((value) => {
-                            const service = services.find(s => s._id === value || s.name === value);
-                            return (
-                              <Chip key={value} label={service ? service.name : value} />
-                            );
-                          })}
-                        </Box>
-                      )}
-                      MenuProps={MenuProps}
-                    >
-                      {services.map((service) => (
-                        <MenuItem key={service._id} value={service._id}>
-                          <Checkbox checked={serviceExpertise.indexOf(service._id) > -1} />
-                          <ListItemText primary={service.name} />
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
                 <Grid item xs={12}>
-                  <Box sx={{ mt: 2, mb: 3 }}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      ID Proof Document *
-                    </Typography>
-                    <Button
-                      component="label"
-                      variant="outlined"
-                      startIcon={<CloudUploadIcon />}
-                      sx={{ mt: 1 }}
+                  <TextField
+                    label="Address"
+                    name="address"
+                    value={address}
+                    onChange={onChange}
+                    fullWidth
+                    required
+                    style={{ marginBottom: '1rem' }}
+                  />
+                </Grid>
+                
+                {/* Multi-pincode input */}
+                <Grid item xs={12}>
+                  <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
+                    Service Pincodes
+                  </Typography>
+                  <Box style={{ display: 'flex', marginBottom: '1rem' }}>
+                    <TextField
+                      label="Add Pincode"
+                      value={newPincode}
+                      onChange={(e) => setNewPincode(e.target.value)}
+                      style={{ flexGrow: 1, marginRight: '1rem' }}
+                    />
+                    <Button 
+                      variant="primary" 
+                      onClick={handleAddPincode}
+                      style={{ minWidth: '100px' }}
                     >
-                      Upload ID Proof
-                      <VisuallyHiddenInput 
-                        type="file" 
-                        onChange={handleIdProofUpload} 
-                        accept="image/*,.pdf"
-                      />
+                      Add
                     </Button>
-                    {idProofPreview && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="body2" gutterBottom>
-                          Preview:
-                        </Typography>
-                        {idProofFile.type.includes('image') ? (
-                          <Box
-                            component="img"
-                            src={idProofPreview}
-                            alt="ID Proof Preview"
-                            sx={{ maxWidth: '100%', maxHeight: 200 }}
-                          />
-                        ) : (
-                          <Typography variant="body2">
-                            {idProofFile.name} (Document uploaded)
-                          </Typography>
-                        )}
-                      </Box>
-                    )}
                   </Box>
+                  <Box style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                    {pincodes.map((pincode, index) => (
+                      <Chip 
+                        key={index} 
+                        label={pincode}
+                        onDelete={() => handleRemovePincode(pincode)}
+                        style={{ margin: '0.25rem' }}
+                      />
+                    ))}
+                  </Box>
+                </Grid>
+                
+                {/* Service expertise selection */}
+                <Grid item xs={12}>
+                  <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
+                    Service Expertise
+                  </Typography>
+                  <Select
+                    multiple
+                    name="serviceExpertise"
+                    value={serviceExpertise}
+                    onChange={onChange}
+                    options={services.map(service => ({
+                      value: service._id,
+                      label: service.name
+                    }))}
+                    fullWidth
+                    required
+                    style={{ marginBottom: '1rem' }}
+                  />
+                </Grid>
+                
+                {/* Multi-file upload */}
+                <Grid item xs={12}>
+                  <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
+                    ID Proof Documents
+                  </Typography>
+                  <Box style={{ 
+                    border: '2px dashed var(--primary-light)', 
+                    borderRadius: 'var(--border-radius-md)',
+                    padding: '2rem',
+                    textAlign: 'center',
+                    marginBottom: '1rem',
+                    backgroundColor: 'rgba(108, 92, 231, 0.05)'
+                  }}>
+                    <input
+                      type="file"
+                      id="file-upload"
+                      onChange={handleFileUpload}
+                      multiple
+                      accept="image/*,.pdf"
+                      style={{ display: 'none' }}
+                    />
+                    <label htmlFor="file-upload">
+                      <Button 
+                        variant="primary" 
+                        component="span"
+                        style={{ marginBottom: '1rem' }}
+                      >
+                        Upload Documents
+                      </Button>
+                    </label>
+                    <Typography variant="body2">
+                      Upload ID proof, certificates, or any relevant documents (Max 5MB each)
+                    </Typography>
+                  </Box>
+                  
+                  {/* File preview section */}
+                  {filePreview.length > 0 && (
+                    <Box style={{ marginBottom: '1.5rem' }}>
+                      <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
+                        Uploaded Documents:
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {filePreview.map((file, index) => (
+                          <Grid item xs={12} sm={6} md={4} key={index}>
+                            <Card variant="flat" style={{ padding: '0.5rem', position: 'relative' }}>
+                              {file.type.includes('image') ? (
+                                <img 
+                                  src={file.url} 
+                                  alt={`Preview ${index}`} 
+                                  style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: 'var(--border-radius-sm)' }} 
+                                />
+                              ) : (
+                                <Box style={{ 
+                                  height: '120px', 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'center',
+                                  backgroundColor: 'var(--background-color)',
+                                  borderRadius: 'var(--border-radius-sm)'
+                                }}>
+                                  <Typography variant="body2">{file.name}</Typography>
+                                </Box>
+                              )}
+                              <Button 
+                                variant="error" 
+                                onClick={() => removeFile(index)}
+                                style={{ 
+                                  position: 'absolute', 
+                                  top: '0.5rem', 
+                                  right: '0.5rem',
+                                  minWidth: 'auto',
+                                  width: '24px',
+                                  height: '24px',
+                                  borderRadius: '50%',
+                                  padding: 0
+                                }}
+                              >
+                                ×
+                              </Button>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Box>
+                  )}
                 </Grid>
               </Grid>
               
               <Button
                 type="submit"
+                variant="primary"
                 fullWidth
-                variant="contained"
-                color="primary"
-                size="large"
-                sx={{ mt: 3, mb: 2 }}
                 disabled={loading || isLoading}
+                style={{ marginTop: '2rem', padding: '1rem' }}
               >
                 {(loading || isLoading) ? (
                   <>
-                    <CircularProgress size={24} sx={{ mr: 1 }} color="inherit" />
+                    <CircularProgress size="small" style={{ marginRight: '0.5rem' }} />
                     Registering...
                   </>
                 ) : 'Register as Vendor'}
               </Button>
             </form>
-          </Paper>
+          </Card>
         </Grid>
       </Grid>
     </Container>
