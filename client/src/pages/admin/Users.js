@@ -74,7 +74,13 @@ const Users = () => {
         },
       };
       const { data } = await axios.get('/api/users', config);
-      setUsers(data);
+      
+      // Sort users by creation date in descending order (newest first)
+      const sortedUsers = [...data].sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      setUsers(sortedUsers);
       setError(null);
     } catch (error) {
       setError(

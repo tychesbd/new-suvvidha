@@ -214,4 +214,58 @@ const theme = {
   },
 };
 
+export const keyframes = {
+  fadeInScale: {
+    '0%': {
+      opacity: 0,
+      transform: 'scale(0.9)',
+    },
+    '100%': {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
+  glowPulse: {
+    '0%': {
+      boxShadow: `0 8px 32px 0 ${theme.colors.primary.main}22`,
+      filter: 'brightness(1)',
+    },
+    '50%': {
+      boxShadow: `0 8px 32px 0 ${theme.colors.primary.main}44`,
+      filter: 'brightness(1.2)',
+    },
+    '100%': {
+      boxShadow: `0 8px 32px 0 ${theme.colors.primary.main}22`,
+      filter: 'brightness(1)',
+    },
+  },
+  rotateAnimation: {
+    '0%': {
+      transform: 'rotate(0deg)',
+    },
+    '100%': {
+      transform: 'rotate(360deg)',
+    },
+  },
+  progressAnimation: {
+    '0%': {
+      transform: 'translateX(-100%)',
+    },
+    '100%': {
+      transform: 'translateX(0)',
+    },
+  },
+  gradientAnimation: {
+    '0%': {
+      backgroundPosition: '0% 50%',
+    },
+    '50%': {
+      backgroundPosition: '100% 50%',
+    },
+    '100%': {
+      backgroundPosition: '0% 50%',
+    },
+  },
+};
+
 export default theme;
