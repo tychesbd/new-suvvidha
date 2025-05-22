@@ -77,13 +77,12 @@ const VendorRegister = () => {
     }
 
     dispatch(reset());
-  }, [userInfo, isError, isSuccess, message, navigate, dispatch]);
-  const onChange = (e, fieldName = null) => {
-    // Handle select component change
-    if (fieldName === 'serviceExpertise') {
+  }, [userInfo, isError, isSuccess, message, navigate, dispatch]);  const onChange = (e) => {
+    // Check if this is a direct value from select component
+    if (Array.isArray(e)) {
       setFormData((prevState) => ({
         ...prevState,
-        serviceExpertise: e // e will be the array of selected values
+        serviceExpertise: e
       }));
       return;
     }
@@ -386,7 +385,7 @@ const VendorRegister = () => {
                     multiple
                     name="serviceExpertise"
                     value={serviceExpertise}
-                    onChange={(value) => onChange(value, 'serviceExpertise')}
+                    onChange={onChange}
                     options={services.map(service => ({
                       value: service._id,
                       label: service.name
