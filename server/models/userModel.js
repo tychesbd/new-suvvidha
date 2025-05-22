@@ -43,10 +43,21 @@ const userSchema = mongoose.Schema(
       type: String,
       default: 'default-avatar.png',
     },
+    // Password reset fields
+    resetPasswordOtp: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
+    },
     // Vendor specific fields
     idProofDocument: {
       type: String,
       // Only required for vendors
+    },
+    documents: {
+      type: [String],
+      default: [],
     },
     yearsOfExperience: {
       type: Number,

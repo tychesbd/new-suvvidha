@@ -1,45 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Typography,
   Box,
-  Paper,
+  Card,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  TablePagination,
+  TableContainer,
   Button,
-  IconButton,
-  TextField,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip,
-  Grid,
-  FormControl,
-  InputLabel,
+  SearchBar,
   Select,
-  MenuItem,
+  Grid,
+  Modal,
+  Chip,
   CircularProgress,
   Alert,
   Divider,
-} from '@mui/material';
+  Container,
+  theme,
+  colors,
+  DashboardTile
+} from '../../components/neumorphic';
+
 import {
-  Search as SearchIcon,
   Visibility as VisibilityIcon,
   Block as BlockIcon,
   CheckCircle as CheckCircleIcon,
   Download as DownloadIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 
 const Users = () => {
-  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
   
   // State for users data
@@ -60,11 +55,17 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   
+  // State for delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  
   // State for action feedback
   const [actionFeedback, setActionFeedback] = useState({ message: '', severity: 'success', show: false });
 
+  const { createNeumorphicStyle } = theme;
+
   // Fetch users data
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const config = {
@@ -73,7 +74,13 @@ const Users = () => {
         },
       };
       const { data } = await axios.get('/api/users', config);
-      setUsers(data);
+      
+      // Sort users by creation date in descending order (newest first)
+      const sortedUsers = [...data].sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      setUsers(sortedUsers);
       setError(null);
     } catch (error) {
       setError(
@@ -84,35 +91,35 @@ const Users = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userInfo]);
 
   useEffect(() => {
     fetchUsers();
-  }, [userInfo]);
+  }, [userInfo, fetchUsers]);
 
   // Handle pagination changes
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (newPage) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+  const handleChangeRowsPerPage = (value) => {
+    setRowsPerPage(value);
     setPage(0);
   };
 
   // Handle search and filter changes
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
     setPage(0);
   };
 
-  const handleRoleFilterChange = (event) => {
-    setRoleFilter(event.target.value);
+  const handleRoleFilterChange = (value) => {
+    setRoleFilter(value);
     setPage(0);
   };
 
-  const handleStatusFilterChange = (event) => {
-    setStatusFilter(event.target.value);
+  const handleStatusFilterChange = (value) => {
+    setStatusFilter(value);
     setPage(0);
   };
 
@@ -124,6 +131,59 @@ const Users = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
+  };
+
+  // Handle delete user
+  const handleDeleteUser = (user) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+      };
+
+      await axios.delete(`/api/users/${userToDelete._id}`, config);
+      
+      // Update users list by removing the deleted user
+      setUsers(users.filter(user => user._id !== userToDelete._id));
+      
+      // Show feedback message
+      setActionFeedback({
+        message: 'User deleted successfully',
+        severity: 'success',
+        show: true
+      });
+
+      // Close the dialog
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+
+      // Hide feedback after 3 seconds
+      setTimeout(() => {
+        setActionFeedback({ ...actionFeedback, show: false });
+      }, 3000);
+
+    } catch (error) {
+      setActionFeedback({
+        message: error.response && error.response.data.message
+          ? error.response.data.message
+          : 'Failed to delete user',
+        severity: 'error',
+        show: true
+      });
+
+      // Hide feedback after 3 seconds
+      setTimeout(() => {
+        setActionFeedback({ ...actionFeedback, show: false });
+      }, 3000);
+    } finally {
+      setDeleteDialogOpen(false);
+    }
   };
 
   // Handle block/unblock user
@@ -207,361 +267,448 @@ const Users = () => {
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Typography variant="h4" gutterBottom>
-        Users Management
-      </Typography>
+    <Container>
+      <Box display="flex" flexDirection="column" gap={2} p={2}>
+        <Typography variant="h4" style={{ color: colors.text.primary, marginBottom: '1rem' }}>
+          Users Management
+        </Typography>
 
-      {/* Feedback Alert */}
-      {actionFeedback.show && (
-        <Alert 
-          severity={actionFeedback.severity} 
-          sx={{ mb: 2 }}
-          onClose={() => setActionFeedback({ ...actionFeedback, show: false })}
-        >
-          {actionFeedback.message}
-        </Alert>
-      )}
+        {/* Feedback Alert */}
+        {actionFeedback.show && (
+          <Alert 
+            severity={actionFeedback.severity} 
+            style={{ marginBottom: '1rem' }}
+            onClose={() => setActionFeedback({ ...actionFeedback, show: false })}
+          >
+            {actionFeedback.message}
+          </Alert>
+        )}
 
-      {/* Search and Filters */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={4}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Search by name or email"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Role</InputLabel>
+        {/* Search and Filters */}
+        <Card variant="flat" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={4}>
+              <SearchBar
+                placeholder="Search by name or email"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                width="100%"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
               <Select
+                options={[
+                  { value: 'all', label: 'All Roles' },
+                  { value: 'admin', label: 'Admin' },
+                  { value: 'vendor', label: 'Vendor' },
+                  { value: 'customer', label: 'Customer' }
+                ]}
                 value={roleFilter}
                 onChange={handleRoleFilterChange}
                 label="Role"
-              >
-                <MenuItem value="all">All Roles</MenuItem>
-                <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="vendor">Vendor</MenuItem>
-                <MenuItem value="customer">Customer</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Status</InputLabel>
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
               <Select
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'active', label: 'Active' },
+                  { value: 'blocked', label: 'Blocked' }
+                ]}
                 value={statusFilter}
                 onChange={handleStatusFilterChange}
                 label="Status"
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <Button 
+                fullWidth
+                variant="primary"
+                onClick={fetchUsers}
+                style={{ height: '100%', minHeight: '42px' }}
               >
-                <MenuItem value="all">All Status</MenuItem>
-                <MenuItem value="active">Active</MenuItem>
-                <MenuItem value="blocked">Blocked</MenuItem>
-              </Select>
-            </FormControl>
+                Refresh
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={2}>
-            <Button 
-              fullWidth 
-              variant="contained" 
-              color="primary"
-              onClick={() => fetchUsers()}
-            >
-              Refresh
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+        </Card>
 
-      {/* Users Table */}
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : error ? (
-        <Alert severity="error" sx={{ my: 2 }}>
-          {error}
-        </Alert>
-      ) : (
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-          <TableContainer sx={{ maxHeight: 440 }}>
-            <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Joined Date</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedUsers.length > 0 ? (
-                  paginatedUsers.map((user) => (
-                    <TableRow hover key={user._id}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                          color={
-                            user.role === 'admin' 
-                              ? 'error' 
-                              : user.role === 'vendor' 
-                                ? 'warning' 
-                                : 'info'
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{formatDate(user.createdAt)}</TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={user.isActive ? 'Active' : 'Blocked'}
-                          color={user.isActive ? 'success' : 'error'}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton 
-                          color="primary" 
-                          onClick={() => handleOpenDialog(user)}
-                          title="View Details"
-                        >
-                          <VisibilityIcon />
-                        </IconButton>
-                        <IconButton 
-                          color={user.isActive ? 'error' : 'success'}
-                          onClick={() => handleToggleUserStatus(user._id, user.isActive)}
-                          title={user.isActive ? 'Block User' : 'Unblock User'}
-                          disabled={user.role === 'admin' && userInfo._id === user._id} // Prevent admin from blocking themselves
-                        >
-                          {user.isActive ? <BlockIcon /> : <CheckCircleIcon />}
-                        </IconButton>
+        {/* Users Table */}
+        {loading ? (
+          <Box display="flex" justifyContent="center" p={4}>
+            <CircularProgress size="large" />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" style={{ margin: '1rem 0' }}>
+            {error}
+          </Alert>
+        ) : (
+          <Card variant="flat" style={{ width: '100%', overflow: 'hidden' }}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell header>Name</TableCell>
+                    <TableCell header>Email</TableCell>
+                    <TableCell header>Role</TableCell>
+                    <TableCell header>Joined Date</TableCell>
+                    <TableCell header>Status</TableCell>
+                    <TableCell header align="center">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {paginatedUsers.length > 0 ? (
+                    paginatedUsers.map((user) => (
+                      <TableRow key={user._id}>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                            variant={
+                              user.role === 'admin' 
+                                ? 'error' 
+                                : user.role === 'vendor' 
+                                  ? 'warning' 
+                                  : 'info'
+                            }
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{formatDate(user.createdAt)}</TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={user.isActive ? 'Active' : 'Blocked'}
+                            variant={user.isActive ? 'success' : 'error'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Button
+                            variant="text"
+                            onClick={() => handleOpenDialog(user)}
+                            title="View Details"
+                            style={{ marginRight: '0.5rem' }}
+                          >
+                            <VisibilityIcon style={{ fontSize: '1.25rem' }} />
+                          </Button>
+                          <Button
+                            variant={user.isActive ? 'error' : 'success'}
+                            onClick={() => handleToggleUserStatus(user._id, user.isActive)}
+                            title={user.isActive ? 'Block User' : 'Unblock User'}
+                            disabled={user.role === 'admin' && userInfo._id === user._id}
+                            style={{ marginRight: '0.5rem' }}
+                          >
+                            {user.isActive ? (
+                              <BlockIcon style={{ fontSize: '1.25rem' }} />
+                            ) : (
+                              <CheckCircleIcon style={{ fontSize: '1.25rem' }} />
+                            )}
+                          </Button>
+                          <Button
+                            variant="error"
+                            onClick={() => handleDeleteUser(user)}
+                            title="Delete User"
+                            disabled={user.role === 'admin' && userInfo._id === user._id}
+                          >
+                            <DeleteIcon style={{ fontSize: '1.25rem' }} />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        <Typography color={colors.text.secondary}>
+                          No users found matching the criteria
+                        </Typography>
                       </TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      No users found matching the criteria
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={filteredUsers.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
-        </Paper>
-      )}
+                  )}
+                </TableBody>
+              </Table>
+              {/* Pagination Controls */}
+              {paginatedUsers.length > 0 && (
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  p={2}
+                  style={{ borderTop: `1px solid ${colors.border}` }}
+                >
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Typography variant="body2" color={colors.text.secondary}>
+                      Rows per page:
+                    </Typography>
+                    <Select
+                      options={[
+                        { value: 5, label: '5' },
+                        { value: 10, label: '10' },
+                        { value: 25, label: '25' },
+                        { value: 50, label: '50' }
+                      ]}
+                      value={rowsPerPage}
+                      onChange={handleChangeRowsPerPage}
+                      style={{ minWidth: '80px' }}
+                    />
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Typography variant="body2" color={colors.text.secondary}>
+                      {`${page * rowsPerPage + 1}-${Math.min((page + 1) * rowsPerPage, filteredUsers.length)} of ${filteredUsers.length}`}
+                    </Typography>
+                    <Box display="flex" gap={1}>
+                      <Button
+                        variant="text"
+                        onClick={() => handleChangePage(page - 1)}
+                        disabled={page === 0}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="text"
+                        onClick={() => handleChangePage(page + 1)}
+                        disabled={(page + 1) * rowsPerPage >= filteredUsers.length}
+                      >
+                        Next
+                      </Button>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </TableContainer>
+          </Card>
+        )}
 
-      {/* User Detail Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        {selectedUser && (
-          <>
-            <DialogTitle>
+        {/* User Details Modal */}
+        <Modal
+          open={openDialog}
+          onClose={handleCloseDialog}
+          title={
+            <>
               User Details
-              <Chip 
-                label={selectedUser.isActive ? 'Active' : 'Blocked'}
-                color={selectedUser.isActive ? 'success' : 'error'}
-                size="small"
-                sx={{ ml: 2 }}
-              />
-            </DialogTitle>
-            <DialogContent dividers>
-              <Grid container spacing={2}>
+              {selectedUser && (
+                <Chip 
+                  label={selectedUser.isActive ? 'Active' : 'Blocked'}
+                  variant={selectedUser.isActive ? 'success' : 'error'}
+                  size="small"
+                  style={{ marginLeft: '0.5rem' }}
+                />
+              )}
+            </>
+          }
+          maxWidth="md"
+        >
+          {selectedUser && (
+            <Box>
+              <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant="subtitle2" color={colors.text.secondary}>
                     Name
                   </Typography>
-                  <Typography variant="body1">{selectedUser.name}</Typography>
+                  <Typography>{selectedUser.name}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant="subtitle2" color={colors.text.secondary}>
                     Email
                   </Typography>
-                  <Typography variant="body1">{selectedUser.email}</Typography>
+                  <Typography>{selectedUser.email}</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant="subtitle2" color={colors.text.secondary}>
                     Role
                   </Typography>
-                  <Typography variant="body1">
+                  <Typography>
                     {selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant="subtitle2" color={colors.text.secondary}>
                     Joined Date
                   </Typography>
-                  <Typography variant="body1">
+                  <Typography>
                     {formatDate(selectedUser.createdAt)}
                   </Typography>
                 </Grid>
+
                 {selectedUser.phone && (
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">
+                    <Typography variant="subtitle2" color={colors.text.secondary}>
                       Phone
                     </Typography>
-                    <Typography variant="body1">{selectedUser.phone}</Typography>
+                    <Typography>{selectedUser.phone}</Typography>
                   </Grid>
                 )}
+
                 {selectedUser.address && (
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" color="text.secondary">
+                    <Typography variant="subtitle2" color={colors.text.secondary}>
                       Address
                     </Typography>
-                    <Typography variant="body1">{selectedUser.address}</Typography>
+                    <Typography>{selectedUser.address}</Typography>
                   </Grid>
                 )}
-                
+
                 {/* Vendor-specific information */}
                 {selectedUser.role === 'vendor' && (
                   <>
                     <Grid item xs={12}>
-                      <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                      <Typography variant="h6" style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
                         Vendor Information
                       </Typography>
                       <Divider />
                     </Grid>
-                    
+
                     {selectedUser.yearsOfExperience !== undefined && (
                       <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">
+                        <Typography variant="subtitle2" color={colors.text.secondary}>
                           Years of Experience
                         </Typography>
-                        <Typography variant="body1">
+                        <Typography>
                           {selectedUser.yearsOfExperience || '0'} years
                         </Typography>
                       </Grid>
                     )}
-                    
+
                     {selectedUser.pincode && (
                       <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">
+                        <Typography variant="subtitle2" color={colors.text.secondary}>
                           Pincode
                         </Typography>
-                        <Typography variant="body1">
-                          {selectedUser.pincode}
-                        </Typography>
+                        <Typography>{selectedUser.pincode}</Typography>
                       </Grid>
                     )}
-                    
+
                     {selectedUser.serviceExpertise && selectedUser.serviceExpertise.length > 0 && (
                       <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">
+                        <Typography variant="subtitle2" color={colors.text.secondary}>
                           Service Expertise
                         </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                        <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
                           {selectedUser.serviceExpertise.map((service, index) => (
-                            <Chip key={index} label={service} size="small" color="primary" variant="outlined" />
+                            <Chip 
+                              key={index} 
+                              label={service} 
+                              variant="primary"
+                              size="small"
+                            />
                           ))}
                         </Box>
                       </Grid>
                     )}
-                    
+
                     {selectedUser.idProofDocument && (
                       <Grid item xs={12} sm={6}>
-                        <Typography variant="subtitle2" color="text.secondary">
+                        <Typography variant="subtitle2" color={colors.text.secondary}>
                           ID Proof Document
                         </Typography>
-                        <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
-                          <Button 
-                            variant="contained" 
-                            color="primary" 
+                        <Box display="flex" gap={2} mt={1}>
+                          <Button
+                            variant="primary"
                             size="small"
-                            startIcon={<DownloadIcon />}
-                            component="a" 
-                            href={selectedUser.idProofDocument} 
+                            component="a"
+                            href={selectedUser.idProofDocument}
                             download={`ID_Proof_${selectedUser.name.replace(/\s+/g, '_')}.${selectedUser.idProofDocument.split('.').pop()}`}
-                            sx={{ mt: 1 }}
                           >
+                            <DownloadIcon style={{ marginRight: '0.5rem' }} />
                             Download Document
                           </Button>
-                          <Button 
-                            variant="outlined" 
-                            color="primary" 
+                          <Button
+                            variant="secondary"
                             size="small"
-                            component="a" 
-                            href={selectedUser.idProofDocument} 
+                            component="a"
+                            href={selectedUser.idProofDocument}
                             target="_blank"
-                            sx={{ mt: 1 }}
                           >
                             View Document
                           </Button>
                         </Box>
                       </Grid>
                     )}
-                    
+
                     <Grid item xs={12}>
-                      <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 1 }}>
+                      <Typography variant="subtitle2" color={colors.text.secondary} mt={1}>
                         Vendor Status
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                        <Chip 
+                      <Box display="flex" alignItems="center" mt={1}>
+                        <Chip
                           label={selectedUser.isActive ? 'Active Vendor' : 'Inactive Vendor'}
-                          color={selectedUser.isActive ? 'success' : 'error'}
+                          variant={selectedUser.isActive ? 'success' : 'error'}
                           size="small"
-                          sx={{ mr: 1 }}
+                          style={{ marginRight: '0.5rem' }}
                         />
-                        <Typography variant="body2" color="text.secondary">
-                          {selectedUser.isActive 
-                            ? 'This vendor can currently provide services to customers.' 
+                        <Typography variant="body2" color={colors.text.secondary}>
+                          {selectedUser.isActive
+                            ? 'This vendor can currently provide services to customers.'
                             : 'This vendor is currently blocked from providing services.'}
                         </Typography>
                       </Box>
                     </Grid>
                   </>
                 )}
-                
+
                 <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary">
+                  <Typography variant="subtitle2" color={colors.text.secondary}>
                     Last Updated
                   </Typography>
-                  <Typography variant="body1">
+                  <Typography>
                     {formatDate(selectedUser.updatedAt)}
                   </Typography>
                 </Grid>
               </Grid>
-            </DialogContent>
-            <DialogActions>
-              <Button 
-                variant="contained" 
-                color={selectedUser.isActive ? 'error' : 'success'}
-                onClick={() => {
-                  handleToggleUserStatus(selectedUser._id, selectedUser.isActive);
-                  handleCloseDialog();
-                }}
-                disabled={selectedUser.role === 'admin' && userInfo._id === selectedUser._id} // Prevent admin from blocking themselves
-              >
-                {selectedUser.isActive ? 'Block User' : 'Unblock User'}
-              </Button>
-              <Button onClick={handleCloseDialog}>Close</Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
-    </Box>
+
+              <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+                <Button
+                  variant={selectedUser.isActive ? 'error' : 'success'}
+                  onClick={() => {
+                    handleToggleUserStatus(selectedUser._id, selectedUser.isActive);
+                    handleCloseDialog();
+                  }}
+                  disabled={selectedUser.role === 'admin' && userInfo._id === selectedUser._id}
+                >
+                  {selectedUser.isActive ? 'Block User' : 'Unblock User'}
+                </Button>
+                <Button variant="text" onClick={handleCloseDialog}>
+                  Close
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          title="Confirm Delete"
+          maxWidth="sm"
+        >
+          {userToDelete && (
+            <Box>
+              <Typography variant="body1" style={{ marginBottom: '1rem' }}>
+                Are you sure you want to delete the user <strong>{userToDelete.name}</strong>?
+              </Typography>
+              <Typography variant="body2" color={colors.text.secondary} style={{ marginBottom: '1rem' }}>
+                This action cannot be undone. All data associated with this user will be permanently removed from the system.
+              </Typography>
+              
+              <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+                <Button
+                  variant="error"
+                  onClick={confirmDeleteUser}
+                >
+                  Delete User
+                </Button>
+                <Button variant="text" onClick={() => setDeleteDialogOpen(false)}>
+                  Cancel
+                </Button>
+              </Box>
+            </Box>
+          )}
+        </Modal>
+      </Box>
+    </Container>
   );
 };
 

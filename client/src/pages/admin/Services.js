@@ -2,33 +2,29 @@ import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Box,
-  Button,
-  Paper,
+  Card,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  IconButton,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  TextField,
-  FormControl,
-  InputLabel,
+  TableContainer,
+  Button,
+  SearchBar,
   Select,
-  MenuItem,
   Grid,
-  Avatar,
-  Tooltip,
-  Snackbar,
-  Alert,
+  Modal,
+  Chip,
   CircularProgress,
-  InputAdornment
-} from '@mui/material';
+  Alert,
+  Divider,
+  Container,
+  theme,
+  colors,
+  TextField,
+  DashboardTile
+} from '../../components/neumorphic';
+
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -269,104 +265,177 @@ const AdminServices = () => {
   });
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
+    <Container>
+      <Box display="flex" flexDirection="column" gap={2} p={2}>
+        <Typography variant="h4" style={{ color: colors.text.primary, marginBottom: '1rem' }}>
           Services Management
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleAddNew}
-          disabled={isLoading}
+
+        {/* Action Feedback */}
+        {snackbar.open && (
+          <Alert 
+            severity={snackbar.severity} 
+            style={{ marginBottom: '1rem' }}
+            onClose={handleCloseSnackbar}
+          >
+            {snackbar.message}
+          </Alert>
+        )}
+
+        {/* Search and Add New Service */}
+        <Card variant="flat" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <SearchBar
+                placeholder="Search by name, category or description"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                width="100%"
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Button 
+                fullWidth
+                variant="primary"
+                onClick={handleAddNew}
+                startIcon={<AddIcon />}
+                style={{ height: '42px' }}
+              >
+                Add New Service
+              </Button>
+            </Grid>
+          </Grid>
+        </Card>
+
+        {/* Services Table */}
+        {isLoading ? (
+          <Box display="flex" justifyContent="center" p={4}>
+            <CircularProgress size="large" />
+          </Box>
+        ) : (
+          <Card variant="flat" style={{ width: '100%', overflow: 'hidden' }}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell header>ID</TableCell>
+                    <TableCell header>Image</TableCell>
+                    <TableCell header>Name</TableCell>
+                    <TableCell header>Category</TableCell>
+                    <TableCell header>Price (₹)</TableCell>
+                    <TableCell header>Description</TableCell>
+                    <TableCell header align="center">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredServices.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        <Typography color={colors.text.secondary}>
+                          {services.length === 0 ? 'No services found' : 'No matching services found'}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredServices.map((service) => (
+                      <TableRow key={service._id || service.id}>
+                        <TableCell>{service._id || service.id}</TableCell>                        <TableCell style={{ width: 80, padding: '8px' }}>
+                          {service.image ? (
+                            <Box
+                              component="img"
+                              src={`${process.env.REACT_APP_API_URL || ''}/uploads/${service.image.split('/').pop()}`}
+                              alt={service.name}
+                              style={{
+                                width: 60,
+                                height: 60,
+                                borderRadius: '8px',
+                                objectFit: 'cover',
+                                backgroundColor: colors.background,
+                                display: 'block'
+                              }}
+                              onError={(e) => {
+                                console.error('Image load error:', e);
+                                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjZWVlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiNhYWEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              style={{
+                                width: 60,
+                                height: 60,
+                                borderRadius: '8px',
+                                backgroundColor: colors.border,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: colors.text.secondary,
+                                fontSize: '12px'
+                              }}
+                            >
+                              No Image
+                            </Box>
+                          )}
+                        </TableCell>
+                        <TableCell>{service.name}</TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={service.category}
+                            variant="primary"
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>₹{service.minPrice}</TableCell>
+                        <TableCell style={{ maxWidth: 250 }}>
+                          <Typography 
+                            style={{ 
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              lineHeight: '1.2em',
+                              maxHeight: '2.4em'
+                            }}
+                          >
+                            {service.description}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Box display="flex" gap={1} justifyContent="center">
+                            <Button
+                              variant="text"
+                              onClick={() => handleEdit(service)}
+                              title="Edit Service"
+                            >
+                              <EditIcon style={{ fontSize: '1.25rem' }} />
+                            </Button>
+                            <Button
+                              variant="text"
+                              color="error"
+                              onClick={() => handleDeleteConfirm(service)}
+                              title="Delete Service"
+                            >
+                              <DeleteIcon style={{ fontSize: '1.25rem' }} />
+                            </Button>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Card>
+        )}
+
+      {/* Add/Edit Service Modal */}
+        <Modal
+          open={openDialog}
+          onClose={handleCloseDialog}
+          title={isEditing ? "Edit Service" : "Add New Service"}
+          maxWidth="md"
         >
-          Add New Service
-        </Button>
-      </Box>
-
-      {/* Search Bar */}
-      <Box sx={{ mb: 3 }}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search services by name, category or description"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-
-      <TableContainer component={Paper} sx={{ mb: 4 }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'primary.light' }}>
-              <TableCell>ID</TableCell>
-              <TableCell>Image</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Min Price (₹)</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredServices.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center">
-                  {services.length === 0 ? 'No services found' : 'No matching services found'}
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredServices.map((service) => (
-                <TableRow key={service._id || service.id}>
-                  <TableCell>{service._id || service.id}</TableCell>
-                  <TableCell>
-                    <Avatar
-                      src={service.image}
-                      alt={service.name}
-                      variant="rounded"
-                      sx={{ width: 60, height: 60 }}
-                    />
-                  </TableCell>
-                  <TableCell>{service.name}</TableCell>
-                  <TableCell>{service.category}</TableCell>
-                  <TableCell>₹{service.minPrice}</TableCell>
-                  <TableCell sx={{ maxWidth: 250 }}>
-                    <Typography noWrap>{service.description}</Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Edit">
-                      <IconButton color="primary" onClick={() => handleEdit(service)} disabled={isLoading}>
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton color="error" onClick={() => handleDeleteConfirm(service)} disabled={isLoading}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* Add/Edit Service Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {isEditing ? 'Edit Service' : 'Add New Service'}
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
                 name="name"
@@ -375,27 +444,21 @@ const AdminServices = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                margin="normal"
               />
-              <FormControl fullWidth margin="normal" required>
-                <InputLabel>Category</InputLabel>
-                <Select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  label="Category"
-                >
-                  {Array.isArray(apiCategories) && apiCategories.length > 0 ? (
-                    apiCategories.map((category) => (
-                      <MenuItem key={category._id} value={category.name}>
-                        {category.name}
-                      </MenuItem>
-                    ))
-                  ) : (
-                    <MenuItem value="">No categories available</MenuItem>
-                  )}
-                </Select>
-              </FormControl>
+              
+              <Select
+                label="Category"
+                options={Array.isArray(apiCategories) && apiCategories.length > 0 
+                  ? apiCategories.map(cat => ({ value: cat.name, label: cat.name }))
+                  : [{ value: "", label: "No categories available" }]
+                }
+                value={formData.category}
+                onChange={(value) => handleInputChange({ target: { name: 'category', value }})}
+                style={{ marginTop: '1rem' }}
+                fullWidth
+                required
+              />
+              
               <TextField
                 name="minPrice"
                 label="Minimum Price (₹)"
@@ -404,54 +467,53 @@ const AdminServices = () => {
                 value={formData.minPrice}
                 onChange={handleInputChange}
                 required
-                margin="normal"
-                InputProps={{ inputProps: { min: 0 } }}
+                style={{ marginTop: '1rem' }}
+                min={0}
               />
             </Grid>
+            
             <Grid item xs={12} md={6}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    Service Image
-                  </Typography>
-                  <Box
-                    sx={{
-                      border: '1px dashed grey',
-                      borderRadius: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      p: 2,
-                      mb: 2,
-                      height: 150,
-                      backgroundImage: formData.image ? `url(${formData.image})` : 'none',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
-                  >
-                    {!formData.image && (
-                      <Typography variant="body2" color="text.secondary" align="center">
-                        No image selected
-                      </Typography>
-                    )}
-                  </Box>
-                  <Button
-                    variant="outlined"
-                    component="label"
-                    startIcon={<UploadIcon />}
-                  >
-                    Upload Image
-                    <input 
-                      type="file" 
-                      hidden 
-                      accept="image/*" 
-                      onChange={handleImageUpload}
-                    />
-                  </Button>
+              <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="subtitle1" gutterBottom>Service Image</Typography>
+                <Box
+                  style={{
+                    border: `1px dashed ${colors.border}`,
+                    borderRadius: '8px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '1rem',
+                    marginBottom: '1rem',
+                    height: '200px',
+                    backgroundImage: formData.image ? `url(${formData.image})` : 'none',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                >
+                  {!formData.image && (
+                    <Typography variant="body2" color={colors.text.secondary} align="center">
+                      No image selected
+                    </Typography>
+                  )}
                 </Box>
+                <Button
+                  variant="primary"
+                  component="label"
+                  startIcon={<UploadIcon />}
+                  style={{ width: '100%' }}
+                >
+                  Upload Image
+                  <input 
+                    type="file" 
+                    hidden 
+                    accept="image/*" 
+                    onChange={handleImageUpload}
+                  />
+                </Button>
               </Box>
             </Grid>
+            
             <Grid item xs={12}>
               <TextField
                 name="description"
@@ -462,44 +524,51 @@ const AdminServices = () => {
                 value={formData.description}
                 onChange={handleInputChange}
                 required
-                margin="normal"
+                style={{ marginTop: '1rem' }}
               />
             </Grid>
           </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} startIcon={<CloseIcon />}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} color="primary" variant="contained" startIcon={<SaveIcon />}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
+          <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+            <Button
+              variant="text"
+              onClick={handleCloseDialog}
+              startIcon={<CloseIcon />}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              startIcon={<SaveIcon />}
+            >
+              Save Service
+            </Button>
+          </Box>
+        </Modal>
+
+        {/* Delete Confirmation Dialog */}
+        <Modal
+          open={openDeleteDialog}
+          onClose={handleCloseDialog}
+          title="Confirm Delete"
+          maxWidth="sm"
+        >
+          <Typography variant="body1" color={colors.text.primary} style={{ marginBottom: '1.5rem' }}>
             Are you sure you want to delete the service "{currentService?.name}"? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleDelete} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar for notifications */}
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+          </Typography>
+          
+          <Box display="flex" justifyContent="flex-end" gap={2}>
+            <Button variant="text" onClick={handleCloseDialog}>
+              Cancel
+            </Button>
+            <Button variant="error" onClick={handleDelete}>
+              Delete
+            </Button>
+          </Box>
+        </Modal>
+      </Box>
+    </Container>
   );
 };
 

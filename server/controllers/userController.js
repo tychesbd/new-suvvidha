@@ -302,6 +302,43 @@ const getUsers = asyncHandler(async (req, res) => {
   res.json(users);
 });
 
+// @desc    Delete a user
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
+const deleteUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (user) {
+    // Prevent deleting yourself or other admins (if you're not a super admin)
+    if (user._id.toString() === req.user._id.toString()) {
+      res.status(400);
+      throw new Error('You cannot delete your own account');
+    }
+
+    // Prevent non-super admins from deleting admin accounts
+    if (user.role === 'admin' && req.user.role === 'admin') {
+      res.status(400);
+      throw new Error('You cannot delete another admin account');
+    }
+
+    await user.deleteOne();
+    
+    // Create notification for admins
+    await createRoleNotifications(
+      'admin',
+      'User Deleted',
+      `User ${user.name} with role ${user.role} has been deleted from the system.`,
+      'info',
+      '/admin/users'
+    );
+
+    res.json({ message: 'User deleted successfully' });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
 // @desc    Create default users (admin, vendor, customer)
 // @route   POST /api/users/create-defaults
 // @access  Public (should be secured in production)
@@ -449,5 +486,6 @@ module.exports = {
   getUsers,
   getVendors,
   toggleUserStatus,
+  deleteUser,
   createDefaultUsers,
 };

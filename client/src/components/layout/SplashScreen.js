@@ -127,60 +127,12 @@ const SplashScreen = ({ onFinished }) => {
       </WelcomeText>
       
       <SubText variant="h6" delay={0.3}>
-        Your One-Stop Solution for Home Services
+        Your One-Stop Solution for All Services
       </SubText>
       
       <SubText variant="body1" delay={0.6}>
         Quality services at your fingertips - anytime, anywhere
       </SubText>
-      
-      <Grid container spacing={3} sx={{ maxWidth: 900, mt: 2, mb: 4 }}>
-        <Grid item xs={6} sm={3}>
-          <ServiceCard elevation={2} delay={0.8} fromLeft={true}>
-            <CleaningServicesIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
-              Cleaning
-            </Typography>
-            <Typography variant="body2" align="center" color="text.secondary">
-              Professional cleaning services
-            </Typography>
-          </ServiceCard>
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <ServiceCard elevation={2} delay={1.0} fromLeft={false}>
-            <PlumbingIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
-              Plumbing
-            </Typography>
-            <Typography variant="body2" align="center" color="text.secondary">
-              Expert plumbing solutions
-            </Typography>
-          </ServiceCard>
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <ServiceCard elevation={2} delay={1.2} fromLeft={true}>
-            <ElectricalServicesIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
-              Electrical
-            </Typography>
-            <Typography variant="body2" align="center" color="text.secondary">
-              Reliable electrical repairs
-            </Typography>
-          </ServiceCard>
-        </Grid>
-        <Grid item xs={6} sm={3}>
-          <ServiceCard elevation={2} delay={1.4} fromLeft={false}>
-            <FormatPaintIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-            <Typography variant="subtitle1" align="center" sx={{ fontWeight: 600 }}>
-              Painting
-            </Typography>
-            <Typography variant="body2" align="center" color="text.secondary">
-              Quality painting services
-            </Typography>
-          </ServiceCard>
-        </Grid>
-      </Grid>
-      
       <CircularProgress 
         size={40} 
         thickness={4} 

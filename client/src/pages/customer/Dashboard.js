@@ -2,10 +2,26 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Routes, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { formatCurrency } from '../../components/ui/utils';
+import '../../components/neumorphic/DashboardTile.css';
 
 // Material UI imports
-import { Typography, Grid, Paper, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button, CircularProgress, Alert } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { 
+  Typography, 
+  Grid, 
+  Box, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
+  Chip, 
+  Button, 
+  CircularProgress, 
+  Alert,
+  Container 
+} from '@mui/material';
 
 // Icons
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -32,38 +48,6 @@ import Profile from './Profile';
 import Home from '../common/Home';
 import Services from '../common/Services';
 import AboutUs from '../common/AboutUs';
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(3),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-  },
-}));
-
-const StatsCard = ({ title, value, icon }) => {
-  return (
-    <Item elevation={3}>
-      <Box sx={{ fontSize: '3rem', color: 'primary.main', mb: 2 }}>{icon}</Box>
-      <Typography variant="h5" component="div" gutterBottom>
-        {title}
-      </Typography>
-      <Typography variant="h3" component="div" color="text.primary">
-        {value}
-      </Typography>
-    </Item>
-  );
-};
 
 const CustomerHome = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -116,155 +100,99 @@ const CustomerHome = () => {
     }
   }, [userInfo]);
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Format currency is now imported at the top of the file
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress size="large" color="primary" />
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Welcome, {userInfo?.name}!
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary" paragraph>
-        Here's an overview of your activity
-      </Typography>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Grid container spacing={4} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Active Bookings" value={dashboardData.activeBookings} icon={<ShoppingCartIcon fontSize="large" />} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Completed" value={dashboardData.completedBookings} icon={<CheckCircleIcon fontSize="large" />} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Cancelled" value={dashboardData.cancelledBookings} icon={<CancelIcon fontSize="large" />} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatsCard title="Total Spent" value={formatCurrency(dashboardData.totalSpent)} icon={<PaymentIcon fontSize="large" />} />
-        </Grid>
-      </Grid>
-
-      <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
-        Recent Bookings
-      </Typography>
-      <Paper elevation={2} sx={{ p: 3 }}>
-        {dashboardData.recentBookings && dashboardData.recentBookings.length > 0 ? (
-          <TableContainer component={Paper} elevation={0}>
-            <Table sx={{ minWidth: 650 }} size="medium">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Booking ID</TableCell>
-                  <TableCell>Service</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Amount</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {dashboardData.recentBookings.map((booking) => (
-                  <TableRow key={booking._id}>
-                    <TableCell>{booking._id.substring(0, 8)}</TableCell>
-                    <TableCell>{booking.service ? booking.service.name || booking.service.title : booking.serviceName}</TableCell>
-                    <TableCell>{new Date(booking.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={booking.status} 
-                        color={
-                          booking.status === 'completed' ? 'success' : 
-                          booking.status === 'in-progress' || booking.status === 'pending' ? 'primary' : 
-                          booking.status === 'cancelled' ? 'error' : 'warning'
-                        }
-                        size="small"
-                        sx={{ textTransform: 'capitalize' }}
-                      />
-                    </TableCell>
-                    <TableCell>{formatCurrency(booking.amount || 0)}</TableCell>
-                    <TableCell>
-                      <Button size="small" variant="outlined">View</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        ) : (
-          <Typography variant="body1" color="text.secondary" align="center">
-            You don't have any recent bookings.
+    <Container style={{ padding: '1rem' }}>
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Box mb={1}>
+          <Typography 
+            variant="h4" 
+            style={{ 
+              marginBottom: '4px',
+              color: 'var(--text-primary)',
+              fontSize: '1.75rem',
+              fontWeight: 600
+            }}
+          >
+            Welcome, {userInfo?.name}!
           </Typography>
-        )}
-      </Paper>
+        </Box>
 
-      <Typography variant="h5" sx={{ mt: 6, mb: 3 }}>
-        Recommended Services
-      </Typography>
-      <Grid container spacing={3}>
-        {['Home Cleaning', 'Plumbing', 'Electrical Repair', 'Painting'].map((service, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Paper
-              elevation={2}
-              sx={{
-                p: 2,
-                height: 200,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                bgcolor: 'background.default',
-                transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-                  cursor: 'pointer'
-                },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  height: 80,
-                  bgcolor: 'primary.light',
-                  mb: 2,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  color: 'white'
-                }}
-              >
-                {index === 0 && <CleaningServicesIcon />}
-                {index === 1 && <PlumbingIcon />}
-                {index === 2 && <ElectricalServicesIcon />}
-                {index === 3 && <FormatPaintIcon />}
-              </Box>
-              <Typography variant="subtitle1">{service}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Starting from ₹{(index + 5) * 100}
+        {error && (
+          <Alert 
+            severity="error" 
+            variant="convex"
+            style={{ marginBottom: '8px' }}
+          >
+            {error}
+          </Alert>
+        )}
+
+        <Grid container spacing={2}>
+          {/* Active Bookings */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile">
+              <div className="dashboard-tile-icon">
+                <ShoppingCartIcon style={{ fontSize: '1.75rem', color: 'var(--primary-main)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Active Bookings</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--primary-main)' }}>
+                {dashboardData.activeBookings}
               </Typography>
-            </Paper>
+            </Box>
           </Grid>
-        ))}
-      </Grid>
-    </Box>
+
+          {/* Completed Bookings */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile">
+              <div className="dashboard-tile-icon">
+                <CheckCircleIcon style={{ fontSize: '1.75rem', color: 'var(--success-main)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Completed</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--success-main)' }}>
+                {dashboardData.completedBookings}
+              </Typography>
+            </Box>
+          </Grid>
+
+          {/* Cancelled Bookings */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile">
+              <div className="dashboard-tile-icon">
+                <CancelIcon style={{ fontSize: '1.75rem', color: 'var(--error-main)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Cancelled</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--error-main)' }}>
+                {dashboardData.cancelledBookings}
+              </Typography>
+            </Box>
+          </Grid>
+
+          {/* Total Spent */}
+          <Grid item xs={6} sm={6} md={3}>
+            <Box className="dashboard-tile revenue">
+              <div className="dashboard-tile-icon">
+                <PaymentIcon style={{ fontSize: '1.75rem', color: 'var(--success-dark)' }} />
+              </div>
+              <Typography className="dashboard-tile-title">Total Spent</Typography>
+              <Typography className="dashboard-tile-value" style={{ color: 'var(--success-dark)' }}>
+                {formatCurrency(dashboardData.totalSpent)}
+              </Typography>
+            </Box>
+          </Grid>        </Grid>
+
+
+      </Box>
+    </Container>
   );
 };
 

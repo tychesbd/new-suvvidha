@@ -134,8 +134,13 @@ const Bookings = () => {
           // Don't set error, just show empty state
         }
         
+        // Sort bookings by creation date in descending order (newest first)
+        const sortedBookings = [...bookingsData].sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        
         // Set the bookings state
-        setBookings(bookingsData);
+        setBookings(sortedBookings);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching admin bookings:', error);

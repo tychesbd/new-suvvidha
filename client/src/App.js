@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import SplashScreen from './components/layout/SplashScreen';
-
-
 
 // Pages
 import Login from './pages/Login';
@@ -20,91 +16,29 @@ import Home from './pages/common/Home';
 import Services from './pages/common/Services';
 import AboutUs from './pages/common/AboutUs';
 
-// Create a theme instance
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#6a1b9a', // Rich purple as primary color
-      light: '#9c4dcc',
-      dark: '#38006b',
-      contrastText: '#ffffff',
-    },
-    secondary: {
-      main: '#ff6f00', // Warm orange as secondary color
-      light: '#ffa040',
-      dark: '#c43e00',
-      contrastText: '#ffffff',
-    },
-    background: {
-      default: '#f8f9fa',
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#333333',
-      secondary: '#666666',
-    },
-  },
-  typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    fontSize: 16, // Increased base font size for better readability
-    h1: {
-      fontSize: '2.5rem',
-      fontWeight: 600,
-      color: '#333333',
-    },
-    h2: {
-      fontSize: '2rem',
-      fontWeight: 600,
-      color: '#333333',
-    },
-    h3: {
-      fontSize: '1.75rem',
-      fontWeight: 600,
-      color: '#333333',
-    },
-    h4: {
-      fontSize: '1.5rem',
-      fontWeight: 600,
-      color: '#333333',
-    },
-    h5: {
-      fontSize: '1.25rem',
-      fontWeight: 600,
-      color: '#333333',
-    },
-    h6: {
-      fontSize: '1rem',
-      fontWeight: 600,
-      color: '#333333',
-    },
-    button: {
-      textTransform: 'none', // Prevents all-caps buttons
-      fontWeight: 500,
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 8,
-          padding: '8px 16px',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-        },
-      },
-    },
-  },
-});
+// Import theme
+import theme from './components/neumorphic/theme';
 
 const App = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    // Add base styles to document
+    document.body.style.backgroundColor = theme.colors.background;
+    document.body.style.color = theme.colors.text.primary;
+    document.body.style.margin = 0;
+    document.body.style.padding = 0;
+    document.body.style.minHeight = '100vh';
+    document.body.style.fontFamily = '"Roboto", "Helvetica", "Arial", sans-serif';
+
+    // Show splash screen for 3 seconds
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Protected route component
   const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -127,8 +61,7 @@ const App = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <>
       {showSplash ? (
         <SplashScreen onFinished={() => setShowSplash(false)} />
       ) : (
@@ -191,7 +124,7 @@ const App = () => {
         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       )}
-    </ThemeProvider>
+    </>
   );
 };
 

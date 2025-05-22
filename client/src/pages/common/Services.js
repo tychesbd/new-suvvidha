@@ -1,93 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Typography, 
-  Container, 
-  Grid, 
-  Card, 
-  CardContent, 
-  CardMedia, 
-  CardActionArea, 
-  Box, 
-  CircularProgress, 
-  Divider, 
-  Button,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Paper
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getServices } from '../../features/services/serviceSlice';
 import { getCategories } from '../../features/categories/categorySlice';
 import BookingModal from '../../components/modals/BookingModal';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-
-// Styled components for service cards with hover effect
-const ServiceCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-  '&:hover': {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 12px 20px rgba(0,0,0,0.15)',
-  },
-}));
-
-const BookNowButton = styled(Button)(({ theme }) => ({
-  position: 'absolute',
-  bottom: '16px',
-  right: '16px',
-  opacity: 0,
-  transition: 'opacity 0.3s ease-in-out',
-  '.MuiCardActionArea-root:hover &': {
-    opacity: 1,
-  },
-}));
+import '../../components/neumorphic/ServiceCard.css';
+import '../../components/neumorphic/HomeServices.css';
 
 // Fallback services in case API fails
 const fallbackServices = [
   {
     id: 1,
-    title: 'Home Cleaning',
+    name: 'Home Cleaning',
     description: 'Professional home cleaning services for a spotless living space.',
+    category: 'Cleaning',
     image: 'https://source.unsplash.com/random/300x200/?cleaning',
+    minPrice: 499
   },
   {
     id: 2,
-    title: 'Plumbing',
+    name: 'Plumbing',
     description: 'Expert plumbing services for all your repair and installation needs.',
+    category: 'Plumbing',
     image: 'https://source.unsplash.com/random/300x200/?plumbing',
+    minPrice: 299
   },
   {
     id: 3,
-    title: 'Electrical Work',
+    name: 'Electrical Work',
     description: 'Reliable electrical services for your home and office.',
+    category: 'Electrical',
     image: 'https://source.unsplash.com/random/300x200/?electrical',
-  },
-  {
-    id: 4,
-    title: 'Painting',
-    description: 'Transform your space with our professional painting services.',
-    image: 'https://source.unsplash.com/random/300x200/?painting',
-  },
-  {
-    id: 5,
-    title: 'Carpentry',
-    description: 'Custom carpentry solutions for your furniture and woodwork needs.',
-    image: 'https://source.unsplash.com/random/300x200/?carpentry',
-  },
-  {
-    id: 6,
-    title: 'Gardening',
-    description: 'Professional gardening services to keep your outdoor space beautiful.',
-    image: 'https://source.unsplash.com/random/300x200/?gardening',
-  },
+    minPrice: 399
+  }
 ];
 
 const Services = () => {
@@ -97,6 +41,7 @@ const Services = () => {
   const [services, setServices] = useState([]);
   const [servicesByCategory, setServicesByCategory] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [allServices, setAllServices] = useState([]); // Added missing state
   
   // State for booking modal
   const [openBookingModal, setOpenBookingModal] = useState(false);
@@ -106,7 +51,6 @@ const Services = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [filteredServices, setFilteredServices] = useState({});
-  const [allServices, setAllServices] = useState([]);
 
   // Fetch services and categories
   useEffect(() => {
@@ -215,200 +159,147 @@ const Services = () => {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
-      </Box>
+      <div className="services-section loading">
+        <div className="loading-spinner"></div>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom align="center">
-          Our Services
-        </Typography>
-        <Typography variant="h6" align="center" color="text.secondary" paragraph>
-          Discover the wide range of services we offer to make your life easier
-        </Typography>
-        
-        {/* Search and Filter Section */}
-        <Paper elevation={3} sx={{ p: 3, mb: 4, mt: 4 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                placeholder="Search by service name or category"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel id="category-filter-label">Filter by Category</InputLabel>
-                <Select
-                  labelId="category-filter-label"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  label="Filter by Category"
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <FilterListIcon />
-                    </InputAdornment>
-                  }
-                >
-                  <MenuItem value="all">All Categories</MenuItem>
-                  {categories && categories.map((category) => (
-                    <MenuItem key={category._id || category.id} value={category.name}>
-                      {category.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </Paper>
-      </Box>
+    <div className="services-section">
+      <h1 className="section-title">Our Services</h1>
+      <p className="section-subtitle">
+        Discover the wide range of services we offer to make your life easier
+      </p>
+      
+      {/* Search and Filter Section */}
+      <div className="search-filter-container">
+        <div className="search-row">
+          <div className="search-group">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search services..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="search-group">
+            <span className="search-icon">🏷️</span>
+            <select
+              className="search-input"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="all">All Categories</option>
+              {categories && categories.map((category) => (
+                <option key={category._id || category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
 
       {/* Display services by category */}
       {Object.keys(filteredServices).length > 0 ? (
-        Object.keys(filteredServices).map((category, index) => (
+        Object.keys(filteredServices).map((category) => (
           filteredServices[category].length > 0 && (
-            <Box key={category} sx={{ mb: 6 }}>
-              <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 4 }}>
-                {category}
-              </Typography>
-              <Divider sx={{ mb: 3 }} />
-              <Grid container spacing={4}>
+            <div key={category} className="category-section">
+              <h2 className="category-title">{category}</h2>
+              <div className="services-grid">
                 {filteredServices[category].map((service) => (
-                  <Grid item key={service.id || service._id} xs={12} sm={6} md={4}>
-                    <ServiceCard elevation={3}>
-                      <CardActionArea sx={{ height: '100%', position: 'relative' }}>
-                        <CardMedia
-                          component="img"
-                          height="140"
-                          image={service.image}
-                          alt={service.title || service.name}
-                        />
-                        <CardContent sx={{ flexGrow: 1, pb: 6 }}>
-                          <Typography gutterBottom variant="h5" component="h2">
-                            {service.title || service.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" paragraph>
-                            {service.description}
-                          </Typography>
-                          {service.minPrice && (
-                            <Typography variant="body1" color="primary" sx={{ fontWeight: 'bold' }}>
-                              Starting from ₹{service.minPrice}
-                            </Typography>
-                          )}
-                        </CardContent>
-                        <BookNowButton 
-                          variant="contained" 
-                          color="primary" 
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedService(service);
-                            setOpenBookingModal(true);
-                          }}
-                        >
-                          Book Now
-                        </BookNowButton>
-                      </CardActionArea>
-                    </ServiceCard>
-                  </Grid>
+                  <div key={service.id || service._id} className="service-card">
+                    <img
+                      src={service.image}
+                      alt={service.name}
+                      className="service-image"
+                    />
+                    <div className="service-content">
+                      <h3 className="service-title">{service.name}</h3>
+                      <p className="service-description">{service.description}</p>
+                      {service.minPrice && (
+                        <p className="service-price">
+                          Starting from ₹{service.minPrice}
+                        </p>
+                      )}
+                      <button
+                        className="book-now-button"
+                        onClick={() => {
+                          setSelectedService(service);
+                          setOpenBookingModal(true);
+                        }}
+                      >
+                        Book Now
+                      </button>
+                    </div>
+                  </div>
                 ))}
-              </Grid>
-            </Box>
+              </div>
+            </div>
           )
         ))
       ) : searchQuery ? (
-        // No results found for search
-        <Box sx={{ textAlign: 'center', py: 5 }}>
-          <Typography variant="h5" color="text.secondary">
-            No services found matching "{searchQuery}"
-          </Typography>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            sx={{ mt: 2 }}
+        <div className="no-results">
+          <h2>No services found matching "{searchQuery}"</h2>
+          <button 
+            className="book-now-button"
             onClick={() => {
               setSearchQuery('');
               setSelectedCategory('all');
             }}
           >
             Clear Search
-          </Button>
-        </Box>
+          </button>
+        </div>
       ) : (
-        // Display all services if no categories are available
-        <Grid container spacing={4}>
+        <div className="services-grid">
           {services.map((service) => (
-            <Grid item key={service.id || service._id} xs={12} sm={6} md={4}>
-              <ServiceCard elevation={3}>
-                <CardActionArea sx={{ height: '100%', position: 'relative' }}>
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={service.image}
-                    alt={service.title || service.name}
-                  />
-                  <CardContent sx={{ flexGrow: 1, pb: 6 }}>
-                    <Typography gutterBottom variant="h5" component="h2">
-                      {service.title || service.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      {service.description}
-                    </Typography>
-                    {service.minPrice && (
-                      <Typography variant="body1" color="primary" sx={{ fontWeight: 'bold' }}>
-                        Starting from ₹{service.minPrice}
-                      </Typography>
-                    )}
-                  </CardContent>
-                  <BookNowButton 
-                    variant="contained" 
-                    color="primary" 
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedService(service);
-                      setOpenBookingModal(true);
-                    }}
-                  >
-                    Book Now
-                  </BookNowButton>
-                </CardActionArea>
-              </ServiceCard>
-            </Grid>
+            <div key={service.id || service._id} className="service-card">
+              <img
+                src={service.image}
+                alt={service.name}
+                className="service-image"
+              />
+              <div className="service-content">
+                <h3 className="service-title">{service.name}</h3>
+                <p className="service-description">{service.description}</p>
+                {service.minPrice && (
+                  <p className="service-price">
+                    Starting from ₹{service.minPrice}
+                  </p>
+                )}
+                <button
+                  className="book-now-button"
+                  onClick={() => {
+                    setSelectedService(service);
+                    setOpenBookingModal(true);
+                  }}
+                >
+                  Book Now
+                </button>
+              </div>
+            </div>
           ))}
-        </Grid>
+        </div>
       )}
 
-      <Box sx={{ mt: 6, mb: 4 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Need a Custom Service?
-        </Typography>
-        <Typography variant="body1" align="center" paragraph>
-          Contact us to discuss your specific requirements and get a personalized solution.
-        </Typography>
-      </Box>
-      
+      {/* Custom Service CTA */}
+      <div className="custom-service-cta">
+        <h2>Need a Custom Service?</h2>
+        <p>Contact us to discuss your specific requirements and get a personalized solution.</p>
+        <button className="book-now-button">Contact Us</button>
+      </div>
+
       {/* Booking Modal */}
       <BookingModal 
         open={openBookingModal} 
         onClose={() => setOpenBookingModal(false)} 
         service={selectedService}
       />
-    </Container>
+    </div>
   );
 };
 
