@@ -20,6 +20,7 @@ const Select = ({
   helperText,
   style,
   className,
+  multiple = false,
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -121,15 +122,49 @@ const Select = ({
     transition: 'transform 0.3s ease',
     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
   };
-
-  // Find selected option label
-  const selectedOption = options.find(option => option.value === value);
-  const displayText = selectedOption ? selectedOption.label : placeholder;
+  // Find selected option(s) label
+  const getDisplayText = () => {
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      return placeholder;
+    }
+    
+    if (multiple) {
+      const selectedOptions = options.filter(option => value.includes(option.value));
+      if (selectedOptions.length === 0) return placeholder;
+      if (selectedOptions.length === 1) return selectedOptions[0].label;
+      return `${selectedOptions.length} items selected`;
+    } else {
+      const selectedOption = options.find(option => option.value === value);
+      return selectedOption ? selectedOption.label : placeholder;
+    }
+  };
 
   const handleSelect = (optionValue) => {
     if (disabled) return;
-    onChange(optionValue);
-    setIsOpen(false);
+    
+    if (multiple) {
+      let newValue;
+      if (Array.isArray(value)) {
+        if (value.includes(optionValue)) {
+          newValue = value.filter(v => v !== optionValue);
+        } else {
+          newValue = [...value, optionValue];
+        }
+      } else {
+        newValue = [optionValue];
+      }
+      onChange(newValue);
+    } else {
+      onChange(optionValue);
+      setIsOpen(false);
+    }
+  };
+
+  const isOptionSelected = (optionValue) => {
+    if (multiple) {
+      return Array.isArray(value) && value.includes(optionValue);
+    }
+    return value === optionValue;
   };
 
   const toggleDropdown = () => {
@@ -145,8 +180,7 @@ const Select = ({
         style={selectWrapperStyles}
         onClick={toggleDropdown}
       >
-        <div style={selectedDisplayStyles}>
-          <span>{displayText}</span>
+        <div style={selectedDisplayStyles}>          <span>{getDisplayText()}</span>
           <span style={arrowIconStyles}>▼</span>
         </div>
       </div>
@@ -155,7 +189,7 @@ const Select = ({
         {options.map((option) => (
           <div
             key={option.value}
-            style={optionStyles(option.value === value)}
+            style={optionStyles(isOptionSelected(option.value))}
             onClick={() => handleSelect(option.value)}
           >
             {option.label}
@@ -170,8 +204,12 @@ const Select = ({
 
 Select.propTypes = {
   label: PropTypes.string,
-  value: PropTypes.any,
+  value: PropTypes.oneOfType([
+    PropTypes.any,
+    PropTypes.arrayOf(PropTypes.any)
+  ]),
   onChange: PropTypes.func.isRequired,
+  multiple: PropTypes.bool,
   options: PropTypes.arrayOf(
     PropTypes.shape({
       value: PropTypes.any.isRequired,

@@ -78,16 +78,19 @@ const VendorRegister = () => {
 
     dispatch(reset());
   }, [userInfo, isError, isSuccess, message, navigate, dispatch]);
-
-  const onChange = (e) => {
-    const { name, value, type } = e.target;
-    
-    if (name === 'serviceExpertise') {
+  const onChange = (e, fieldName = null) => {
+    // Handle select component change
+    if (fieldName === 'serviceExpertise') {
       setFormData((prevState) => ({
         ...prevState,
-        [name]: value,
+        serviceExpertise: e // e will be the array of selected values
       }));
-    } else {
+      return;
+    }
+
+    // Handle regular input change
+    if (e && e.target) {
+      const { name, value, type } = e.target;
       setFormData((prevState) => ({
         ...prevState,
         [name]: type === 'number' ? Number(value) : value,
@@ -175,10 +178,9 @@ const VendorRegister = () => {
       formDataToSend.append('pincodes', JSON.stringify(pincodes));
       
       formDataToSend.append('yearsOfExperience', yearsOfExperience);
-      
-      // Append service expertise as comma-separated string
+        // Append service expertise as JSON string
       if (serviceExpertise && serviceExpertise.length > 0) {
-        formDataToSend.append('serviceExpertise', serviceExpertise.join(','));
+        formDataToSend.append('serviceExpertise', JSON.stringify(serviceExpertise));
       }
       
       // Append all files
@@ -380,12 +382,11 @@ const VendorRegister = () => {
                 <Grid item xs={12}>
                   <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
                     Service Expertise
-                  </Typography>
-                  <Select
+                  </Typography>                  <Select
                     multiple
                     name="serviceExpertise"
                     value={serviceExpertise}
-                    onChange={onChange}
+                    onChange={(value) => onChange(value, 'serviceExpertise')}
                     options={services.map(service => ({
                       value: service._id,
                       label: service.name
