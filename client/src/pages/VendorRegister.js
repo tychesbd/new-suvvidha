@@ -77,7 +77,7 @@ const VendorRegister = () => {
     }
 
     dispatch(reset());
-  }, [userInfo, isError, isSuccess, message, navigate, dispatch]);  const onChange = (e) => {
+  }, [userInfo, isError, isSuccess, message, navigate, dispatch]); const onChange = (e) => {
     // Check if this is a direct value from select component
     if (Array.isArray(e)) {
       setFormData((prevState) => ({
@@ -103,14 +103,14 @@ const VendorRegister = () => {
     if (selectedFiles.length > 0) {
       // Add new files to existing files
       setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
-      
+
       // Create preview URLs for new files
       const newPreviews = selectedFiles.map(file => ({
         name: file.name,
         url: URL.createObjectURL(file),
         type: file.type
       }));
-      
+
       setFilePreview(prevPreviews => [...prevPreviews, ...newPreviews]);
     }
   };
@@ -118,7 +118,7 @@ const VendorRegister = () => {
   // Remove a file
   const removeFile = (index) => {
     setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
-    
+
     // Revoke the object URL to avoid memory leaks
     URL.revokeObjectURL(filePreview[index].url);
     setFilePreview(prevPreviews => prevPreviews.filter((_, i) => i !== index));
@@ -172,30 +172,30 @@ const VendorRegister = () => {
       formDataToSend.append('role', 'vendor');
       formDataToSend.append('phone', phone);
       formDataToSend.append('address', address);
-      
+
       // Append pincodes as JSON string
       formDataToSend.append('pincodes', JSON.stringify(pincodes));
-      
+
       formDataToSend.append('yearsOfExperience', yearsOfExperience);
-        // Append service expertise as JSON string
+      // Append service expertise as JSON string
       if (serviceExpertise && serviceExpertise.length > 0) {
         formDataToSend.append('serviceExpertise', JSON.stringify(serviceExpertise));
       }
-      
+
       // Append all files
       files.forEach((file, index) => {
         formDataToSend.append('documents', file);
       });
-      
+
       // Register the vendor
       const response = await axios.post('/api/users/vendor-register', formDataToSend);
-      
+
       if (response.data) {
         toast.success('Registration successful! Please wait for admin approval.');
         navigate('/');
       }
     } catch (error) {
-      const message = 
+      const message =
         (error.response && error.response.data && error.response.data.message) ||
         error.message ||
         error.toString();
@@ -207,66 +207,38 @@ const VendorRegister = () => {
 
   return (
     <Container style={{ paddingTop: '2rem', paddingBottom: '2rem', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          objectFit: 'cover',
+          zIndex: -1,
+        }}
+      >
+        <source src="/images/team/login.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
       <Grid container spacing={3} style={{ flexGrow: 1, alignItems: 'stretch' }}>
-        {/* Left Panel: Benefits */}
-        <Grid item xs={12} md={5} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <Box style={{ marginBottom: '2rem', textAlign: 'center' }}>
-            <Link to="/">
-              <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '1rem' }} />
-            </Link>
-            <Typography variant="h3" component="h1" style={{ marginBottom: '1rem' }}>
-              Become a Vendor
-            </Typography>
-            <Typography variant="body1" style={{ marginBottom: '2rem' }}>
-              Join our platform as a service provider and grow your business
-            </Typography>
-          </Box>
-          
-          <Card variant="convex" style={{ padding: '2rem', marginBottom: '2rem' }}>
-            <Typography variant="h5" style={{ marginBottom: '1rem' }}>
-              Benefits of becoming a vendor:
-            </Typography>
-            <Box component="ul" style={{ paddingLeft: '1.5rem', marginBottom: '1rem' }}>
-              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
-                Access to a large customer base
-              </Typography>
-              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
-                Easy booking management
-              </Typography>
-              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
-                Flexible subscription plans
-              </Typography>
-              <Typography component="li" style={{ marginBottom: '0.5rem' }}>
-                Increased visibility for your services
-              </Typography>
-              <Typography component="li">
-                Professional profile to showcase your expertise
-              </Typography>
-            </Box>
-          </Card>
-          
-          <Card variant="convex" style={{ padding: '2rem' }}>
-            <Typography variant="h5" style={{ marginBottom: '1rem' }}>
-              Already registered?
-            </Typography>
-            <Button 
-              variant="primary"
-              onClick={() => navigate('/login')}
-              style={{ width: '100%', marginTop: '1rem' }}
-            >
-              Login to your account
-            </Button>
-          </Card>
-        </Grid>
-        
         {/* Right Panel: Registration Form */}
-        <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={12}>
           <Card variant="convex" style={{ padding: '2rem' }}>
+            <Box style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <Link to="/">
+                <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px', display: { xs: 'block', md: 'none' }, cursor: 'pointer' }} />
+              </Link>
+            </Box>
             <Typography variant="h4" style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
               Vendor Registration Form
             </Typography>
             <Divider style={{ marginBottom: '1.5rem' }} />
-            
+
             <form onSubmit={onSubmit}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
@@ -344,7 +316,7 @@ const VendorRegister = () => {
                     style={{ marginBottom: '1rem' }}
                   />
                 </Grid>
-                
+
                 {/* Multi-pincode input */}
                 <Grid item xs={12}>
                   <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
@@ -357,8 +329,8 @@ const VendorRegister = () => {
                       onChange={(e) => setNewPincode(e.target.value)}
                       style={{ flexGrow: 1, marginRight: '1rem' }}
                     />
-                    <Button 
-                      variant="primary" 
+                    <Button
+                      variant="primary"
                       onClick={handleAddPincode}
                       style={{ minWidth: '100px' }}
                     >
@@ -367,8 +339,8 @@ const VendorRegister = () => {
                   </Box>
                   <Box style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
                     {pincodes.map((pincode, index) => (
-                      <Chip 
-                        key={index} 
+                      <Chip
+                        key={index}
                         label={pincode}
                         onDelete={() => handleRemovePincode(pincode)}
                         style={{ margin: '0.25rem' }}
@@ -376,7 +348,7 @@ const VendorRegister = () => {
                     ))}
                   </Box>
                 </Grid>
-                
+
                 {/* Service expertise selection */}
                 <Grid item xs={12}>
                   <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
@@ -395,14 +367,14 @@ const VendorRegister = () => {
                     style={{ marginBottom: '1rem' }}
                   />
                 </Grid>
-                
+
                 {/* Multi-file upload */}
                 <Grid item xs={12}>
                   <Typography variant="body1" style={{ marginBottom: '0.5rem' }}>
                     ID Proof Documents
                   </Typography>
-                  <Box style={{ 
-                    border: '2px dashed var(--primary-light)', 
+                  <Box style={{
+                    border: '2px dashed var(--primary-light)',
                     borderRadius: 'var(--border-radius-md)',
                     padding: '2rem',
                     textAlign: 'center',
@@ -418,8 +390,8 @@ const VendorRegister = () => {
                       style={{ display: 'none' }}
                     />
                     <label htmlFor="file-upload">
-                      <Button 
-                        variant="primary" 
+                      <Button
+                        variant="primary"
                         component="span"
                         style={{ marginBottom: '1rem' }}
                       >
@@ -430,7 +402,7 @@ const VendorRegister = () => {
                       Upload ID proof, certificates, or any relevant documents (Max 5MB each)
                     </Typography>
                   </Box>
-                  
+
                   {/* File preview section */}
                   {filePreview.length > 0 && (
                     <Box style={{ marginBottom: '1.5rem' }}>
@@ -442,16 +414,16 @@ const VendorRegister = () => {
                           <Grid item xs={12} sm={6} md={4} key={index}>
                             <Card variant="flat" style={{ padding: '0.5rem', position: 'relative' }}>
                               {file.type.includes('image') ? (
-                                <img 
-                                  src={file.url} 
-                                  alt={`Preview ${index}`} 
-                                  style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: 'var(--border-radius-sm)' }} 
+                                <img
+                                  src={file.url}
+                                  alt={`Preview ${index}`}
+                                  style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: 'var(--border-radius-sm)' }}
                                 />
                               ) : (
-                                <Box style={{ 
-                                  height: '120px', 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
+                                <Box style={{
+                                  height: '120px',
+                                  display: 'flex',
+                                  alignItems: 'center',
                                   justifyContent: 'center',
                                   backgroundColor: 'var(--background-color)',
                                   borderRadius: 'var(--border-radius-sm)'
@@ -459,12 +431,12 @@ const VendorRegister = () => {
                                   <Typography variant="body2">{file.name}</Typography>
                                 </Box>
                               )}
-                              <Button 
-                                variant="error" 
+                              <Button
+                                variant="error"
                                 onClick={() => removeFile(index)}
-                                style={{ 
-                                  position: 'absolute', 
-                                  top: '0.5rem', 
+                                style={{
+                                  position: 'absolute',
+                                  top: '0.5rem',
                                   right: '0.5rem',
                                   minWidth: 'auto',
                                   width: '24px',
@@ -483,7 +455,7 @@ const VendorRegister = () => {
                   )}
                 </Grid>
               </Grid>
-              
+
               <Button
                 type="submit"
                 variant="primary"

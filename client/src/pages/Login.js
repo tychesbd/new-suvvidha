@@ -12,7 +12,6 @@ import {
   Card,
   TextField,
   Button,
-  Checkbox,
   Typography,
   Box,
   CircularProgress,
@@ -26,7 +25,7 @@ const Login = () => {
     email: '',
     password: '',
   });
-  const [rememberMe, setRememberMe] = useState(false);
+  //const [rememberMe, setRememberMe] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [forgotPasswordStep, setForgotPasswordStep] = useState(1); // 1: Email, 2: OTP, 3: New Password
@@ -67,9 +66,9 @@ const Login = () => {
     }));
   };
 
-  const handleRememberMeChange = (e) => {
-    setRememberMe(e.target.checked);
-  };
+  // const handleRememberMeChange = (e) => {
+  //   setRememberMe(e.target.checked);
+  // };
 
   const handleForgotPassword = () => {
     setForgotPasswordOpen(true);
@@ -161,69 +160,29 @@ const Login = () => {
     dispatch(login(userData));
   };
 
-  const categories = [
-    { name: "Home Maintanance" },
-    { name: "Cleaning" },
-    { name: "Appliances Repair" },
-    { name: "Plumbing" },
-  ];
-
   return (
     <Container style={{ paddingTop: '2rem', paddingBottom: '2rem', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
-      <Grid container spacing={2} style={{ flexGrow: 1, alignItems: 'stretch' }}>
-        {/* Left Panel: Promotional Content */}
-        <Grid item xs={12} md={7} style={{ display: { xs: 'none', md: 'flex' }, position: 'relative', borderRadius: '15px', overflow: 'hidden' }}>
-          <Box
-            style={{
-              position: 'relative',
-              zIndex: 3,
-              textAlign: 'center',
-              color: 'white',
-              padding: '32px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100%',
-            }}
-          >
-            <Link to="/">
-              <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '80px', marginBottom: '20px', cursor: 'pointer' }} />
-            </Link>
-            <Typography variant="h3" component="h1" style={{ marginBottom: '16px' }}>
-              Welcome to Suvvidha
-            </Typography>
-            <Typography variant="h6" style={{ marginBottom: '32px' }}>
-              Your One-Stop Solution for All Services
-            </Typography>
-            <Grid container spacing={2} justifyContent="center">
-              {categories.map((categories, index) => (
-                <Grid item key={index} xs={6} sm={4} md={3}>
-                  <Card 
-                    variant="convex" 
-                    style={{ 
-                      padding: '16px', 
-                      textAlign: 'center',
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)', // Light neumorphic card on dark bg
-                      backdropFilter: 'blur(5px)',
-                      color: 'white',
-                      height: '100px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <Typography variant="body1">{categories.name}</Typography>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        </Grid>
+      <video
+    autoPlay
+    loop
+    muted
+    playsInline
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      objectFit: 'cover',
+      zIndex: -1,
+    }}
+  >
+    <source src="/images/team/login.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
 
         {/* Right Panel: Login Form */}
-        <Grid item xs={12} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Grid item xs={12} md={12}     sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Card 
             variant="convex" // or "concave" or "flat" based on your neumorphic Card's API
             style={{ 
@@ -310,7 +269,7 @@ const Login = () => {
             </Grid>
           </Card>
         </Grid>
-      </Grid>
+
       {/* Forgot Password Modal */}
       <Modal
         open={forgotPasswordOpen}

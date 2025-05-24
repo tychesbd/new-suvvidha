@@ -184,21 +184,6 @@ const SimpleLayout = ({ children }) => {
               gap: isMobile ? '0.5rem' : '1rem',
               alignItems: 'center'
             }}>
-              {!isMobile && (
-                <Button
-                  variant="secondary"
-                  onClick={() => navigate('/vendor-register')}
-                  style={{ 
-                    color: 'inherit', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  <span style={{ color: 'var(--text-primary)' }}>Become a Vendor</span>
-                </Button>
-              )}
               <Button
                 variant="text"
                 onClick={() => navigate('/login')}
