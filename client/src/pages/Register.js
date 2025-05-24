@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { register, reset } from '../features/auth/authSlice';
-import indianFlag from './indianflag.jpg';
 
 // Neumorphic UI imports
 import {
@@ -12,8 +11,6 @@ import {
   Card,
   TextField,
   Button,
-  Select, // Assuming Select takes options prop or similar
-  Typography,
   Box,
   CircularProgress,
 } from '../components/neumorphic';
@@ -74,89 +71,44 @@ const Register = () => {
     }
   };
 
-  const services = [
-    { name: "Maintenance" },
-    { name: "Laundry" },
-    { name: "Pest Control" },
-    { name: "Home Care" },
-  ];
-
-  const roleOptions = [
-    { value: 'customer', label: 'Customer' },
-    // { value: 'vendor', label: 'Vendor' }, // Uncomment if needed
-    // { value: 'admin', label: 'Admin' },   // Uncomment if needed
-  ];
-
   return (
     <Container style={{ paddingTop: '2rem', paddingBottom: '2rem', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          objectFit: 'cover',
+          zIndex: -1,
+        }}
+      >
+        <source src="/images/team/login.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
       <Grid container spacing={2} style={{ flexGrow: 1, alignItems: 'stretch' }}>
-        {/* Left Panel: Promotional Content */}
-        <Grid item xs={12} md={7} style={{ display: { xs: 'none', md: 'flex' }, position: 'relative', borderRadius: '15px', overflow: 'hidden' }}>
-          <Box
-            style={{
-              position: 'relative',
-              zIndex: 3,
-              textAlign: 'center',
-              color: 'white',
-              padding: '32px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100%',
-            }}
-          >
-            <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '80px', marginBottom: '20px' }} />
-            <Typography variant="h3" component="h1" style={{ marginBottom: '16px' }}>
-              Join Suvvidha Today
-            </Typography>
-            <Typography variant="h6" style={{ marginBottom: '32px' }}>
-              Register for Quality Services at Your Fingertips
-            </Typography>
-            <Grid container spacing={2} justifyContent="center">
-              {services.map((service, index) => (
-                <Grid item key={index} xs={6} sm={4} md={3}>
-                  <Card 
-                    variant="convex" 
-                    style={{ 
-                      padding: '16px', 
-                      textAlign: 'center',
-                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'white',
-                      height: '100px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <Typography variant="body1">{service.name}</Typography>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        </Grid>
-
         {/* Right Panel: Registration Form */}
-        <Grid item xs={12} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Card 
-            variant="convex" 
-            style={{ 
-              padding: '32px', 
-              width: '100%', 
+        <Grid item xs={12} md={12} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Card
+            variant="convex"
+            style={{
+              padding: '32px',
+              width: '100%',
               maxWidth: '480px', // Slightly wider for more fields
-              margin: 'auto' 
+              margin: 'auto'
             }}
           >
             <Box style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px', display: { xs: 'block', md: 'none' } }} />
-              <Typography variant="body1" color="textSecondary">
-                Get started with Suvvidha
-              </Typography>
+              <Link to="/">
+                <img src="/logo1.png" alt="Suvvidha Logo" style={{ height: '60px', marginBottom: '16px', display: { xs: 'block', md: 'none' }, cursor: 'pointer' }} />
+              </Link>
             </Box>
-            
+
             <form onSubmit={onSubmit}>
               <TextField
                 label="Full Name"
@@ -215,33 +167,46 @@ const Register = () => {
                 style={{ marginBottom: '20px' }}
                 disabled={isLoading}
               />
-              
-              <Button 
-                type="submit" 
-                variant="primary" 
-                fullWidth 
+
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
                 disabled={isLoading}
                 style={{ marginBottom: '24px', minHeight: '44px' }}
               >
                 {isLoading ? <CircularProgress size="small" /> : 'Sign Up'}
               </Button>
             </form>
-            
+
             <Grid container justifyContent="flex-end">
               <Grid item>
-              <Button
-                variant="secondary"
-                onClick={() => navigate('/login')}
-                style={{ 
-                  color: 'inherit', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem',
-                  minWidth: 'auto'
-                }}
-              >
-                <span style={{ color: 'var(--text-primary)' }}>Login</span>
-              </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate('/login')}
+                  style={{
+                    color: 'inherit',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    minWidth: 'auto'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-primary)' }}>Login</span>
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate('/vendor-register')}
+                  style={{
+                    color: 'inherit',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <span style={{ color: 'var(--text-primary)' }}>Become a Vendor</span>
+                </Button>
               </Grid>
             </Grid>
           </Card>
