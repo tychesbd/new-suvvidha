@@ -110,12 +110,23 @@ const registerVendor = asyncHandler(async (req, res) => {
     throw new Error('At least one ID proof document is required');
   }
 
-  // Parse service expertise if it's a string
+  // Parse service expertise if it's a JSON string
   let parsedServiceExpertise = [];
   if (serviceExpertise) {
-    parsedServiceExpertise = typeof serviceExpertise === 'string' 
-      ? serviceExpertise.split(',') 
-      : serviceExpertise;
+    try {
+      parsedServiceExpertise = typeof serviceExpertise === 'string' 
+        ? JSON.parse(serviceExpertise) 
+        : serviceExpertise;
+      
+      // Log for debugging
+      console.log('Parsed serviceExpertise:', parsedServiceExpertise);
+    } catch (error) {
+      console.error('Error parsing serviceExpertise:', error);
+      // If parsing fails, try comma-separated fallback
+      parsedServiceExpertise = typeof serviceExpertise === 'string' 
+        ? serviceExpertise.split(',') 
+        : serviceExpertise;
+    }
   }
   
   // Parse pincodes if it's a JSON string

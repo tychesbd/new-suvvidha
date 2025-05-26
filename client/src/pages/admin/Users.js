@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 import {
   Typography,
   Box,
@@ -32,7 +33,64 @@ import {
   Download as DownloadIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
+
+// Component to fetch and display service names
+const FetchServiceNames = ({ serviceIds }) => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { userInfo } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    const fetchServiceNames = async () => {
+      if (!serviceIds || serviceIds.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        };
+
+        // Fetch all services
+        const { data } = await axios.get('/api/services', config);
+        
+        // Map service IDs to service names
+        const serviceDetails = serviceIds.map(serviceId => {
+          const service = data.find(s => s._id === serviceId);
+          return service ? { id: serviceId, name: service.name } : { id: serviceId, name: 'Unknown Service' };
+        });
+
+        setServices(serviceDetails);
+      } catch (error) {
+        console.error('Error fetching service names:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServiceNames();
+  }, [serviceIds, userInfo.token]);
+
+  if (loading) {
+    return <CircularProgress size="small" />;
+  }
+
+  return (
+    <>
+      {services.map((service) => (
+        <Chip 
+          key={service.id} 
+          label={service.name} 
+          variant="primary"
+          size="small"
+        />
+      ))}
+    </>
+  );
+};
 
 const Users = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -586,14 +644,8 @@ const Users = () => {
                           Service Expertise
                         </Typography>
                         <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
-                          {selectedUser.serviceExpertise.map((service, index) => (
-                            <Chip 
-                              key={index} 
-                              label={service} 
-                              variant="primary"
-                              size="small"
-                            />
-                          ))}
+                          {/* Fetch service names when viewing user details */}
+                          <FetchServiceNames serviceIds={selectedUser.serviceExpertise} />
                         </Box>
                       </Grid>
                     )}

@@ -151,18 +151,81 @@ const BookingDetails = ({ bookingId }) => {
       
       setLoading(true);
       
-      // Get customer pincode from booking for filtering vendors
+      // Get customer pincode and service ID from booking for filtering vendors
       const pincode = booking.customer.pincode;
+      const serviceId = booking.service;
       
-      // Fetch vendors from the API with pincode filter if available
-      const response = await axios.get(
-        `/api/users/vendors${pincode ? `?pincode=${pincode}` : ''}`,
-        config
-      );
+      // First, fetch all services to get service details
+      const serviceResponse = await axios.get('/api/services', config);
+      const services = serviceResponse.data;
       
-      // Use all vendors from the API response instead of filtering
-      console.log('Vendors API response:', response.data);
-      setVendors(response.data || []);
+      // Find the current service to get its name
+      const currentService = services.find(service => service._id === serviceId);
+      const serviceName = currentService ? currentService.name : 'Unknown Service';
+      
+      console.log(`Filtering vendors for service: ${serviceName} (${serviceId}) and pincode: ${pincode}`);
+      
+      // Fetch all vendors from the API
+      const vendorResponse = await axios.get('/api/users/vendors', config);
+      
+      // Log raw vendor data for debugging
+      console.log('Raw vendor data from API:', vendorResponse.data);
+      console.log('Looking for service ID:', serviceId);
+      
+      // Filter vendors by service expertise and pincode
+      const filteredVendors = vendorResponse.data.filter(vendor => {
+        // Skip invalid vendor objects
+        if (!vendor || typeof vendor !== 'object') {
+          console.warn('Invalid vendor object found:', vendor);
+          return false;
+        }
+        
+        // Log detailed vendor data for debugging
+        console.log(`Checking vendor ${vendor.name} (${vendor._id})`);
+        console.log('  serviceExpertise:', vendor.serviceExpertise);
+        console.log('  pincode:', vendor.pincode);
+        console.log('  pincodes:', vendor.pincodes);
+        
+        // Check if vendor has the required service expertise
+        let hasServiceExpertise = false;
+        
+        if (vendor.serviceExpertise && Array.isArray(vendor.serviceExpertise)) {
+          // Log each service ID in the vendor's expertise for comparison
+          console.log(`  Comparing service IDs - Required: ${serviceId}`);
+          console.log(`  Vendor's service IDs:`, vendor.serviceExpertise);
+          
+          // Check if any of the vendor's service IDs match the required service ID
+          hasServiceExpertise = vendor.serviceExpertise.some(id => {
+            const matches = id === serviceId;
+            console.log(`  Comparing ${id} with ${serviceId}: ${matches ? 'MATCH' : 'NO MATCH'}`);
+            return matches;
+          });
+        } else {
+          console.log(`  Vendor ${vendor.name} has no service expertise or it's not an array`);
+        }
+        
+        // Check if vendor serves the customer's pincode
+        const servesPincode = vendor.pincode === pincode || 
+          (vendor.pincodes && Array.isArray(vendor.pincodes) && vendor.pincodes.includes(pincode));
+        
+        // Check if the booking is not already assigned to this vendor
+        // or if the booking status allows for vendor reassignment
+        const canBeAssigned = !booking.vendor || booking.status === 'pending';
+        
+        // Log the filtering details for debugging
+        if (hasServiceExpertise && servesPincode) {
+          console.log(`  MATCH: Vendor ${vendor.name} matches service expertise and pincode`);
+        } else if (!hasServiceExpertise) {
+          console.log(`  NO MATCH: Vendor ${vendor.name} does not have service expertise for ${serviceName}`);
+        } else if (!servesPincode) {
+          console.log(`  NO MATCH: Vendor ${vendor.name} does not serve pincode ${pincode}`);
+        }
+        
+        return hasServiceExpertise && servesPincode && canBeAssigned;
+      });
+      
+      console.log(`Found ${filteredVendors.length} vendors matching service expertise and pincode`);
+      setVendors(filteredVendors || []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching vendors:', error);
@@ -264,16 +327,23 @@ const BookingDetails = ({ bookingId }) => {
         },
       };
       
+      // Assign the vendor to the booking
+      // The backend will automatically set the status to 'in-progress'
       const response = await axios.put(
         `/api/bookings/${booking._id}/assign`,
         { vendorId: selectedVendor._id },
         config
       );
       
+      // Show success message
+      alert(`Vendor ${selectedVendor.name} has been assigned to this booking. The booking status has been updated to 'in-progress'.`);
+      
+      // Update the booking state with the response data
       setBooking(response.data);
       setLoading(false);
       setAssignVendorDialogOpen(false);
     } catch (error) {
+      console.error('Error assigning vendor:', error);
       setError(error.response?.data?.message || 'Failed to assign vendor');
       setLoading(false);
     }

@@ -463,17 +463,44 @@ const getVendors = asyncHandler(async (req, res) => {
   
   const vendors = await User.find(query).select('-password');
   
+  // Log vendors data for debugging
+  console.log('Vendors from database:', vendors.map(v => ({
+    id: v._id,
+    name: v.name,
+    serviceExpertise: v.serviceExpertise
+  })));
+  
   // Format the response to match the expected structure in the frontend
-  const formattedVendors = vendors.map(vendor => ({
-    _id: vendor._id,
-    name: vendor.name,
-    rating: vendor.yearsOfExperience ? (3 + vendor.yearsOfExperience / 10).toFixed(1) : 4.0, // Mock rating based on experience
-    reviews: Math.floor(Math.random() * 30) + 5, // Mock reviews count
-    pincode: vendor.pincode || '400001',
-    distance: `${(Math.random() * 5 + 1).toFixed(1)} km`, // Mock distance
-    phone: vendor.phone || '9876543210',
-    isActive: vendor.isActive // Include isActive status
-  }));
+  const formattedVendors = vendors.map(vendor => {
+    // Ensure serviceExpertise is an array
+    let expertise = [];
+    if (vendor.serviceExpertise) {
+      if (Array.isArray(vendor.serviceExpertise)) {
+        expertise = vendor.serviceExpertise;
+      } else {
+        try {
+          // Try to parse if it's a JSON string
+          expertise = JSON.parse(vendor.serviceExpertise);
+        } catch (e) {
+          // If parsing fails, use as is
+          expertise = [vendor.serviceExpertise];
+        }
+      }
+    }
+    
+    return {
+      _id: vendor._id,
+      name: vendor.name,
+      rating: vendor.yearsOfExperience ? (3 + vendor.yearsOfExperience / 10).toFixed(1) : 4.0, // Mock rating based on experience
+      reviews: Math.floor(Math.random() * 30) + 5, // Mock reviews count
+      pincode: vendor.pincode || '400001',
+      pincodes: vendor.pincodes || [], // Include pincodes array if available
+      distance: `${(Math.random() * 5 + 1).toFixed(1)} km`, // Mock distance
+      phone: vendor.phone || '9876543210',
+      isActive: vendor.isActive, // Include isActive status
+      serviceExpertise: expertise // Include properly formatted service expertise for filtering
+    };
+  });
   
   res.json(formattedVendors);
 });
