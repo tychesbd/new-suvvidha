@@ -1,51 +1,35 @@
-# Suvvidha Application
+# Suvvidha Server
 
-A MERN stack web application with multiple dashboards for connecting vendors and customers.
+Express backend for the Suvvidha MERN application.
 
-## Project Structure
-
-The project is organized into two main directories:
-
-- `client/`: React frontend application
-- `server/`: Express backend API
-
-Each directory has its own `package.json` file and can be run independently.
-
-## Installation
-
-### Server Setup
+## Setup
 
 ```bash
-cd server
+cd /home/runner/work/new-suvvidha/new-suvvidha/server
 npm install
+cp .env.example .env
 ```
 
-### Client Setup
+Update `.env` with real values before running.
+
+## Run (development)
 
 ```bash
-cd client
-npm install
-```
-
-### Install Both (from client directory)
-
-```bash
-cd client
-npm run install-all
-```
-
-## Running the Application
-
-### Run Server Only
-
-```bash
-cd server
 npm run dev
 ```
 
-### Run Client Only
+## Run (production)
 
 ```bash
-cd client
-npm start
+NODE_ENV=production npm start
 ```
+
+## Build client for production serving
+
+From the server directory:
+
+```bash
+npm run build-client
+```
+
+The server serves React static assets from `../client/build` when `NODE_ENV=production`.
